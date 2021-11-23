@@ -1,0 +1,6 @@
+You need to have:
+
+go get github.com/gravwell/gencert
+export GOPATH=<your gopath>
+
+Then just `bash run.sh`

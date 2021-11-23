@@ -1,0 +1,227 @@
+\chapter{Lab Setup and Docker Testing}
+
+We will be making extensive use of the Docker container platform during
+the hands on exercises. The purpose of this chapter is to ensure that
+all training attendees have a Linux system with a functioning Docker
+installation. To fully participate in the training each attendee will
+need the following:
+
+\begin{enumerate}
+	\item Workstation running AMD64 Linux or a virtual machine running 64-bit Linux
+	\begin{enumerate}
+		\item At least 4GB of available RAM
+		\item At least 10GB disk storage available for Docker instances
+	\end{enumerate}
+	\item Ethernet adapter and cable with connectivity to training server
+	\item Standards-compliant web browser (Firefox, Chrome, Chromium)
+\end{enumerate}
+
+\section{Verifying Docker Installation}
+
+Docker is available in most Linux package managers on modern Linux
+distributions. Most Debian based distributions can install Docker via
+the command \code{apt install docker.io} and Redhat based distributions can
+install docker using \code{yum install docker}. Make sure to execute these
+commands as the super user, either via \code{sudo} or by first becoming
+root using \code{su}.
+
+\section{Getting Started With Docker}
+
+The hands on training segments make heavy use of
+Docker\footnote{https://www.docker.com}. Docker is
+a container platform designed to simplify the deployment and management
+of microservices. While Gravwell is not a microservice, Docker provides
+an easy to use and clean environment to experiment with Gravwell
+services. This section will ensure that you have a working Docker
+environment and can import Gravwell images.
+
+\subsection{Host System Requirements}
+
+The first thing to verify is that the system that will be hosting
+Docker and our gravwell images is a modern 64bit Linux kernel. We need
+at least kernel version 3.2 running on an x86 architecture with 64bit
+extensions. Any X86 AMD or Intel processor manufactured within the last
+10 years should work. Open a command prompt and run the \code{uname
+-a} command. We want to see \code{x86\_64} and a kernel version greater
+than 3.2.0:
+
+\code{Linux training 4.18.0-16-generic \#17-Ubuntu SMP Fri Feb 8 00:06:57 UTC
+2019 x86\_64 x86\_64 x86\_64 GNU/Linux}
+
+
+\subsection{Granting User Access to Docker}
+
+Docker requires elevated privileges to start containers, build
+networks, and generally manage the Docker process. If you don't mind
+interacting with Docker as the superuser you can skip this section, but
+if you would like to be able to run the labs as a non-privileged user
+(recommended) we will set up the \code{docker} group and add your current
+user to it. This will allow your current user to drive Docker.
+
+First check if your user can run Docker commands by executing \code{docker
+ps -q} and \code{docker network ls} as a non-root user. If the output is
+empty or contains a list of running Docker containers, your user already
+has access to the Docker API. If errors were displayed, we will need to
+create the docker group and add your current user to it. This is done
+using the \code{groupadd} and \code{usermod} commands. First run \code{groupadd
+docker} as the superuser, then run \code{usermod -aG docker
+<username>} where
+\code{<username>} is the user you wish to use for
+the training labs. You will need to logout of the current user and then
+log back in so that the group permission changes can propagate. You can
+also just reboot your machine/VM. If all goes well, you should be able
+to run the docker commands as a non-root user.
+
+\section{Testing Docker Image Imports}
+
+A core component of the hands-on training labs is importing prebuilt
+Gravwell images for experimentation. We need to walk through the basic
+Docker commands to import and/or load a Docker image and run it. You
+should have been provided with a \code{tar.gz} archive containing materials for
+the course. Make sure it's unpacked, then look in the
+\code{dockerimages} subdirectory for a file named ``\code{test.tar.gz}''. Load it
+into your local docker image repository using the command \code{docker load
+-i test.tar.gz}, then verify that the image was imported using the
+\code{docker images} command. You should see a new image tagged (named) \code{gravwell:test}.
+
+Now we can start up the test container using Docker and poke around a
+little. A container is like a very lightweight virtual machine. Note that a
+container is not quite the same as a Type 1 or Type 2 virtual machine,
+since it uses the same kernel as the host system.\footnote{https://www.backblaze.com/blog/vm-vs-containers/}.
+
+\section{Starting a Container in Docker}
+
+Now that we have imported a Docker image, let's create a new container
+and poke around in it a bit. We are going to start the
+\code{gravwell:test} image and execute the \code{/bin/sh} command in
+interactive mode. This means that we will immediately drop into the
+container. To keep things clean we will also pass the
+\code{-\/-rm} flag which tells Docker to destroy the container when the
+main process (\code{/bin/sh}) exits. Start the container and poke around a
+bit, check the IPs, proc filesystem, and running processes. The
+container \emph{almost} looks like a real machine.
+
+\begin{Verbatim}[breaklines=true]
+user@training:~$ docker run -it --rm gravwell:test /bin/sh
+# ps
+PID   USER     TIME  COMMAND
+    1 root      0:00 /bin/sh
+    6 root      0:00 ps
+# ip addr
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc
+noqueue qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+7: eth0@if8:
+<BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN qdisc
+noqueue
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+# whoami
+root
+# pwd
+/
+# exit
+user@training:~$
+\end{Verbatim}
+
+Type exit to leave the container, and run \code{docker ps -a} to list all
+active containers. Because we gave the \code{-\/-rm} flag the container
+should be completely gone.
+
+WARNING: Do not use the \code{-\/-rm} flag on containers that you want
+to keep or that you expect to continue to work on; one accidental
+\code{exit} command will completely destroy all your work.
+
+\section{Testing Gravwell in a Container}
+
+Let's fire up a minimal Gravwell instance in a docker container and
+verify that we can get to the web portal. A minimal Gravwell instance
+is available in the images directory at \code{dockerimages/base.tar.gz} within
+the training directory. Load it into your local images repository,
+then run it without any arguments. The base image already has
+configuration parameters which specify which processes should be started
+within the container. We will be naming this container \code{base} using
+the \code{-\/-name} parameter and also starting the container in the
+background using the \code{-d} parameter.
+
+\begin{Verbatim}[breaklines=true]
+~/gravwell_training$ docker load -i dockerimages/base.tar.gz 
+Loaded image: gravwell:base
+~/gravwell_training$ docker run -d --name test gravwell:base
+7c18342e7dcc4e362323797954bd1b1742dd903ded097331f5c92e13853bd628
+~/gravwell_training$ docker ps -q
+7c18342e7dcc
+\end{Verbatim}
+
+Verify that the container is running using docker ps, then let's pull
+out the IP that Docker assigned our container so that we can hit the
+Gravwell webserver.
+
+\code{docker inspect test}
+
+With the IP in hand, visit the Gravwell web page and upload your
+license. Once you have verified that you can upload a license and log
+into Gravwell with the credentials admin/changeme, go back to your
+command prompt and stop and cleanup the base image.
+
+\begin{Verbatim}[breaklines=true]
+docker stop test
+docker rm test
+\end{Verbatim}
+
+\section{Loading the Lab Images}
+\label{sec:load-lab-images}
+
+Several different Docker container images are used for the lab sections
+of this training. They are available in the \code{dockerimages/} subdirectory on
+the course materials bundle and can be installed with the following
+command:
+
+\code{docker load -i imagename.tar.gz}
+
+Fetch and load the following images from the dockerimagesimages folder:
+
+\begin{itemize}
+	\item base.tar.gz
+	\item cloudarchive\_server.tar.gz
+	\item datastore.tar.gz
+	\item indexer.tar.gz
+	\item ingesters.tar.gz
+	\item offlinereplication.tar.gz
+	\item webserver.tar.gz
+\end{itemize}
+
+Once loaded, they should all be in the listing when you run \code{docker
+image ls}.
+
+\section{Creating the Gravwell Test Network}
+
+To help keep our Gravwell experimental containers separate, we put them
+all on a Docker network called ``gravnet''. This is also what allows
+containers to connect to each other by name rather than by IP, which is
+an important part of our experimental config. Before you use the
+network, you must create it:
+
+\code{docker network create gravnet}
+
+
+\section{Helpful Docker Tips}
+
+This section has some commands or scripts to help you when doing this
+training.
+
+To show all IPs and names:
+
+\begin{Verbatim}[breaklines=true]
+docker ps -q | xargs -n 1 docker inspect --format \
+'{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} {{ .Name }}' \
+| sed 's/ \// /'
+\end{Verbatim}
+
+To kill all running containers:
+
+\code{docker kill \$(docker ps -q)}
+

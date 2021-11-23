@@ -1,0 +1,3 @@
+This creates the base gravwell image that has ONLY the webserver.
+
+We dont' have a crash reporter or ingester, or gencert.  Its designed to be extremely small
