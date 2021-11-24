@@ -1,0 +1,5 @@
+This creates the base gravwell image that has ONLY the indexer, webserver, and search agent.
+
+We dont' have a crash reporter or ingester, or gencert.  Its designed to be extremely small
+
+The gravwell.conf file only has a default well

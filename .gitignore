@@ -1,0 +1,11 @@
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.pdf
+*.toc
+images/*.tar.gz
+images/*.tgz
+dockerimages/
+gravwell_training.tgz

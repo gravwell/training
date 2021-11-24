@@ -1,0 +1,4 @@
+You must set GOPATH
+
+Expects simple relay, file follow, netflow, pcap, and federator installers in /tmp/.
+

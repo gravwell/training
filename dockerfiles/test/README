@@ -1,0 +1,3 @@
+This creates the test image which is the smallest docker image that we can fire
+
+It ONLY contains a busybox image

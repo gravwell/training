@@ -1,0 +1,8 @@
+This creates the base gravwell image that has ONLY the indexer, webserver, and search agent.
+
+We also create a user and group with UID/GID 1000/1000 named gravwell/gravwell.
+Each component should have the appropriate user and group permissions
+
+We dont' have a crash reporter or ingester, or gencert.  Its designed to be extremely small
+
+The gravwell.conf file only has a default well

@@ -1,0 +1,285 @@
+\chapter{Securing Gravwell}
+
+This chapter discusses security considerations for a Gravwell cluster.
+It will discuss indexer and webserver security, securing ingesters, and
+user authentication. It will also demonstrate some of the risks of an
+improperly-secured Gravwell installation through hands-on labs.
+
+This chapter makes frequent references to \textbf{shared secrets}. These are
+strings used by Gravwell components to communicate with each other
+without user intervention. Shared secrets are never transmitted directly
+over the network; instead, clients and servers use a challenge-response
+algorithm to verify that they have the same shared secret. Because the
+shared secrets must be stored in plaintext to perform
+challenge-response, they are potentially vulnerable to users on the same
+machine and should therefore be protected. The shared secrets can be
+stored in three different ways:
+
+\begin{enumerate}
+\tightlist
+\item
+  Directly in \code{gravwell.conf}. This is the simplest, but care should
+  be taken to ensure the file is only readable by the gravwell user.
+\item
+  As environment variables. If done correctly, this can help protect
+  the secrets, but take note that setting the environment variables in a
+  Docker command line (e.g. \code{`-e GRAVWELL\_INGEST\_AUTH=MySecret'}) can
+  make them vulnerable to interception by other users. See
+  the Gravwell online documentation\footnote{https://docs.gravwell.io/\#!configuration/environment-variables.md} for a description of environment variables.
+\item
+  As a Docker secret. This is only available for systems running in
+  Docker containers. See
+  the Gravwell online documentation\footnote{https://docs.gravwell.io/\#!configuration/environment-variables.md} for a description of how to pass Docker secret files to a Gravwell instance.
+\end{enumerate}
+
+
+
+\section{TLS/HTTPS}
+
+By default, Gravwell is configured to communicate via unencrypted
+channels. This means that communications between the webserver and the
+user, as well as communication between ingesters and indexers, will be
+visible to any adversary capable of intercepting traffic. As later
+sections will explain, Gravwell's built-in authentication methods ensure
+that the ingester's shared secrets will not be leaked, but an adversary
+could potentially capture passwords as users authenticate to the
+webserver, view entries as they are ingested, etc.
+
+Switching over to TLS-encrypted communications will have two benefits:
+it will encrypt traffic to prevent eavesdropping, and it will allow
+components to verify that they are actually connecting to the correct
+system rather than an adversary's man-in-the-middle attack. The
+datastore component cannot be used without installing TLS certificates,
+so enabling TLS encryption is also a necessary part of configuring
+distributed frontends.
+
+We strongly recommend installing a properly-signed TLS certificate on
+the Gravwell webserver and indexer before deploying Gravwell in any
+production environment. If a properly-signed certificate is unavailable,
+Gravwell can be deployed with a self-signed certificate, but every
+component will need to be configured to ignore invalid certificates,
+which makes the system vulnerable to man-in-the-middle attacks.
+
+\subsection{Installing a properly-signed TLS certificate}
+
+A properly-signed TLS certificate is the most secure way to access
+Gravwell. Browsers will automatically accept the certificate without
+complaint.
+
+Obtaining a certificate is outside the scope of this documentation;
+consider either purchasing a certificate through one of the traditional
+providers or
+using LetsEncrypt\footnote{https://letsencrypt.org} to
+obtain a free one.
+
+To use the certificate, Gravwell must be told where the certificate and
+key files are. Assuming the files are installed at \code{/etc/certs/cert.pem} and
+\code{/etc/certs/key.pem}, edit \code{gravwell.conf} to uncomment and populate
+the \code{Certificate-File} and \code{Key-File} options:
+
+\begin{Verbatim}[breaklines=true]
+Certificate-File=/etc/certs/cert.pem
+Key-File=/etc/certs/key.pem
+\end{Verbatim}
+
+Note: These files must be readable by the ``gravwell'' user, but make
+sure other users can't read them.
+
+To enable HTTPS on the webserver, change the \code{Web-Port} directive
+from 80 to 443, then comment out the
+\code{Insecure-Disable-HTTPS} directive. To enable TLS-encrypted ingester
+connections, find and uncomment the line \code{TLS-Ingest-Port=4024}. To
+enable HTTPS for the search agent, open
+\code{/opt/gravwell/etc/searchagent.conf}, comment out the
+\code{Insecure-Use-HTTP=true} line and change the port in the
+\code{Webserver-Address} line from 80 to 443.
+
+Finally, restart the webserver, indexer, and search agent:
+
+\begin{Verbatim}[breaklines=true]
+systemctl restart gravwell_webserver.service
+systemctl restart gravwell_indexer.service
+systemctl restart gravwell_searchagent.service
+\end{Verbatim}
+
+\subsection{Install a self-signed certificate}
+
+Although it is not as secure as a proper TLS certificate, a self-signed
+certificate will ensure encrypted communication between users and
+Gravwell. By instructing browsers to trust the self-signed cert, it is
+also possible to avoid recurring warning screens.
+
+First, we will generate a 1-year certificate in
+\code{/opt/gravwell/etc} using \code{gencert}, a program we ship with the
+Gravwell install:}
+
+\begin{Verbatim}[breaklines=true]
+cd /opt/gravwell/etc
+sudo -u gravwell ../bin/gencert -h HOSTNAME
+\end{Verbatim}
+
+Make sure to replace HOSTNAME with either the hostname or the IP
+address of your Gravwell system. You can specify multiple hostnames or
+IPs by separating them with commas, e.g. \code{gencert -h gravwell.example.com,10.0.0.1,192.168.0.3}
+
+Now, open \code{gravwell.conf} and uncomment the \code{Certificate-File} and
+\code{Key-File} directives. The defaults should point correctly to the two
+files we just created.
+
+To enable HTTPS on the webserver, change the \code{Web-Port} directive
+from 80 to 443, then comment out the
+\code{Insecure-Disable-HTTPS} line. To enable TLS-encrypted ingester
+connections, find and uncomment the line \code{TLS-Ingest-Port=4024}.
+
+To enable HTTPS for the search agent, open
+\code{/opt/gravwell/etc/searchagent.conf}, comment out the
+\code{Insecure-Use-HTTP=true} line and change the port in the
+\code{Webserver-Address} line from 80 to 443. With a self-signed
+certificate, you will also need to ensure that \code{Insecure-Skip-TLS-Verify=true} is set.
+
+Finally, restart the webserver, indexer, and search agent:}
+
+\begin{Verbatim}[breaklines=true]
+systemctl restart gravwell_webserver.service
+systemctl restart gravwell_indexer.service
+systemctl restart gravwell_searchagent.service
+\end{Verbatim}
+
+\section{Indexer Security}
+
+Gravwell indexers communicate with two components: ingesters, and
+webservers. Users never interact directly with indexers.
+
+\subsection{Authentication \& Secrets}
+
+Ingesters and webservers authenticate to the indexer using shared
+secrets. Ingesters are authenticated using the \code{Ingest-Auth} secret
+while webservers use the \code{Control-Auth} secret. These shared secrets
+are stored in plaintext and used to perform challenge-response
+authentication. This means ingesters and webservers can auth to the
+indexer over plaintext channels without leaking the shared secrets, but
+it also means these secrets are vulnerable to attackers who have access
+to the filesystems of these systems.
+
+\subsection{Indexer-Webserver Communications}
+
+Communications between the indexer and the webserver take place over
+TCP port 9404 by default (specified by the \code{Control-Port} parameter).
+These connections \emph{are not encrypted}. Indexers often have to transfer
+very large numbers of entries to the webserver during a search, and
+encryption would significantly slow the transfer. For this reason,
+indexers and webservers should communicate only over trusted networks.
+If the indexer-webserver traffic must traverse the Internet, we
+strongly recommend using a VPN or other tunnel to transport the
+traffic.
+
+\subsection{Indexer-Ingester Communications}
+
+Ingesters can connect to indexers using either encrypted or unencrypted
+connections. By default, indexers listen for cleartext ingest
+connections on TCP port 4023. If a TLS certificate is set up on the
+indexer, it can also listen for encrypted connections; by convention,
+indexers should listen for TLS ingest connections on TCP port 4024.
+
+
+\section{Webserver Security}
+
+Webservers communicate with user clients, indexers, the search agent,
+and optionally the datastore. As the gateway into the Gravwell system,
+they are often accessible from public networks and should therefore be
+protected carefully.
+
+\subsection{Authentication \& Secrets}
+
+Webservers store the following shared secrets:
+
+\begin{itemize}
+\tightlist
+\item
+  \code{Control-Auth}, used to authenticate the webserver to indexers and
+  the datastore.
+\item
+  \code{Search-Agent-Auth}, used by the search agent to authenticate to the
+  webserver.
+\end{itemize}
+
+They also maintain a database of Gravwell users, stored by default in
+\code{/opt/gravwell/etc/users.db}. Passwords in the user database are
+bcrypt hashed, but care should still be taken to prevent unauthorized
+system users from reading this file.
+
+\subsection{Webserver-Indexer Communication}
+
+Communications between the indexer and the webserver take place over
+TCP port 9404 by default (specified by the \code{Control-Port} parameter).
+These connections \emph{are not encrypted}. Indexers often have to transfer
+very large numbers of entries to the webserver during a search, and
+encryption would significantly slow the transfer. For this reason,
+indexers and webservers should communicate only over trusted networks.
+If the indexer-webserver traffic must traverse the Internet, we
+strongly recommend using a VPN or other tunnel to transport the
+traffic.
+
+\subsection{Webserver-User Communication}
+
+Users access the webserver via their web browsers over either HTTP or
+HTTPS. Authentication consists of an HTTP POST request containing a
+username and password, meaning a user's password may be transmitted in
+plaintext if TLS is not configured on the webserver. Because of this, \emph{no
+Gravwell webserver should be used over the Internet without first
+installing TLS certificates.}
+
+\subsection{Webserver-Search Agent Communication}
+
+The automated search agent connects to a Gravwell webserver over the
+same HTTP or HTTPS ports as a regular user, but it authenticates using a
+challenge-response algorithm and the search agent-specific shared
+secret. The search agent will default to unencrypted HTTP, which may be
+acceptable when the search agent is on the same system as the webserver,
+but if a search agent is installed on a separate system it should be
+configured to use HTTPS.
+
+\subsection{Webserver-Datastore Communication}
+
+When multiple webservers are configured in a Gravwell cluster, they
+coordinate via the datastore component. Communications between the
+webservers and the datastore include (hashed) user passwords, search
+histories, user-uploaded resources, and other potentially sensitive
+items. For this reason, Gravwell \emph{strongly suggests} that communication between
+the webserver and the datastore be TLS-encrypted; configuring a TLS
+certificate as described in an earlier section is an important step in
+setting up a Gravwell cluster with multiple webservers.
+
+
+\section{Ingester security}
+
+Ingesters communicate only with indexers, using a shared ingest secret
+which can be stored via the methods described at the beginning of this
+chapter. As documented in the section on indexer security, ingesters may
+communicate with the indexers over either cleartext or encrypted
+connections. In either case, the shared secret is never transmitted, so
+it is not susceptible to interception, but an adversary could
+potentially intercept \emph{entries} as they are uploaded over a cleartext
+connection. For this reason we strongly recommend configuring TLS
+certificates on the indexer if you intend to run ingesters outside your
+trusted networks.
+
+If all ingesters use the same ingest secret, and one is compromised, the attacker
+could theoretically use that compromised ingest secret to upload entries to
+your indexers. Consider deploying Federators (see Section \ref{sec:federator}) in
+order to segment your ingesters into different security enclaves to help ameliorate this risk.
+
+\section{User Authentication and Lockout}
+
+As mentioned in the webserver section, users are authenticated to the
+webserver by sending their username and password in an HTTP POST
+request. If the webserver is not configured to offer HTTPS connections,
+user credentials are at risk of interception. Always set up TLS
+certificates on the webserver and enable HTTPS before allowing users to
+log on from public networks.
+
+Gravwell provides a basic form of brute-force protection. If several
+failed login attempts are made over a short period, the webserver will
+delay its response to subsequent attempts by several seconds. This is
+intended to slow down brute-forcers while still allowing legitimate
+users to log in.

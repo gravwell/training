@@ -1,0 +1,152 @@
+\chapter{Command Line Interface}
+
+In addition to the GUI we've shown so far, Gravwell provides a
+command-line client. This client can be useful for certain repetitive
+tasks such as testing scripts (see the Automation chapter for more info)
+or in situations where the GUI is not available. It can also be used in
+shell scripts or cron jobs to automatically gather information from a
+Gravwell instance, if needed. The intent is that the command line
+interface should provide every function available in the GUI.
+
+\section{Running the Client}
+
+The command-line client is installed as \code{/usr/sbin/gravwell} by
+default. It will attempt to connect to localhost unless a different
+server is specified with the ``-s'' flag, but be aware that since Gravwell's
+default install disables HTTPS, we'll need to use the ``-insecure-no-https''
+flag. The client will prompt for a username and password; use the same
+credentials you would use to log in to the GUI:
+
+\begin{Verbatim}[breaklines=true]
+/ # gravwell -insecure-no-https
+Username:  admin
+Password:  changeme
+#>
+\end{Verbatim}
+
+Once you log in, the client will show a top-level prompt. Similar to
+the Cisco command line, the client implements multi-level menus; by
+typing `admin', we can enter the administrative menu, then we can type
+`help' to get a listing of available commands. Here is a snippet of
+available commands:
+
+\begin{Verbatim}[breaklines=true]
+#>  admin
+admin>  help
+add_user            Add a new user
+impersonate_user    Impersonate an existing users
+del_user            Delete an existing user
+get_user            Get an existing users details
+update_user         Update an existing user
+list_users          List all users
+lock_user           Lock a user account
+user_activity       Show a specific users activity
+\end{Verbatim}
+
+Help is available at all menu levels. When a command is selected,
+the client will prompt for input:
+
+\begin{Verbatim}[breaklines=true]
+#>  search
+query>  tag=* count
+time range> -6h
+count 1100
+1/1
+Press q[Enter] to quit, [Enter] to continue
+
+Total Items: 1
+1101 stats records from Mar 22 16:29:53.000 <-> Mar 22 22:29:54.000
+count 1.10 K/1.00 663.35 KB/547 B 65.238537ms
+\end{Verbatim}
+
+\section{Hands-on Lab: Basic CLI exploration}
+
+Launch a Gravwell webserver+indexer container:
+
+\begin{Verbatim}[breaklines=true]
+docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
+\end{Verbatim}
+
+Now get a shell on the Gravwell container and run the client:
+
+\begin{Verbatim}[breaklines=true]
+$ docker exec -it gravwell /bin/sh
+/ # gravwell -insecure-no-https
+Username:  admin
+Password:  changeme
+#>
+\end{Verbatim}
+
+Try the following tasks:
+
+\begin{enumerate}
+\item
+  {Create a new user}
+\item
+  {Lock that user}
+\item
+  {Verify that the user has been locked.}
+\item
+  {Unlock the user}
+\item
+  {Delete the user}
+\end{enumerate}
+
+When you're done, use the ``exit'' command to quit the CLI, then ``exit'' again to leave the shell in the Docker container.
+
+Now, let's use the command line client non-interactively to run
+a search and download the results. First, we'll ingest 1,000 random JSON
+entries into the Gravwell instance:
+
+
+\begin{Verbatim}[breaklines=true]
+docker run --net gravnet --rm -it --name ingesters gravwell:ingesters \
+/opt/gravwell/bin/jsonGenerator -clear-conns gravwell:4023 -entry-count 1000
+\end{Verbatim}
+
+
+Now, we use the client to run a search in the background; the search
+will find all entries containing the name ``David'':
+
+\begin{Verbatim}[breaklines=true]
+$ docker exec -it gravwell /bin/sh
+/ # gravwell -insecure-no-https -b search
+query>  tag=default grep David
+time range> -6h
+Background search with ID 569547375 launched
+\end{Verbatim}
+
+And use the client to download the results:
+
+\begin{Verbatim}[breaklines=true]
+/ # gravwell -insecure-no-https download
++----------+-----+---------+----------+--------------------+-----------+
+|Search ID |User |   Group |    State |   Attached Clients |   Storage |
++==========+=====+=========+==========+====================+===========+
+|569547375 |   1 |       0 |  DORMANT |                  0 |  12.66 KB |
++----------+-----+---------+----------+--------------------+-----------+
+search ID>  569547375
+Available formats:
+json
+text
+csv
+format>  text
+Save Location (default: /tmp)>  /tmp
+Saving to  /tmp/569547375.text
+\end{Verbatim}
+
+To clean up after the experiment, run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
+
+\subsection{Lab Questions}
+
+\begin{enumerate}
+\item
+  Download the results in csv and json format. What's the difference?
+\item
+  What happens when you leave out the ``-b'' flag while launching the
+  search?
+\end{enumerate}
