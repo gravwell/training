@@ -752,7 +752,11 @@ timestamps don't include a time zone, and your system is probably set to
 the local time zone, so the log files will contain entries with local
 timestamps. Docker containers default to UTC, though, so the ingester
 will improperly parse the log timestamps. Luckily, this can be fixed in
-the config file. We'll first copy out the config file from the ingester:
+the config file. 
+
+\textbf{NOTE:} If your host computer is set to UTC, you can skip these config modifications and skip straight to starting the ingester.
+
+We'll first copy out the config file from the ingester:
 
 \begin{Verbatim}[breaklines=true]
 docker cp ingesters:/opt/gravwell/etc/file_follow.conf /tmp
@@ -762,8 +766,6 @@ Edit the file and add the following to each
 \code{Follower}block, substituting your timezone:
 
 \code{Timezone-Override="America/Denver"}
-
-\textbf{NOTE:} If your host computer is set 
 
 And push the configuration back to the ingester:
 

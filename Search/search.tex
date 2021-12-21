@@ -3107,7 +3107,7 @@ the menu to return to the search bar. This time, let's get a table
 together of which hosts are communicating the most:
 
 \begin{Verbatim}[breaklines=true]
-tag=netflow netflow IP Bytes | stats sum(Bytes) by IP | table IP su
+tag=netflow netflow IP Bytes | stats sum(Bytes) by IP | table IP sum
 \end{Verbatim}
 
 Follow the same procedure to add this search to the dashboard but
