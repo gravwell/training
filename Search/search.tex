@@ -135,18 +135,25 @@ line.
 Let's examine a query that uses successive filtering modules to find
 syslog data from a specific service originating from a specific machine.
 We will use the
-\code{grep}\footnote{https://docs.gravwell.io/\#!search/grep/grep.md} module
+\code{grep}\footnote{Gravwell's ``grep'' module behaves much like the Unix tool of the same name: it searches text for patterns the user specifies. See https://docs.gravwell.io/\#!search/grep/grep.md for more information.} module
 twice, first filtering for the machine name and then filtering for the
 service name. Our example query is:
 
-\code{tag=syslog grep build \textbar{} grep sshd}
+\code{tag=syslog grep dunkel \textbar{} grep sshd}
 
-This query first tells all indexers that we only want to look at syslog
+This query tells all indexers that we only want to look at syslog
 data (\code{tag=syslog}). The first \code{grep} search module filters out all entries which do not
-have the value ``build'' in their data. The second \code{grep} filters out all
+have the value ``dunkel'' (a hostname) in their data. The second \code{grep} filters out all
 entries which do not have the value ``sshd'' in their data. The output
-entries are guaranteed to contain both ``build'' and ``sshd'' in their
+entries are guaranteed to contain both ``dunkel'' and ``sshd'' in their
 bodies.
+
+Therefore, given the following entries as input, the first one would be returned while the second would be dropped:
+
+\begin{Verbatim}[breaklines=true]
+Mar 20 17:41:08 dunkel sshd[26779]: Failed password for root from 218.92.0.192 port 38978 ssh2
+Mar 20 17:41:05 porter sshd[21703]: Failed password for root from 218.92.0.192 port 57623 ssh2
+\end{Verbatim}
 
 However, the query as you see it is not what actually gets executed.
 Our example query does not specify a \emph{renderer} module, so Gravwell
@@ -169,7 +176,7 @@ correct order.
 \subsection{Hands-on Lab: Basic Filtering}
 \label{sec:lab-filter}
 
-For this hands on lab we are going to chain a few modules together to
+For this hands-on lab we are going to chain a few modules together to
 achieve some basic filtering and zero in on very specific data.
 
 Start by cleaning your environment and starting up a new base Gravwell
@@ -182,7 +189,7 @@ docker create --rm --net gravnet -p 8080:80 --name test gravwell:base
 docker start test
 \end{Verbatim}
 
-Next, we'll use the \code{reimport} ingester to ingest a set of logs, 
+Next, we'll use the \code{reimport} ingester to ingest a prepared set of logs into the \code{syslog} tag:
 
 \begin{Verbatim}[breaklines=true]
 cd ~/gravwell_training/Search/Lab-Basics
@@ -191,32 +198,34 @@ gravwell:ingesters /opt/gravwell/bin/reimport -rebase-timestamp \
 -clear-conns test -i /tmp/data/auth.json.gz -import-format json
 \end{Verbatim}
 
-Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080}) and perform the following queries:
+Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080}, recall that the username/password is ``admin''/``changeme'' by default), then try the following tasks:
 
 \begin{enumerate}
 \item
-  Filter the auth logs to only include logs from the sshd daemon on the
+  Filter the syslog tag to only include logs from the sshd daemon on the
   host \code{porter}.
-\item
-  Filter the auth logs to include sshd logs from all hosts \emph{except} \code{porter}.
 	\begin{enumerate}
 	\item
-	  The grep module has a -v option that inverts the filter logic
-	\item
-	  The grep module can also use glob patterns, e.g. \code{grep host*}
+	  Hint: Refer back to the section above for example queries you can adapt.
 	\end{enumerate}
 \item
-  Filter auth logs to find successful logins on the host \code{porter}.
+  Filter the syslog tag to include sshd logs from all hosts \emph{except} \code{porter}.
 	\begin{enumerate}
 	\item
-	  sshd will log ``Accepted'' when a user logs in
+	  Hint: The grep module has a -v option that inverts the filter logic.
+	\end{enumerate}
+\item
+  Filter the syslog tag to find successful logins on the host \code{porter}.
+	\begin{enumerate}
+	\item
+	  Hint: sshd will log ``Accepted'' when a user logs in.
 	\end{enumerate}
 \item
   Generate a final count of failed ssh password logins for non-root
   accounts.
 	\begin{enumerate}
 	\item
-	  Use the \code{count} module without any arguments to count entries
+	  Hint: Use the \code{count} module without any arguments to count entries.
 	\end{enumerate}
 \end{enumerate}
 
