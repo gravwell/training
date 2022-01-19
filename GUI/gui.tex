@@ -34,8 +34,6 @@ This menu is used to access all the primary functionalities of Gravwell, includi
 	\label{fig:submenu}
 \end{figure}
 
-Note: These screenshots include an ``Administrator'' sub-menu, which contains admin-only management tools and is only visible to users flagged as administrators.
-
 \subsection{Notifications}
 
 Important notifications are accessible under the bell icon in the upper right corner of the page. Regular notifications are indicated by a small red circle containing the number of notifications. A critical notification will change the entire icon to a more attention-catching red icon; see Figure \ref{fig:notifications-icons} for examples.
@@ -71,7 +69,7 @@ The round button in the upper-right of the page is the Account Menu button. It w
 Selecting ``Account'' will open your preferences page, shown in Figure \ref{fig:account-prefs}. Here, you can change your email address, display name, or password; be sure to click ``Update Account'' after making changes! The ``Log out all sessions'' button at the bottom of the screen will kick \emph{all} active sessions for your account, across all client machines.
 
 \begin{figure}
-	\includegraphics[width=0.9\linewidth]{images/account-prefs.png}
+	\includegraphics[width=0.7\linewidth]{images/account-prefs.png}
 	\caption{Account preferences}
 	\label{fig:account-prefs}
 \end{figure}
@@ -81,7 +79,7 @@ The second tab of the Preferences page, ``Interface \& Appearance'', is shown in
 The ``Chart theme'' dropdown selects different color palettes which will be used when drawing charts. The editor theme \& font size options control the appearance of Gravwell's built-in text editor, which is used to create automation scripts and in a few other places.
 
 \begin{figure}
-	\includegraphics[width=0.6\linewidth]{images/interface-prefs.png}
+	\includegraphics[width=0.7\linewidth]{images/interface-prefs.png}
 	\caption{Interface and appearance preferences}
 	\label{fig:interface-prefs}
 \end{figure}
@@ -89,7 +87,7 @@ The ``Chart theme'' dropdown selects different color palettes which will be used
 The third tab, ``Preferences'' (Figure \ref{fig:general-prefs}), allows you to change some default behaviors of Gravwell.
 
 \begin{figure}
-	\includegraphics[width=0.6\linewidth]{images/general-prefs.png}
+	\includegraphics[width=0.7\linewidth]{images/general-prefs.png}
 	\caption{General preferences}
 	\label{fig:general-prefs}
 \end{figure}
@@ -104,7 +102,7 @@ The ``Advanced Preferences'' section can be ignored by most users. Selecting ``D
 The final tab, ``Email Server'' (Figure \ref{fig:email-prefs-gui}, is extremely important for users who intend to do automated email alerting via scheduled scripts. It must be set up with a valid SMTP configuration before emails can be sent.
 
 \begin{figure}
-	\includegraphics[width=0.6\linewidth]{images/email-prefs.png}
+	\includegraphics[width=0.7\linewidth]{images/email-prefs.png}
 	\caption{Email preferences}
 	\label{fig:email-prefs-gui}
 \end{figure}
@@ -151,13 +149,13 @@ The GUI can filter objects based on their labels. At the top of many screens is 
 Multiple filters can be applied simultaneously. When a filter has been applied to a page, a blue ``X'' icon will appear on the Filters button. Clicking this icon will clear all filters.
 
 \begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/filters-menu.png}
+	\includegraphics[width=0.7\linewidth]{images/filters-menu.png}
 	\caption{The filters menu}
 	\label{fig:filters-menu}
 \end{figure}
 
 \begin{figure}
-	\includegraphics[width=0.6\linewidth]{images/filters-options.png}
+	\includegraphics[width=0.7\linewidth]{images/filters-options.png}
 	\caption{Options for filtering}
 	\label{fig:filters-options}
 \end{figure}
@@ -174,7 +172,7 @@ The left-most dropdown, ``Filter by label or kit'', allows you to select one or 
 
 \subsubsection{Filtering by Owner}
 
-By default, most interfaces will show all objects the user has access to, regardless of owner. Another filter option can make it show only objects owned by a particular set of users. Figure \ref{fig:filter-owner} shows the user filtering macros to show only those macros owned by the user ``John''. Note that the ``My data'' option applies to the current user; selecting this checkbox will show only those items which \emph{belong} to the current user, rather than all items the user \emph{can access}.
+By default, most interfaces will show all objects the user has access to, regardless of owner. Another filter option can make it show only objects owned by a particular set of users. Figure \ref{fig:filter-owner} shows the user filtering macros to show only those macros owned by the user named ``Admin User''. Note that the ``My data'' option applies to the current user; selecting this checkbox will show only those items which \emph{belong} to the current user, rather than all items the user \emph{can access}.
 
 \begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/filter-owner.png}
