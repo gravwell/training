@@ -279,7 +279,7 @@ tag=apache regex "^(?P<ip>\S+)\s\S+\s(?P<user>\S+)\s" | table
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/extract-ip.png}
+	\includegraphics[width=0.8\linewidth]{images/extract-ip.png}
 	\caption{Extracted IP and username}
 	\label{fig:extract-ip}
 \end{figure}
@@ -306,7 +306,7 @@ regex "\]\s\"(?P<method>\S+)\s(?P<url>\S+)\"\s"
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/extract-chaining.png}
+	\includegraphics[width=0.8\linewidth]{images/extract-chaining.png}
 	\caption{Chaining multiple extractions}
 	\label{fig:extract-chaining}
 \end{figure}
@@ -327,7 +327,7 @@ table ip user method data
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/extract-ev.png}
+	\includegraphics[width=0.8\linewidth]{images/extract-ev.png}
 	\caption{Extracting from an enumerated value}
 	\label{fig:extract-ev}
 \end{figure}
@@ -345,7 +345,7 @@ table ip user method decoded
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/hex-decode-url.png}
+	\includegraphics[width=0.8\linewidth]{images/hex-decode-url.png}
 	\caption{Hex-decoded URL}
 	\label{fig:hex-decode-url} 
 \end{figure}
@@ -369,7 +369,7 @@ table ip user method username password
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/url-extract-json.png}
+	\includegraphics[width=0.8\linewidth]{images/url-extract-json.png}
 	\caption{URL parameters extracted as JSON}
 	\label{fig:url-extract-json}
 \end{figure}
@@ -714,7 +714,7 @@ of the results; the user can select portions of the timeline to zoom in
 on a particular subset of the results, as shown in Figure \ref{fig:temporal-render}
 
 \begin{figure}
-	\includegraphics{images/temporal-render.png}
+	\includegraphics[width=0.8\linewidth]{images/temporal-render.png}
 	\caption{Renderer in temporal mode}
 	\label{fig:temporal-render}
 \end{figure}
@@ -724,7 +724,7 @@ renderer will enter \emph{non-temporal} mode, in which subselection is not
 possible, as shown in Figure \ref{fig:nontemporal-render}.
 
 \begin{figure}
-	\includegraphics{images/nontemporal-render.png}
+	\includegraphics[width=0.8\linewidth]{images/nontemporal-render.png}
 	\caption{Renderer in non-temporal mode}
 	\label{fig:nontemporal-render}
 \end{figure}
@@ -846,7 +846,7 @@ convenient way to export a lookup table to another Gravwell system.
 
 These renderers provide only the most basic functionality but are
 useful when doing initial explorations on data. The text renderer is
-designed to show human readable entries in a text format. Any
+designed to show human readable entries in a text format, as seen in Figure \ref{fig:text-entries}. Any
 non-printable characters will be converted to the `.' character. Text
 also fully supports Unicode and can render non-ASCII characters. Text is
 the default renderer and is applied if no renderer is specified.
@@ -863,44 +863,34 @@ entry, to prevent accidentally displaying multiple megabytes of raw
 data. To increase the maximum length of output add the limit argument, 
 e.g. \code{text limit 2048} to display up to 2048 characters.
 
-Both renderers provide a useful feature when enumerated values have
-been extracted from data. The bottom of the search results will show
-buttons to switch between ``Entries'' view (Figure \ref{fig:text-entries}), which shows the original
-entry contents, and ``Enumerated Values'' view (Figure \ref{fig:text-ev}), which shows the
-enumerated values which were extracted from the entries.
-
 \begin{figure}
-	\includegraphics{images/text-entries.png}
+	\includegraphics[width=0.7\linewidth]{images/text-entries.png}
 	\caption{Text renderer entries view}
 	\label{fig:text-entries}
 \end{figure}
 
-\begin{figure}
-	\includegraphics{images/text-ev.png}
-	\caption{Text renderer enumerated values view}
-	\label{fig:text-ev}
-\end{figure}
-
 Hovering the mouse over an entry in the GUI when using either the text
-or raw renderer brings up a context menu with three options, as shown
+or raw renderer brings up a context menu with two options, as shown
 in Figure \ref{fig:text-context-menu}.
 
 \begin{figure}
-	\includegraphics{images/text-context-menu.png}
+	\includegraphics[width=0.7\linewidth]{images/text-context-menu.png}
 	\caption{Text renderer context menu}
 	\label{fig:text-context-menu}
 \end{figure}
 
-The right-most icon shows the source and timestamp of the entry, and
-the center icon copies the entry contents to the clipboard. The
-left-most option, however, is particularly useful when dealing with
-JSON-formatted data: it will attempt to pretty-print the entry's data as
-JSON, as seen in Figure \ref{fig:text-json-prettyprint}.
+The right-most icon shows the built-in fields and any enumerated values on the entry, as seen in Figure \ref{fig:text-ev}. The star icon allows you to highlight particular entries; highlighted entries can be viewed later in the ``Highlights'' tab at the bottom of the page, as seen in Figure \ref{fig:text-highlights}.
 
 \begin{figure}
-	\includegraphics{images/text-json-prettyprint.png}
-	\caption{Text renderer JSON pretty-print}
-	\label{fig:text-json-prettyprint}
+	\includegraphics[width=0.7\linewidth]{images/text-ev.png}
+	\caption{Text renderer enumerated values view}
+	\label{fig:text-ev}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/text-highlights.png}
+	\caption{Text renderer highlight view}
+	\label{fig:text-highlights}
 \end{figure}
 
 
@@ -938,17 +928,19 @@ automatically display them:
 tag=netflow netflow Src Dst SrcPort DstPort | table
 \end{Verbatim}
 
-Find brute-force SSH attacks:
+Find failed SSH login attempts and count how many attempts were made for each username (Figure \ref{fig:table-ssh-bruteforce}):
 
 \begin{Verbatim}[breaklines=true]
-tag=syslog grep sshd | regex "authentication error for (?P<user>\S+)"
-| count by user | table user count
+tag=syslog grep sshd 
+| regex "invalid user (?P<username>\S+)" 
+| stats count by username 
+| table username count
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics[width=0.5\linewidth]{images/table-brute-force.png}
-	\caption{Brute force attempt table}
-	\label{fig:table-brute-force}
+	\includegraphics[width=0.7\linewidth]{images/table-ssh-bruteforce.png}
+	\caption{Failed SSH login table}
+	\label{fig:table-ssh-bruteforce}
 \end{figure}
 
 \subsubsection{Using the -save option}
@@ -970,7 +962,7 @@ tag=syslog grep sshd
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/table-ssh-login.png}
+	\includegraphics[width=0.7\linewidth]{images/table-ssh-login.png}
 	\caption{SSH login MAC addresses}
 	\label{fig:ssh-login-macs}
 \end{figure}
@@ -1004,26 +996,25 @@ to not introduce the ``other'' grouping until it exceeds the given limit
 of n values. The user interface for charting allows for a rapid
 transition between line, area, bar, pie, and donut charts.
 
-The following query generates a chart showing which usernames most
-commonly fail ssh authentication; due to online brute-forcing attacks,
-we can expect "root" to be the most common.
+The following query generates a chart showing the most common invalid usernames seen on incoming SSH connections--indicators of brute-forcing:
 
 \begin{Verbatim}[breaklines=true]
-tag=syslog grep sshd | grep "Failed password for"
-| regex "Failed\spassword\sfor\s(?P<user>\S+)"
-| count by user | chart count by user limit 10
+tag=syslog grep sshd 
+| regex "invalid user (?P<username>\S+)" 
+| stats count by username 
+| chart count by username limit 10
 \end{Verbatim}
 
 The results can be rendered in a variety of ways. By default, the UI will show a line chart (Figure \ref{fig:chart-line}, but the gear icon on the right side allows you to select a variety of chart types, including pie charts (Figure \ref{fig:chart-pie}.
 
 \begin{figure}
-	\includegraphics{images/chart-line.png}
+	\includegraphics[width=0.6\linewidth]{images/chart-line.png}
 	\caption{Line chart}
 	\label{fig:chart-line}
 \end{figure}
 
 \begin{figure}
-	\includegraphics{images/chart-pie.png}
+	\includegraphics[width=0.6\linewidth]{images/chart-pie.png}
 	\caption{Pie chart}
 	\label{fig:chart-pie}
 \end{figure}
@@ -1060,35 +1051,31 @@ Pointmap translates entries into distinct markers on the map. If
 additional enumerated value names are specified, their contents will be
 displayed when a point is clicked.
 
-The following search displays a map of all IP addresses captured in
-netflow records, as seen in Figure \ref{fig:pointmap-ip}.
+The following search displays a map of all IP addresses which connected to the SSH service, as seen in Figure \ref{fig:pointmap-ip}.
 
 \begin{Verbatim}[breaklines=true]
-tag=netflow netflow IP | geoip IP.Location | pointmap IP
+tag=syslog grep sshd | regex "Connection from (?P<ip>\S+) port"
+| geoip ip.Location | pointmap ip
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/pointmap-ip.png}
+	\includegraphics[width=0.6\linewidth]{images/pointmap-ip.png}
 	\caption{Pointmap IP locations}
 	\label{fig:pointmap-ip}
 \end{figure}
 
-If we sum up the number of bytes from each IP and add the IP and Bytes
-enumerated values to pointmap's arguments, they will appear when we
-click on a point as shown in Figure \ref{fig:pointmap2}
-(we also added the ASN Organization so we can see
-\emph{who} we are talking to).
+We can also use the geoip module to look up an IP address's ASN organization. Any enumerated values passed to the pointmap renderer can be viewed by clicking on a point, as seen in Figure \ref{fig:pointmap2}
 
 \begin{Verbatim}[breaklines=true]
-tag=netflow netflow IP Bytes |
-sum Bytes by IP |
-geoip IP.Location |
-geoip -r maxmindASN IP.ASNOrg |
-pointmap IP Bytes ASNOrg
+tag=syslog grep sshd 
+| regex "Connection from (?P<ip>\S+) port" 
+| geoip ip.Location 
+| geoip -r asn_db ip.ASNOrg 
+| pointmap ip ASNOrg
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/pointmap2.png}
+	\includegraphics[width=0.6\linewidth]{images/pointmap2.png}
 	\caption{Pointmap with additional enumerated values}
 	\label{fig:pointmap2}
 \end{figure}
@@ -1099,17 +1086,18 @@ pointmap IP Bytes ASNOrg
 Heatmap operates similarly to pointmap, but it takes 0 or 1 additional
 enumerated values as arguments. If no enumerated value argument is
 given, it generates a heat map using the number of entries for each
-location as the 'heat'. In this example using netflow records, the
+location as the 'heat'. In this example using IPFIX records, the
 'heat' represents the number of connections from a location, as seen
 in Figure \ref{fig:heatmap-basic}.
 
 \begin{Verbatim}[breaklines=true]
-tag=netflow netflow IP | geoip IP.Lat IP.Long
+tag=ipfix ipfix ip!~PRIVATE 
+| geoip ip.Lat ip.Long 
 | heatmap -lat Lat -long Long
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/heatmap-basic.png}
+	\includegraphics[width=0.6\linewidth]{images/heatmap-basic.png}
 	\caption{Basic heatmap use}
 	\label{fig:heatmap-basic}
 \end{figure}
@@ -1119,12 +1107,14 @@ derived from the number of bytes sent over the connection, rather than
 the number of connections, as shown in Figure \ref{fig:heatmap-bytes}.
 
 \begin{Verbatim}[breaklines=true]
-tag=netflow netflow IP Bytes | sum Bytes by IP
-| geoip IP.Location | heatmap sum
+tag=ipfix ipfix ip!~PRIVATE bytes 
+| stats sum(bytes) by ip 
+| geoip ip.Location 
+| heatmap sum
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/heatmap-bytes.png}
+	\includegraphics[width=0.6\linewidth]{images/heatmap-bytes.png}
 	\caption{Heatmap using byte count as ``heat''}
 	\label{fig:heatmap-bytes}
 \end{figure}
@@ -1169,12 +1159,13 @@ of bytes sent to different TCP or UDP ports. See Figure \ref{fig:stackgraph-traf
 for a sample of the output.
 
 \begin{Verbatim}[breaklines=true]
-tag=netflow netflow Src ~ PRIVATE Port < 1024 Bytes as traffic |
-sum traffic by Src,Port | stackgraph Src Port sum
+tag=ipfix ipfix src ~ PRIVATE port < 1024 bytes 
+| stats sum(bytes) by src port 
+| stackgraph src port sum
 \end{Verbatim}
 
 \begin{figure}[H]
-	\includegraphics{images/stackgraph-traffic.png}
+	\includegraphics[width=0.6\linewidth]{images/stackgraph-traffic.png}
 	\caption{Stackgraph of traffic volumes by IP \& Port}
 	\label{fig:stackgraph-traffic}
 \end{figure}
@@ -1182,22 +1173,22 @@ sum traffic by Src,Port | stackgraph Src Port sum
 \subsubsection{Stackgraph Example: Failed SSH Logins by Country \& User}
 
 This query will generate a stackgraph in which each bar represents a country and the
-components of the bars indicate the different usernames given for failed SSH logins.
-Note that China has been excluded, as they are the overwhelming majority of
-attempts and make the other countries too small to read. Figure \ref{fig:stackgraph-ssh}
+components of the bars indicate the number of connections to a given port, based on IPFIX logs.
+Figure \ref{fig:stackgraph-connections}
 shows the results.
 
 \begin{Verbatim}[breaklines=true]
-tag=syslog grep sshd
-| regex "Failed password for (?P<user>\S+) from (?P<ip>\d+\.\d+\.\d+\.\d+) "
-| geoip ip.Country != CN | count by user,Country
-| stackgraph Country user count
+tag=ipfix ipfix ip!~PRIVATE port < 1024 
+| geoip ip.Country 
+| stats count by port Country 
+| require Country 
+| stackgraph Country port count
 \end{Verbatim}
 
 \begin{figure}[H]
-	\includegraphics{images/stackgraph-ssh.png}
-	\caption{Stackgraph of failed SSH logins by country \& user}
-	\label{fig:stackgraph-ssh}
+	\includegraphics[width=0.6\linewidth]{images/stackgraph-connections.png}
+	\caption{Stackgraph of connection count by country \& port}
+	\label{fig:stackgraph-connections}
 \end{figure}
 
 
@@ -1239,11 +1230,15 @@ force directed graph of IPV4 traffic while grouping nodes into a class C
 network can be accomplished with the following query, as shown in Figure \ref{fig:fdg-classC}.
 
 \begin{Verbatim}[breaklines=true]
-tag=pcap packet ipv4.SrcIP ipv4.DstIP ipv4.Length | sum Length by SrcIP,DstIP | subnet -t SrcSub SrcIP /24 | subnet -t DstSub DstIP /24 | fdg -v sum -sg SrcSub -dg DstSub SrcIP DstIP
+tag=pcap packet ipv4.SrcIP ipv4.DstIP ipv4.Length 
+| sum Length by SrcIP,DstIP 
+| subnet -t SrcSub SrcIP /24 
+| subnet -t DstSub DstIP /24 
+| fdg -v sum -sg SrcSub -dg DstSub SrcIP DstIP
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/fdg-classC.png}
+	\includegraphics[width=0.6\linewidth]{images/fdg-classC.png}
 	\caption{FDG of traffic between class C networks}
 	\label{fig:fdg-classC}
 \end{figure}
@@ -1252,7 +1247,7 @@ Hovering the mouse over a node shows its label and the labels of its
 neighbors, as in Figure \ref{fig:fdg-context}.
 
 \begin{figure}[H]
-	\includegraphics{images/fdg-context.png}
+	\includegraphics[width=0.6\linewidth]{images/fdg-context.png}
 	\caption{FDG context popup}
 	\label{fig:fdg-context}
 \end{figure}
@@ -1347,7 +1342,7 @@ Resources are managed via a page accessible from the main menu of the user inter
 menu and select "Resources" (Figure \ref{fig:resource-page}).
 
 \begin{figure}
-	\includegraphics{images/resource-page.png}
+	\includegraphics[width=0.7\linewidth]{images/resource-page.png}
 	\caption{Resources management page}
 	\label{fig:resource-page}
 \end{figure}
@@ -1369,7 +1364,7 @@ Note that the resource will not be created or uploaded unless the 'Save'
 button is clicked!
 
 \begin{figure}
-	\includegraphics{images/resource-new.png}
+	\includegraphics[width=0.7\linewidth]{images/resource-new.png}
 	\caption{New resource dialog}
 	\label{fig:resource-new}
 \end{figure}
@@ -1381,7 +1376,7 @@ desired resource in the resource list. This will open the resource
 editing screen as shown in Figure \ref{fig:resource-edit}.
 
 \begin{figure}
-	\includegraphics{images/resource-edit.png}
+	\includegraphics[width=0.7\linewidth]{images/resource-edit.png}
 	\caption{Resource editing dialog}
 	\label{fig:resource-edit}
 \end{figure}
@@ -1439,7 +1434,7 @@ using tar; it should contain a file named \code{GeoLite2-City.mmdb}.
 Upload that file into a new resource named ``maxmind'', as shown in Figure \ref{fig:maxmind-upload}.
 
 \begin{figure}[H]
-	\includegraphics[width=0.7\linewidth]{images/maxmind-upload.png}
+	\includegraphics[width=0.5\linewidth]{images/maxmind-upload.png}
 	\caption{Uploading maxmind database}
 	\label{fig:maxmind-upload}
 \end{figure}
@@ -1459,7 +1454,7 @@ address. Finally, the pointmap renderer draws each location on a map, as
 seen in Figure \ref{fig:maxmind-pointmap}.
 
 \begin{figure}[H]
-	\includegraphics{images/maxmind-pointmap.png}
+	\includegraphics[width=0.7\linewidth]{images/maxmind-pointmap.png}
 	\caption{Netflow source IP pointmap}
 	\label{fig:maxmind-pointmap}
 \end{figure}
