@@ -1482,22 +1482,24 @@ data stream from another, provide unified visibility across multiple
 data sources, or generate a single view for an operator that fuses many
 different data sources.
 
-Tags form the basis of data control in the Gravwell pipeline,
-previously we have shown that tags are used
-only to control what data enters the pipeline. However, we can add tag
+Tags form the basis of data control in the Gravwell pipeline.
+Previously we have only shown tags being used
+to control what data \emph{enters} the pipeline. However, we can also add tag
 specifications to individual modules and to inform them that they should
 only process entries with those specific tags. Any entries that do not
-match the specified tags are passed through untouched. Most data fusion
-queries are broken into three sections. The first section is the
-extraction phase where we use the data bypass and additional tag
-specifications to target modules against specific data types, for
-example we might have an unstructured log and JSON data. We use the
-tags to invoke the json module against the JSON data and the regex
+match the specified tags are passed through untouched. This is what we
+call data fusion.
+
+Most data fusion queries are broken into three sections. The first section
+is the extraction phase where we use the data bypass and additional
+tag specifications to target modules against specific data types,
+for example we might have an unstructured log and JSON data. We use
+the tags to invoke the json module against the JSON data and the regex
 module against the unstructured data. The next section of a fusion query
 might use one data source to enrich or pivot on the other, potentially
 creating a running lookup system that adds additional enumerated values
-to one tag but derived from the other. The final section might look
-like every other search pipeline using the data fused data.
+to one tag but derived from the other. The final section tends to look like
+regular search pipelines, using the data fused data without targeting any particular tag.
 
 The following diagram shows what a data fusing query might look like.
 We have two data sources coming in, let's call them tag RED and tag
@@ -1505,7 +1507,7 @@ BLUE. There are three modules that have been instructed to only
 operate on either RED or BLUE data, then there is a fusing
 module (orange) that uses the RED and BLUE data to create a
 single data stream with both data types fused. The final search module
-performs some standard operation before sending the data on to the
+performs some standard operation on \emph{all} entries before sending the data on to the
 renderer.
 
 \begin{figure}
@@ -1689,7 +1691,7 @@ from the DHCP log can be looked up against a MAC address from the switch log.
 	\label{fig:mac-host-table}
 \end{figure}
 
-The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keeping an eye on what devices are on your network.
+The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keeping an eye on what devices are on your network. Note that some MAC addresses don't have a hostname associated with them; those are devices we may want to investigate!
 
 \subsubsection{Lab Tasks}
 
@@ -1937,391 +1939,6 @@ docker kill $(docker ps -a -q)
 
 
 
-\section{Search Scripts}
-
-The \code{anko} search module allows users to write complex scripts to
-manipulate entries in the pipeline. Scripts are written in the Anko
-scripting language, which is covered more completely in the Automation
-chapter. This section will discuss requirements and peculiarities of
-scripts used with the anko search module.
-
-\subsection{Managing and Running Anko Scripts}
-
-In order to run an anko script in a search, a text file containing the
-script must be uploaded as a resource. See the resources section (\ref{sec:resources}) for
-information on how to create and upload a resource.
-
-At this time, to make a change to a script you must edit the script in
-the original text file, then re-upload the file to the resource. Future
-versions of Gravwell will include an integrated text editor to make
-scripting simpler.
-
-To run a script in the pipeline, simply specify \code{anko}, followed by the name of the
-script, followed by any arguments intended for the script. For example,
-to run a script named ``foo'' which takes two numbers as arguments,
-type \code{anko foo 1 3} in the pipeline.
-
-\subsection{Writing anko scripts}
-
-An anko script \emph{must} contain either a function named \code{Process} or
-a function named \code{Main}. These functions do not take arguments. These
-two functions represent two different options for processing search
-entries.
-
-If a \code{Process} function is defined, it will be called once per search
-entry. Enumerated values on the entry may be treated as local variables,
-and the return value of the \code{Process} function determines if the entry
-is allowed to continue down the pipeline (true) or not (false).
-
-If a \code{Main} function is defined, it will be called only once; the
-programmer must therefore call the \code{readEntry} and
-\code{writeEntry} functions to fetch each search entry and pass it down the
-pipeline after operating on it.
-
-We strongly recommend writing scripts with Process instead of
-Main whenever possible, because it is conceptually much simpler.
-
-The script may also contain functions named \code{Parse} and
-\code{Finalize}.
-
-The \code{Parse} function is called before Process or Main and is
-given the command line arguments as an array of arguments. The
-Parse function indicates that the arguments have been successfully
-processed by returning nil; any non-nil return is treated as an error
-and presented to the user. See the sample script below for a sample of
-how to parse script arguments.
-
-The \code{Finalize} function is called after Process or Main have
-completed. It is the last code executed in the script; this is a good
-place to create resources if desired.
-
-\subsubsection{Sample Script Using Process() Function}
-
-This example script operates in two modes, specified as an argument to
-the script. In `build' mode, it takes the ``SrcIP'' field extracted from
-the packet module and builds a list of IP addresses seen in the current
-search, then stores that list as a resource. In `apply' mode, it takes
-the previously-built table and drops any entries which contain a
-previously-seen ``SrcIP'' field. This script was developed to detect new
-devices on a network; since that time, the ``-save'' flag on the table
-render module has duplicated the `build' mode, while the lookup module
-has duplicated the `apply' mode. It is presented here as a useful
-demonstration of the Process function.
-
-\begin{Verbatim}[breaklines=true]
-# Define an empty map
-table = {}
-task = "build" # Set the default task
-
-var json = import("encoding/json")
-
-# first arg = "build" or "apply"
-func Parse(args) {
-    errstr = "argument must be 'build' or 'apply'"
-    if len(args) == 1 {
-        task = args[0]
-    } else {
-        return errstr
-    }
-    switch task {
-    case "apply":
-        # load the table resource & unpack json
-        data, _ = getResource("lookuptable")
-        json.Unmarshal(data, &table)
-    case "build":
-    default:
-        return errstr
-    }
-    return nil
-}
-
-func Process() {
-    if task == "build" {
-        s = toString(SrcIP)
-        table[s] = true
-        return true
-    } else if task == "apply" {
-        s = toString(SrcIP)
-        # set an enumerated value named "new" to true or false
-        setEnum("new", !table[s]) 
-        return !table[s]# if it's not in the table, return true
-    }
-}
-
-func Finalize() {
-    if task == "build" {
-        # pack the table as json and store the resource
-        data, _ = json.Marshal(table)
-        setResource("lookuptable", data)
-    }
-}
-\end{Verbatim}
-
-Observe that the ``SrcIP'' enumerated value may be \emph{read} like any
-other variable inside the Process function, but in order to \emph{set} an
-enumerated value we must use the \code{setEnum} function to make the action
-explicit.
-
-Note that the table and task variables are declared outside the
-function definitions. The built-in JSON encoding library is also
-imported prior to the function definitions. A full list of available
-libraries is provided \href{https://docs.gravwell.io/#!scripting/scripting.md}{on the Gravwell documentation site, https://docs.gravwell.io/\#!scripting/scripting.md}.
-
-\subsubsection{Sample Script Using Main() Function}
-
-This sample script is extremely simple, meant to show how scripts
-implementing Main can duplicate entries. For every entry it reads, it
-sends 10 copies of that entry down the line, setting an enumerated value
-named ``index'' on each one:
-
-\begin{Verbatim}[breaklines=true]
-func Main() {
-        for {
-                # Read an entry from the pipeline
-                ent, err = readEntry()
-                if err != nil {
-                        return err
-                }
-                for i = 0; i < 10; i++ {
-                        # Clone the entry
-                        e = cloneEntry(ent)
-                        # Add an enumerated value to the new entry
-                        setEntryEnum(e, "index", i)
-                        # Write the new entry down the pipeline
-                        err = writeEntry(e)
-                        if err != nil {
-                                return err
-                        }
-                }
-        }
-}
-\end{Verbatim}
-
-
-\subsection{Utility functions}
-
-Anko provides built-in utility functions, listed below in the format
-\code{functionName(\textless{}functionArgs\textgreater{})
-\textless{}returnValues\textgreater{}}. The following functions can be
-used in any anko script:
-
-\begin{itemize}
-\tightlist
-\item
-  \code{getResource(name) ([]byte, error)} - returns the slice of bytes
-  is the content of the specified resource, while the error is any error
-  encountered while fetching the resource.
-\item
-  \code{setResource(name, value) error} - creates (if necessary) and updates
-  a resource named name with the contents of value, returning an error
-  if one arises.
-\item
-  \code{producesEnum(val)} - Informs the pipeline that the script plans to produce an Enumerated Value of that name. Should be called in the Parse() function.
-  \code{consumesEnum(val)} - Informs the pipeline that the script plans to consume the Enumerated Value of that name. Should be called in the Parse() function.
-\item
-  \code{len(val) int} - returns the length of val, which can be a string,
-  slice, etc.
-\item
-  \code{toIP(string) IP} - converts string to an IP, suitable for comparing
-  against IPs generated by e.g. the packet module.
-\item
-  \code{toMAC(string) MAC} - converts string to a MAC address.
-\item
-  \code{toString(val) string} - converts val to a string.
-\item
-  \code{toInt(val) int64} - converts val to an integer if possible. Returns
-  0 if no conversion is possible.
-\item
-  \code{toFloat(val) float64} - converts val to a floating point number
-  if possible. Returns 0.0 if no conversion is possible.
-\item
-  \code{toBool(val) bool} - attempts to convert val to a boolean. Returns
-  false if no conversion is possible. Non-zero numbers and the strings
-  ``y'', ``yes'', and ``true'' will return true.
-\item
-  \code{typeOf(val) type} - returns the type of val as a string, e.g.
-  ``string'', ``bool''.
-\end{itemize}
-
-The following functions are only available in scripts implementing the
-Process function:
-
-\begin{itemize}
-\tightlist
-\item
-  \code{setEnum(key, value) error} - creates an enumerated value on the
-  current entry named key containing value.
-\item
-  \code{getEnum(key) (value, error)} - returns the enumerated value
-  specified by key.
-\item
-  \code{delEnum(key)} - deletes an enumerated value named key from the
-  current entry.
-\item
-  \code{hasEnum(key) bool} - returns whether the current entry has the
-  enumerated value.
-\end{itemize}
-
-The following functions are only available in scripts implementing the
-Main function:
-
-\begin{itemize}
-\tightlist
-\item
-  \code{readEntry() (entry, error)} - returns the next entry and an error
-  (if any). It will return an error when no entries remain.
-\item
-  \code{writeEntry(ent) error} - writes out the given entry down the
-  pipeline, returning an error if any.
-\item
-  \code{cloneEntry(ent) entry} - returns a copy of the specified entry.
-\item
-  \code{newEntry() entry} - creates an entirely new entry, with the timestamp set to the current time.
-\item
-  \code{setEntryEnum(ent, key, value)} - sets an enumerated value on the
-  specified entry.
-\item
-  \code{getEntryEnum(ent, key) (value, error)} - reads an enumerated value
-  from the specified entry.
-\item
-  \code{hasEntryEnum(ent, key) bool} - returns whether the entry contains
-  the enumerated value.
-\item
-  \code{delEntryEnum(ent, key)} - deletes the specified enumerated value
-  from the given entry.
-\item
-  \code{setEntryData(ent, value)} - sets the data portion of an entry.
-\item
-  \code{setEntrySrc(ent, ip)} - sets the source field of an entry.
-\item
-  \code{setEntryTimestamp(ent, time)} - sets the timestamp of an entry.
-\end{itemize}
-
-Note: The setEnum, hasEnum, and delEnum functions differ
-for scripts using Process functions vs. Main functions, because
-the Process function is implicitly operating on a particular entry.
-
-\subsection{Hands-On Lab}
-
-In this lab, we will create and use a simple search script. Sometimes
-it is desirable to apply several different criteria to entries, which
-can be extremely cumbersome to implement using the eval module. By
-moving the logic to an anko script, we can keep the ugliness out of the
-search query! For this example, we'll filter Netflow based on multiple
-IP and port rules.
-
-First, launch a Gravwell webserver+indexer container:
-
-\begin{Verbatim}[breaklines=true]
-docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
-\end{Verbatim}
-
-Log into the web GUI (\href{http://localhost:8080}{http://localhost:8080}) and leave the page open.
-
-Next, start the ingester container running the Netflow ingester:
-
-\begin{Verbatim}[breaklines=true]
-docker run --rm -d --net gravnet --name ingesters -e \
-GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 gravwell:ingesters \
-/opt/gravwell/bin/gravwell_netflow_capture
-\end{Verbatim}
-
-The Netflow ingester is pre-configured to listen on port 2055 for
-incoming Netflow v5 records.
-
-Now, we use another Docker container to generate Netflow records and
-send them to the ingester:
-
-\begin{Verbatim}[breaklines=true]
-docker run -it --net gravnet --rm \
-networkstatic/nflow-generator -t ingesters -p 2055
-\end{Verbatim}
-
-The Netflow generator will run indefinitely, generating flow records,
-until killed. Leave it running for the duration of this lab.
-
-Now we will write the script. In this example, we want to pass entries
-which satisfy the following conditions and drop all others:
-
-\begin{itemize}
-\item
-  Flows originating in the 10.0.0.0/8 subnet with a destination port of
-  8080
-\item
-  Flows with a destination port of 443
-\end{itemize}
-
-We will add an enumerated value label to those entries which pass,
-labeling the former ``local8080'' and the latter ``https''. Because we
-wish to operate on each entry individually, we can write a script using
-a \code{Process} function rather than implementing \code{Main}.
-
-Copy the following script into a file on your local system:
-
-\begin{Verbatim}[breaklines=true]
-func Process() {
-        if SrcSub == toIP("10.0.0.0") && DstPort == 8080 {
-                setEnum("type", "local8080")
-                return true
-        } else if DstPort == 443 {
-                setEnum("type", "https")
-                return true
-        }
-        return false
-}
-\end{Verbatim}
-
-Note the variables used: \code{SrcSub} and \code{DstPort}. Those \emph{must} be
-extracted in the pipeline prior to the anko module or an error will
-occur. Look for their extractions in the query below.
-
-Upload the script as a new resource named ``nflow'' as shown in Figure \ref{fig:script-upload}
-
-\begin{figure}
-	\includegraphics[width=0.5\linewidth]{images/script-upload.png}
-	\caption{Uploading Anko script}
-	\label{fig:script-upload}
-\end{figure}
-
-By this point, the Netflow generator should have generated thousands of
-flow records. Run the following query over the last hour:
-
-\begin{Verbatim}[breaklines=true]
-tag=netflow netflow Src DstPort | subnet Src /8 as SrcSub | anko nflow | table
-\end{Verbatim}
-
-The query uses the netflow module to extract the \code{Src} and
-\code{DstPort} fields, then the subnet module finds the /8 subnet of the
-Src IP and saves it to an enumerated value named \code{SrcSub}. Then
-the anko module calls our script and sends the results to the table
-module as seen in Figure \ref{fig:script-results}.
-
-\begin{figure}
-	\includegraphics{images/script-results.png}
-	\caption{Anko script results}
-	\label{fig:script-results}
-\end{figure}
-
-Note that entries with \code{DstPort == 443} have been marked ``https'',
-while those with a \code{Src} in the 10.0.0.0/8 ubnet and \code{DstPort == 8080}
-have been marked ``local8080''.
-
-To clean up after the experiment, simply run:
-
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
-\subsubsection{Lab Questions}
-
-\begin{enumerate}
-\item
-  What happens if `DstPort' is omitted from the netflow module's
-  arguments?
-\item
-  How would you count how many entries of each type were seen?
-\end{enumerate}
-
 
 
 \section{Auto-extractors}
@@ -2329,10 +1946,10 @@ docker kill $(docker ps -a -q)
 Gravwell enables per-tag extraction definitions that can ease the
 complexity of interacting with unstructured data and data formats that
 are not self-describing. Unstructured data often requires complicated
-regular expressions to extract desired data fields, which can be
-time-consuming to produce and prone to errors.
+regular expressions or slice specifications to extract desired data
+fields, which can be time-consuming to produce and prone to errors.
 
-Auto-extractors are simply definitions that can be applied to tags and
+Auto-extractors are simply definitions that can be applied to tags which
 describe how to correctly extract fields from the data in a given tag.
 The "ax" module then automatically invokes the appropriate functionality
 of other modules. The auto-extractor system supports the following
@@ -2348,11 +1965,26 @@ extraction methods:
   Regex
 \item
   Slice
+\item
+  KV
+\item
+  Syslog
+\item
+  JSON
+\item
+  Grok
+\item
+  CEF
 \end{itemize}
 
 Auto-extractor definitions are used by
 the \href{https://docs.gravwell.io/\#!search/ax/ax.md}{ax} module
 which transparently references the correct extraction based on tags.
+
+Note that only a single extraction can be defined per tag per user. Also note
+that auto-extractors always operate on the full underlying data of an
+entry. They cannot be used to perform extractions on Enumerated Values
+(the "-e" argument is disallowed)
 
 \subsection{Auto-Extractor Configuration}
 
@@ -2379,8 +2011,37 @@ Only the module, params, and tag parameters are required;
 all others can be left blank if desired (for example, the regex module
 does not take any arguments, so args will always be empty).
 
+\subsection{Managing Auto-Extractors in the GUI}
+
+The Gravwell GUI can be used to manage extractors. The screenshot in Figure \ref{fig:extractors-page}
+shows the Extractors page with four defined extractors.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/extractors-page.png}
+	\caption{Extractors page}
+	\label{fig:extractors-page}
+\end{figure}
+
+Note the buttons in the upper right. ``Add'' creates a new extractor
+interactively, allowing the user to enter appropriate values, as seen in Figure \ref{fig:new-extractor}.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/new-extractor.png}
+	\caption{New extractor dialog}
+	\label{fig:new-extractor}
+\end{figure}
+
+``Upload'' allows you to directly upload files containing text versions of AX definitions; this is a convenient way to install many extractors at once.
+
+\subsection{Auto-Extractor Files}
+
+Auto-extractors can be defined in text files, which may then be uploaded through
+the web interface. Auto-extractor files follow the TOML V4 format which allows comments
+using the "\#" character. Each "ax" file can contain multiple
+auto-extraction definitions.
+
 There are a few important rules about how the extraction parameters are
-defined:
+defined in files:
 
 \begin{enumerate}
 \tightlist
@@ -2399,40 +2060,6 @@ defined:
 
 The ability to ignore string escape rules is especially handy for the
 "regex" processor as it makes heavy use of backslash.
-
-\subsection{Managing Auto-Extractors in the GUI}
-
-The Gravwell GUI can be used to manage extractors. The screenshot in Figure \ref{fig:extractors-page}
-shows the Extractors page with four defined extractors.
-
-\begin{figure}
-	\includegraphics{images/extractors-page.png}
-	\caption{Extractors page}
-	\label{fig:extractors-page}
-\end{figure}
-
-Note the buttons in the upper right. ``Add'' creates a new extractor
-interactively, allowing the user to enter appropriate values, as seen in Figure \ref{fig:new-extractor}.
-
-\begin{figure}
-	\includegraphics{images/new-extractor.png}
-	\caption{New extractor dialog}
-	\label{fig:new-extractor}
-\end{figure}
-
-``Upload'' allows you to directly upload files containing text versions of AX definitions; this is a convenient way to install many extractors at once.
-
-\subsection{Auto-Extractor Files}
-
-Auto-extractors can be defined in text files, which may then be uploaded through
-the web interface. Auto-extractor files follow the TOML V4 format which allows comments
-using the "\#" character. Each "ax" file can contain multiple
-auto-extraction definitions.
-
-Note that only a single extraction can be defined per tag per user. Also note
-that auto-extractors always operate on the full underlying data of an
-entry. They cannot be used to perform extractions on Enumerated Values
-(the "-e" argument is disallowed)
 
 Here is a sample auto-extraction file designed to pull some basic data
 from an Apache 2.0 access log using the regex module:
@@ -2461,9 +2088,7 @@ contrast queries which accomplish the same task with and without
 auto-extractors. We will also show how to use filters within AX.
 
 In these examples, we show extractor definitions in the TOML file format
-described above; to instantiate them through the GUI, simply enter the
-components of the definition into the corresponding fields of the GUI's
-extractor creation interface.
+described above; to instantiate them through the GUI, simply save them as a file and use the Upload button.
 
 \subsubsection{CSV}
 
@@ -2748,7 +2373,7 @@ uint64be([10:18]) as nsec float32be([18:22]) as temp [22:] as name
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/sliced-keg.png}
+	\includegraphics[width=0.65\linewidth]{images/sliced-keg.png}
 	\caption{Sliced binary data}
 	\label{fig:sliced-keg}
 \end{figure}
@@ -2779,7 +2404,7 @@ tag=keg ax id==0x1200 temp name | max temp by name | chart max by name
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/keg-temps.png}
+	\includegraphics[width=0.65\linewidth]{images/keg-temps.png}
 	\caption{Keg temperature graph}
 	\label{fig:keg-temps}
 \end{figure}
@@ -2793,7 +2418,7 @@ tag=keg ax id==0x1200 temp name~Keg | stddev temp by name | chart stddev by name
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics{images/keg-stddev.png}
+	\includegraphics[width=0.65\linewidth]{images/keg-stddev.png}
 	\caption{Keg standard deviation graph}
 	\label{fig:keg-stddev}
 \end{figure}
@@ -2827,7 +2452,7 @@ A quick search on the csv tag should show the raw entries, as in Figure \ref{fig
 \code{tag=csv}
 
 \begin{figure}
-	\includegraphics{images/lab-csv-raw.png}
+	\includegraphics[width=0.7\linewidth]{images/lab-csv-raw.png}
 	\caption{Raw CSV entries}
 	\label{fig:lab-csv-raw}
 \end{figure}
@@ -2864,7 +2489,7 @@ Open the menu in the Gravwell UI, then select the ``Extractors'' page.
 Click the ``Add'' button and populate it with the values above as shown in Figure \ref{fig:lab-new-extractor}
 
 \begin{figure}
-	\includegraphics{images/new-extractor.png}
+	\includegraphics[width=0.8\linewidth]{images/new-extractor.png}
 	\caption{Creating a new extractor}
 	\label{fig:lab-new-extractor}
 \end{figure}
@@ -2873,7 +2498,7 @@ We can test it by running the query \code{tag=csv ax \textbar{}
 table}, which will extract and display all fields. The results should resemble Figure \ref{fig:lab-test-ax}.
 
 \begin{figure}
-	\includegraphics{images/lab-test-ax.png}
+	\includegraphics[width=0.8\linewidth]{images/lab-test-ax.png}
 	\caption{Testing new extraction}
 	\label{fig:lab-test-ax}
 \end{figure}
@@ -2896,7 +2521,7 @@ page, as seen in Figure \ref{fig:bg-new-search}.
 
 
 \begin{figure}
-	\includegraphics{images/bg-new-search.png}
+	\includegraphics[width=0.8\linewidth]{images/bg-new-search.png}
 	\caption{Starting a search in the background}
 	\label{fig:bg-new-search}
 \end{figure}
@@ -2904,7 +2529,7 @@ page, as seen in Figure \ref{fig:bg-new-search}.
 Or a running search can be sent to the background from the menu, as in Figure \ref{fig:bg-existing-search}.
 
 \begin{figure}
-	\includegraphics{images/bg-existing-search.png}
+	\includegraphics[width=0.8\linewidth]{images/bg-existing-search.png}
 	\caption{Backgrounding a running search}
 	\label{fig:bg-existing-search}
 \end{figure}
@@ -2914,7 +2539,7 @@ things while the search runs. The results of the search can later be
 viewed in the Persistent Searches page (Figure \ref{fig:persistent-searches}).
 
 \begin{figure}
-	\includegraphics{images/persistent-searches.png}
+	\includegraphics[width=0.8\linewidth]{images/persistent-searches.png}
 	\caption{Persistent searches page}
 	\label{fig:persistent-searches}
 \end{figure}
@@ -2924,14 +2549,14 @@ server restarts. To keep the results of a search permanently, either
 select `Save' in the search's menu on the Persistent Searches page (Figure \ref{fig:save-search}) or select `Save Results' from the menu on the search results page (Figure \ref{fig:save-search-menu}).
 
 \begin{figure}
-	\includegraphics{images/save-search.png}
+	\includegraphics[width=0.8\linewidth]{images/save-search.png}
 	\caption{Saving a search from the persistent searches page}
 	\label{fig:save-search}
 \end{figure}
 
 
 \begin{figure}
-	\includegraphics{images/save-search-menu.png}
+	\includegraphics[width=0.8\linewidth]{images/save-search-menu.png}
 	\caption{Saving a search from the search results page}
 	\label{fig:save-search-menu}
 \end{figure}
@@ -2956,7 +2581,7 @@ administration page. In Figure \ref{fig:newgroup-foo}, the administrator is
 creating a group named ``foo'' which contains the users John and Bob.
 
 \begin{figure}
-	\includegraphics{images/newgroup-foo.png}
+	\includegraphics[width=0.8\linewidth]{images/newgroup-foo.png}
 	\caption{Creating a new group}
 	\label{fig:newgroup-foo}
 \end{figure}
@@ -2968,7 +2593,7 @@ Persistent Searches page by selecting the `Edit group' button for that
 search, as shown in Figure \ref{fig:share-search}.
 
 \begin{figure}
-	\includegraphics{images/share-search.png}
+	\includegraphics[width=0.7\linewidth]{images/share-search.png}
 	\caption{Sharing search results}
 	\label{fig:share-search}
 \end{figure}
@@ -2980,7 +2605,7 @@ performs will by default be visible to members of that group. This can
 be set from the Preferences tab of the Account page (Figure \ref{fig:default-group}).
 
 \begin{figure}
-	\includegraphics{images/default-group.png}
+	\includegraphics[width=0.7\linewidth]{images/default-group.png}
 	\caption{Setting default group}
 	\label{fig:default-group}
 \end{figure}
@@ -3008,7 +2633,7 @@ users named `john' and `bob'. Use any passwords you like. Once you've
 created the new users, you should see three users in the User page, as in Figure \ref{fig:lab-john-bob}.
 
 \begin{figure}
-	\includegraphics{images/lab-john-bob.png}
+	\includegraphics[width=0.7\linewidth]{images/lab-john-bob.png}
 	\caption{Additional user accounts}
 	\label{fig:lab-john-bob}
 \end{figure}
@@ -3017,7 +2642,7 @@ Then open the Groups page and add a new group called `Test' containing
 those users, as shown in Figure \ref{fig:lab-test-group}.
 
 \begin{figure}
-	\includegraphics{images/lab-test-group.png}
+	\includegraphics[width=0.7\linewidth]{images/lab-test-group.png}
 	\caption{Creating a new test group}
 	\label{fig:lab-test-group}
 \end{figure}
@@ -3028,7 +2653,7 @@ the search, then go to the Persistent Searches page and make the search
 accessible to the new Test group (Figure \ref{fig:lab-shared-search}).
 
 \begin{figure}
-	\includegraphics{images/lab-shared-search.png}
+	\includegraphics[width=0.7\linewidth]{images/lab-shared-search.png}
 	\caption{Saved search shared with Test group}
 	\label{fig:lab-shared-search}
 \end{figure}
@@ -3099,7 +2724,7 @@ dashboard''. We have the option to create a fresh dashboard right from
 here, so let's do so (Figure \ref{fig:new-dashboard}).
 
 \begin{figure}
-	\includegraphics{images/new-dashboard.png}
+	\includegraphics[width=0.7\linewidth]{images/new-dashboard.png}
 	\caption{Adding search to a new dashboard}
 	\label{fig:new-dashboard}
 \end{figure}
@@ -3179,7 +2804,7 @@ Actionables provide a way to create custom triggers and menus that key on any te
 Actionables are created by specifying one or more regular expressions, along with one or more actions. Gravwell automatically parses all text rendered with the table and chart renderers, bringing up appropriate actionable context menues when the text is clicked, as seen in Figure \ref{fig:actionables-overview}.
 
 \begin{figure}[H]
-	\includegraphics[width=0.6\linewidth]{images/actionables-overview.png}
+	\includegraphics[width=0.7\linewidth]{images/actionables-overview.png}
 	\caption{Actionables context menu}
 	\label{fig:actionables-overview}
 \end{figure}
@@ -3189,7 +2814,7 @@ Actionables are made up of two components - triggers, which are simply regular e
 To get started with actionables, first open the Actionables menu, found in the main menu. Actionables are listed by name, and it's possible for two actionables to have the same name. By allowing actionables to have the same name, Gravwell can automatically group like actionables from different sources. For example, both the Netflow and CoreDNS kits provide actionables for IP addresses, and both are named "IP Address", as shown in Figure \ref{fig:actionables-menu}.
 
 \begin{figure}[H]
-	\includegraphics[width=0.6\linewidth]{images/actionables-menu.png}
+	\includegraphics[width=0.8\linewidth]{images/actionables-menu.png}
 	\caption{Actionables duplicate names}
 	\label{fig:actionables-menu}
 \end{figure}
@@ -3298,7 +2923,7 @@ and are deleted as soon as the query is completed.
 
 For example, say we have both DNS query and IP-level connection data under the
 tags "dns" and "conns", and we want to filter connection data down to only
-connections that didn't first have a corresponding DNS query. We can use
+connections that \emph{didn't} first have a corresponding DNS query; these are potentially suspicious IP addresses, since users typically access services via DNS names. We can use
 compound queries to enrich our first query with DNS data and filter.
 
 Let's start with the inner query:
@@ -3307,10 +2932,10 @@ Let's start with the inner query:
 tag=dns json query answers | table query answers
 \end{verbatim}
 
-This produces a table:
+This produces a table seen in Figure \ref{fig:compound-table1}
 
 \begin{figure}[H]
-	\includegraphics[width=0.6\linewidth]{images/compound-table1.png}
+	\includegraphics[width=0.8\linewidth]{images/compound-table1.png}
 	\caption{The beginning of an inner query}
 	\label{fig:compound-table1}
 \end{figure}
@@ -3348,11 +2973,11 @@ tag=conns json SrcIP DstIP SrcIPBytes DstIPBytes
 | table SrcIP DstIP SrcIPBytes DstIPBytes 
 \end{verbatim}
 
-This gives us a table of just connections that didn't have a corresponding DNS
-query:
+This gives us a table (Figure \ref{fig:compound-table2} of just those connections that \emph{didn't} have a corresponding DNS
+query.
 
 \begin{figure}[H]
-	\includegraphics[width=0.6\linewidth]{images/compound-table2.png}
+	\includegraphics[width=0.8\linewidth]{images/compound-table2.png}
 	\caption{Results from a complete compound query}
 	\label{fig:compound-table2}
 \end{figure}
