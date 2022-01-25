@@ -798,7 +798,7 @@ confirm this, as shown in Figure \ref{fig:file-follow-lab}.
 
 \begin{figure}
 	\includegraphics{images/igst-filefollow-lab.png}
-	\caption{Ingested Logs}
+	\caption{Auth logs ingested via File Follower}
 	\label{fig:file-follow-lab}
 \end{figure}
 
@@ -1198,7 +1198,7 @@ generating any traffic; this can be verified by searching for
 \code{tag=pcap} as shown in Figure \ref{fig:pcap-lab1}.
 
 \begin{figure}
-	\includegraphics{images/igst-pcap-lab1.png}
+	\includegraphics[width=0.8\linewidth]{images/igst-pcap-lab1.png}
 	\caption{Raw packets}
 	\label{fig:pcap-lab1}
 \end{figure}
@@ -1214,13 +1214,13 @@ dest IP, and IP protocol from each packet. Results are shown in Figure \ref{fig:
 
 
 \begin{figure}
-	\includegraphics{images/igst-pcap-lab2.png}
+	\includegraphics[width=0.8\linewidth]{images/igst-pcap-lab2.png}
 	\caption{Parsing Packets}
 	\label{fig:pcap-lab2}
 \end{figure}
 
 The screenshot shows that the majority of packets are currently
-protocol 17 (UDP) with the occasional protocol 2 packet (IGMP).
+protocol 17 (UDP).
 
 Next, we'll generate some ping traffic:
 
@@ -1244,7 +1244,7 @@ chart count by Protocol}
 The results are shown in Figure \ref{fig:pcap-lab3}, with the chart changed to a pie chart.
 
 \begin{figure}
-	\includegraphics{images/igst-pcap-lab3.png}
+	\includegraphics[width=0.8\linewidth]{images/igst-pcap-lab3.png}
 	\caption{Protocol Ratios}
 	\label{fig:pcap-lab3}
 \end{figure}
