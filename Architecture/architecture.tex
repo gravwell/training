@@ -160,7 +160,7 @@ interface. For each deployment example we will show some basic diagrams
 which will use the icons in Figure \ref{fig:archicons} to depict each component.
 
 \begin{figure}
-	\includegraphics[width=0.3\linewidth]{images/archicons.png}
+	\includegraphics[width=0.2\linewidth]{images/archicons.png}
 	\caption{Icons used}
 	\label{fig:archicons}
 \end{figure}
@@ -172,8 +172,8 @@ components are co-resident on a single host or container. When
 operating in a single node deployment, Gravwell optimizes queries to
 maintain data locality. This means that webserver participation in the
 query pipeline is minimal, typically only running the renderer module.
-The complete Gravwell deployment contains three components: Indexer,
-Webserver, and Search Agent, as shown in Figure \ref{fig:singlenode}
+The complete Gravwell deployment contains three core components (Indexer,
+Webserver, and Search Agent), plus any number of ingesters (both on and off the node) as shown in Figure \ref{fig:singlenode}.
 
 \begin{figure}[H]
 	\includegraphics[width=0.6\linewidth]{images/singlenode.png}
