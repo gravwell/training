@@ -2731,8 +2731,8 @@ here, so let's do so (Figure \ref{fig:new-dashboard}).
 
 Click ``View Dashboard'' from the resulting popup message after you
 save. You should see the newly-created dashboard with the chart sitting nicely in a
-tile. Let's add one more search. Click the logo in the upper left or use
-the menu to return to the search bar. This time, let's get a table
+tile. Let's add one more search. Click the Gravwell logo in the upper left or use
+the main menu to return to the new search page. This time, let's get a table
 together of which hosts are communicating the most:
 
 \begin{Verbatim}[breaklines=true]
@@ -2744,29 +2744,45 @@ instead of selecting ``New Dashboard'' you can choose the already
 existing netflow dashboard. Give your tile a name like ``Top Talkers'',
 click save, and then let's move back to the dashboard view.
 
-Let's add the ability for a
-user to zoom in on a specific time area of the dashboard. This is
-accomplished by adding another tile as an ``Overview'' tile. The
-Overview renderer shows a chart of all log activity and allows the user
-to click-drag and zoom in on specific regions for more detail.
-Dashboards can optionally sync up zooming of searches so that a zoom on
-one Overview renderer will cause all other tiles to zoom to the same
-range. This is controlled by the toggle option under the Settings tab of
-the dashboard and is titled ``Update all tiles when zooming''. Click on
-settings, enable that option, save, and then return to the dashboard
-view. Now try zooming in on a small region of the overview chart to see
-the other tiles respond.
+It would be nice to let the user zoom in on a specific time area of
+the dashboard results. This is accomplished by adding another tile as an
+``Overview'' tile. The Overview renderer shows a chart of all log activity
+and allows the user to click-drag and zoom in on specific regions for
+more detail. To add an Overview tile, open the dashboard, then click
+the new tile button in the upper right.  Give it a name (``Overview''
+works well) and set the query to any one of the existing queries in the
+dashboard. Then chose ``Overview'' from the renderer dropdown.
 
-We should now have two tiles present that are showing us some
-information about our network communication as well as an `overview'
-tile which we can use for time exploration. Let's change the
-functionality of this dashboard to use live updates. This will
-periodically refresh the underlying search data to keep the latest
-information available without having to refresh the page or manually
-re-run searches. Navigate to the Settings tab and enable this toggle
-with a setting of 10 seconds. Now, when viewing the dashboard it should
-auto-refresh.
+Dashboards can optionally sync up zooming of searches so that a zoom
+on one Overview renderer will cause all other tiles to zoom to the same
+range. This is controlled by the ``Update all tiles when zooming'' toggle
+option under the Settings page for the dashboard, in the ``Timeframe \&
+Live Update'' section (see Figure \ref{fig:dashboard-settings}). Open settings, enable that option, save, and
+then return to the dashboard view. Now try zooming in on a small region
+of the overview chart to see the other tiles respond.
 
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/dashboard-settings.png}
+	\caption{Live update and zoom sync options.}
+	\label{fig:dashboard-settings}
+\end{figure}
+
+We should now have two tiles present that are showing us some information
+about our network communication, as well as an `overview' tile which we
+can use for time exploration. As a final task, change the dashboard to use
+live updates. This will periodically refresh the underlying search data
+to keep the latest information available without having to refresh the
+page or manually re-run searches. Navigate to the dashboard's Settings
+page and turn on the ``Enable live update'' toggle in the ``Timeframe
+\& Live Update'' section (see Figure \ref{fig:dashboard-settings}). The default update interval of 10s is fine.
+Now, if you watch the dashboard, you should see it automatically refresh
+every 10 seconds.
+
+To clean up after the experiment, run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 \section{Templates}
 
