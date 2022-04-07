@@ -552,7 +552,7 @@ Some examples are:
 \item ``net''
 \item ``net/http''
 \item ``github.com/ziutek/telnet''
-\item "google/uuid'' (github.com/google/uuid)
+\item ``google/uuid'' (github.com/google/uuid)
 \end{itemize}
 
 Libraries must be imported using the import function before use:
@@ -678,7 +678,7 @@ otherwise manage.
   read entries etc.
 \item
   \code{getSearchStatus(searchID) (string, error)} - returns the status of
-  the specified search, which can be "ACTIVE", "ATTACHED", "DORMANT", "SAVED", "SAVING", or "UNKNOWN".
+  the specified search, which can be ``ACTIVE'', ``ATTACHED'', ``DORMANT'', ``SAVED'', ``SAVING'', or ``UNKNOWN''.
 \item
   \code{getAvailableEntryCount(search) (uint64, bool, error)} - returns
   the number of entries that can be read from the given search, a
@@ -760,7 +760,7 @@ The following functions provide basic HTTP functionality:
 \item
   \code{httpPost(url, contentType, data) (response, error)} - performs an
   HTTP POST request to the given URL with the specified content type
-  (e.g. "application/json") and the given data as the POST body.
+  (e.g. ``application/json'') and the given data as the POST body.
 \end{itemize}
 
 More elaborate HTTP operations are possible with the ``net/http''
@@ -800,7 +800,7 @@ script using the following functions:
 The entries returned by the \code{getEntries} function can be modified if
 desired and re-ingested via \code{ingestEntries}, or new entries can be created
 from scratch. For example, to re-ingest some entries from a previous search
-into the tag "newtag":
+into the tag ``newtag'':
 
 \begin{Verbatim}[breaklines=true]
     # Get the first 100 entries from the search
