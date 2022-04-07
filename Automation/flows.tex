@@ -253,7 +253,7 @@ Wire them up as seen in Figure \ref{fig:lab-nodes}
 	\label{fig:lab-nodes}
 \end{figure}
 
-Each node now needs to be configured. Begin with the Run a Query node; click it, then paste the Gravwell query above into the ``Query String'' config field. Note how the ``Search Timeframe'' defaults to the last hour, and ``Output Variable Name`` defaults to ``search''. This means the payload output by the Run a Query node will contain an item named ``search'' with information about the query which was executed.
+Each node now needs to be configured. Begin with the Run a Query node; click it, then paste the Gravwell query above into the ``Query String'' config field. Note how the ``Search Timeframe'' defaults to the last hour, and ``Output Variable Name'' defaults to ``search''. This means the payload output by the Run a Query node will contain an item named ``search'' with information about the query which was executed.
 
 The If node should be configured to check \code{search.Count > 0}. This means that execution will continue if there were any results from the search.
 
