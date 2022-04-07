@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 TGT="/tmp/nflow.tar.gz"
-GO111MODULE=off go get -u github.com/nerdalert/nflow-generator
-GO111MODULE=off CGO_ENABLED=0 go install --ldflags "-w -s" github.com/nerdalert/nflow-generator
+go get -u github.com/nerdalert/nflow-generator
+CGO_ENABLED=0 go install --ldflags "-w -s" github.com/nerdalert/nflow-generator
 NFGEN=$(readlink -f $GOPATH/bin/nflow-generator)
 
 if [ ! -f "$NFGEN" ]; then

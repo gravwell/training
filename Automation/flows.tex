@@ -1,0 +1,280 @@
+\section{Flows}
+
+Flows provide a no-code method for developing advanced automations in Gravwell. A flow consists of one of more \emph{nodes}; each node performs a single action and passes the results (if any) on to the next node(s). By wiring together nodes in a drag-and-drop user interface, users can:
+
+\begin{itemize}
+\tightlist
+\item Run queries
+\item Generate PDF reports
+\item Send emails
+\item Fire off Slack and MS Teams messages
+\item Re-ingest alerts
+\item etc.
+\end{itemize}
+
+\subsection{Flow Concepts}
+\label{sec:flow-concepts}
+
+Flows are automations, meaning they are normally executed on a user-specified schedule by the search agent. They can also be run manually through the user interface. The basic process of flow development is:
+
+\begin{enumerate}
+\item Create a new flow
+\item Instantiate nodes in the flow and connect them together
+\item Configure nodes
+\item Test the flow with debug runs
+\item Deploy the flow by setting a schedule \& enabling scheduled execution
+\end{enumerate}
+
+\subsubsection{Nodes}
+
+A flow is a collection of \emph{nodes}, linked together to define an order of execution. Each node does a single task, such as running a query or sending an email. Figure \ref{fig:nodes} shows a simple flow of three nodes; the leftmost node runs a Gravwell query, then the middle node formats the results of that query into a PDF document, and finally the rightmost node sends that PDF document as an email attachment.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/nodes.png}
+	\caption{A simple flow with three nodes.}
+	\label{fig:nodes}
+\end{figure}
+
+All nodes have a single output socket. Most have only a single input socket, but some nodes which merge \emph{payloads} (see below) have multiple input sockets. One node's output socket may be connected to the \emph{inputs} of multiple other nodes, but each input socket can only take one connection.
+
+\subsubsection{Payloads}
+
+\emph{Payloads} are collections of data passed from node to node, representing the state of execution. For instance, the ``Run a Query'' node will insert an item named ``search'' into the payload, containing things like the query results and metadata about the search. The PDF node can \emph{read} that ``search'' item, format it into a nice PDF document, and insert the PDF file back into the payload with a name like ``gravwell.pdf''. Then the Email node can be configured to attach ``gravwell.pdf'' to the outgoing email.
+
+Each node receives a single incoming payload through its \emph{input} socket, then passes its outgoing payload via the \emph{output} socket. In most cases, the outgoing payload will be a modified version of the incoming payload.
+
+\subsubsection{Execution order}
+
+Nodes are always executed one at a time. A node can be executed if all nodes upstream of it (its \emph{dependencies}) have executed. If multiple nodes are ready to execute, one will be chosen at random. In Figure \ref{fig:execution}, both the ``Run a Query'' node and the ``HTTP'' node are candidates to run first. After the Query node finishes, the If node can execute; when it is done, the Slack Message node may run. We say that the ``If'' node is \emph{downstream} of the Query node, and the Slack node is \emph{downstream} of both the If and Query nodes.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/execution.png}
+	\caption{An illustration of execution order.}
+	\label{fig:execution}
+\end{figure}
+
+Note that some nodes may block execution of downstream nodes. The \code{If} node is configured with a boolean logic expression; if that expression evaluates to \emph{false}, none of the If node's downstream nodes are executed. Nodes which can block downstream execution will always have a note to that effect in the online documentation.
+
+\subsection{The Flow Editor}
+Flows are created using the flow editor. Although the Gravwell flow editor can be intimidating at first glance, a few minutes' worth of experimentation and exploration should be enough to get started building flows. This section will go through the various components of the UI, explaining each component.
+
+Note: If you're not yet familiar with the basic components of a flow (nodes, sockets, payloads), refer to Section \ref{sec:flow-concepts} for an overview.
+
+You can access the flow editor from the Query \& Dev Studio interface, found in the Main Menu. Select ``Flows'' from the left-hand side, as shown in Figure \ref{fig:dev-studio-newflow}. From there, you can either start a new blank flow (``Start a New Flow'') or instantiate one of the ``starter flows'' provided by Gravwell.
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/dev-studio-newflow.png}
+	\caption{Flows in the Query Studio}
+	\label{fig:dev-studio-newflow}
+\end{figure}
+
+Selecting either option will take you into the flow editor, the parts of which are marked in Figure \ref{fig:flow-editor}. The \emph{palette} provides a list of available nodes, which can be dragged out into the \emph{canvas}. The \emph{console} provides information about problems with the flow and output from any test runs.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/flow-editor.png}
+	\caption{Parts of the Flow Editor.}
+	\label{fig:flow-editor}
+\end{figure}
+
+Nodes are instantiated by dragging them from the palette onto the canvas. Once on the canvas, node input and output sockets can be connected, nodes can be re-arranged, etc. Note that the scroll wheel can be used to zoom in and out of the canvas view.
+
+The toolbar contains buttons for quick access to editor functionality. From left to right:
+
+\begin{itemize}
+\item Flow Designer: shows the flow canvas (default view).
+\item Info \& Scheduling: shows options to set flow name, description, scheduling, sharing, etc.
+\item Disable scheduling: toggle to quickly enable/disable automatic execution of the flow.
+\item Save: save the flow.
+\item Debug: run the flow
+\item Clear selection: deselects any currently-selected node.
+\item Delete: delete the selected node.
+\item Delete all: delete all nodes (requires confirmation).
+\item Export flow: download the flow specification, for backup or sharing.
+\item Import flow: upload a previously-exported flow spec.
+\item Fit all nodes on screen: zoom \& center the canvas so that \emph{all} nodes are visible.
+\item Fullscreen: puts the editor into fullscreen mode.
+\end{itemize}
+
+\subsubsection{Configuring Nodes}
+
+Once a node has been instantiated by dragging it from the palette to the canvas, it must be configured. Clicking on the node will bring up the configuration pane as seen in Figure \ref{fig:node-config}.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/node-config.png}
+	\caption{Configuring a node.}
+	\label{fig:node-config}
+\end{figure}
+
+The HTTP node shown in Figure \ref{fig:node-config} is a particularly complex node with many config options, which serves well for demonstration. Note that the URL and Method fields are marked with an asterisk, indicating that they are required. Note also the drop-down menus for each config option; these allow you to change between entering a constant value (e.g. the string ``http://gravwell.io'' in the URL config) or selecting a value from the payload as shown with the Body config.
+
+
+If a node is misconfigured, the console will display a list of problems. In Figure \ref{fig:parse-errors}, we see that the Email node has several config options which are not yet set. As those options are populated, the errors will go away.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/parse-errors.png}
+	\caption{Parse errors.}
+	\label{fig:parse-errors}
+\end{figure}
+
+Note: You can return to the palette view at any time by clicking the palette icon above the configuration pane.
+
+\subsubsection{Debugging}
+
+Once a flow has been designed and configured, it can be debugged. This will signal the search agent component that it should try executing the flow. To start a debug run, click the ``Run flow and debug'' button (the ``play button'') in the toolbar. The user interface will then wait for the search agent to complete its run.
+
+Once the run is complete, the console will have detailed execution information for each node in the ``Debug Output'' pane. The nodes are listed in order of execution. Clicking on a node in the debug output will bring up a pane showing that node's log output and the actual contents of that node's output payload. In Figure \ref{fig:if-payload}, we can see that the If node received a payload where \code{search.Count} was ``10'', meaning the If node's boolean statement evaluated to true and the HTTP node was allowed to execute:
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/if-payload.png}
+	\caption{Node payload showing If node payload.}
+	\label{fig:if-payload}
+\end{figure}
+
+If we modify the If node's config so the statement is \code{search.Count <= 0} and re-run the flow, we'll see that it now evaluates to false and the HTTP node does not execute (as seen by the empty ``Message'' column in the Debug Output pane), as shown in Figure \ref{fig:if-false}
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/if-false.png}
+	\caption{Debug run where If node evaluates to false and execution halts.}
+	\label{fig:if-false}
+\end{figure}
+
+\subsubsection{Info \& Scheduling}
+
+Once you're happy with a flow, the final step is to give it a schedule and enable it. This is done in the ``Info \& Scheduling'' page, accessible via a button in the toolbar.
+
+You should specify a name and description for the flow, then define a schedule. The schedule is set in cron format\footnote{https://cron.help/}, which is very flexible but can also be intimidating. There are a few shortcuts for simple cases: \code{@hourly} runs at the start of every hour, \code{@daily} at midnight every day, and so on.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/scheduling.png}
+	\caption{Info \& scheduling page for flows.}
+	\label{fig:scheduling}
+\end{figure}
+
+Once the schedule is set, toggle the ``Disable scheduling'' option to enable scheduled executions of the flow. The search agent will then automatically run it on the given schedule.
+
+\subsubsection{In-Flow ``Sticky'' Notes}
+
+The ``Note'' node is a special node used to annotate flows. Unlike other nodes, it plays no role in the execution of the flow; notes exist purely for the convenience of users.
+
+When dragged from the palette, a Note node starts out in a minimized state as seen in Figure \ref{fig:note-minimized}.
+
+\begin{figure}
+	\includegraphics[width=0.6\linewidth]{images/note-minimized.png}
+	\caption{A minimized note.}
+	\label{fig:note-minimized}
+\end{figure}
+
+When clicked, the note expands and text can be entered, as shown in Figure \ref{fig:note-open}.
+
+\begin{figure}
+	\includegraphics[width=0.6\linewidth]{images/note-open.png}
+	\caption{An ``open'' note.}
+	\label{fig:note-open}
+\end{figure}
+
+Clicking the ``X'' will minimize the note, leaving the start of the text visible as seen in Figure \ref{fig:note-multiple}.
+
+\begin{figure}
+	\includegraphics[width=0.6\linewidth]{images/note-multiple.png}
+	\caption{Multiple minimized notes with text preview visible.}
+	\label{fig:note-multiple}
+\end{figure}
+
+\subsection{Nodes}
+
+The following nodes are currently implemented:
+
+\begin{itemize}
+\item Email: send email messages.
+\item Flow Storage Read: read items from a persistent storage.
+\item Flow Storage Write: write items into a persistent storage.
+\item Gravwell Indexers: get information about Gravwell indexers.
+\item Gravwell Ingesters: get information about Gravwell ingesters.
+\item Gravwell Notification: set Gravwell notifications.
+\item HTTP: do HTTP requests.
+\item If: perform logical operations.
+\item Ingest: ingest data into Gravwell.
+\item Nest Merge: join multiple input payloads into one.
+\item PDF: create PDF documents.
+\item Query Log Ingest: convert search results to alert entries \& ingest.
+\item Rename: rename variables in the payload.
+\item Run a Query: run a Gravwell query.
+\item Set Variables: inject variables into the payload.
+\item Slack File: upload a file to a Slack channel.
+\item Slack Message: send a message to a Slack channel.
+\item Sleep: pause flow execution for a given period of time.
+\item Stack Merge: join multiple input payloads into one.
+\item Teams Message: send a Microsoft Teams message.
+\item Text Template: format text.
+\end{itemize}
+
+The following nodes tend to be needed only in particular advanced cases:
+
+\begin{itemize}
+\item Get Table Results: get results from a search using the table renderer.
+\item Get Text Results: get results from a search using the text renderer.
+\end{itemize}
+
+\subsection{Hands-On Lab: Flows}
+
+This lab will demonstrate how to build a flow. The flow will send a notification whenever there have been failed login attempts to the Gravwell system. First, create a Gravwell webserver+indexer container:
+
+\begin{Verbatim}[breaklines=true]
+docker run -d --rm --net gravnet -p 8080:80 --name gravwell gravwell:base
+\end{Verbatim}
+
+Now log into the web GUI (\href{http://localhost:8080}{http://localhost:8080}). After that, open a new \emph{private} browser window (so the existing login cookie isn't used) and enter some invalid login credentials, e.g. username ``admin'' with password ``admin''. This will generate a login failure message which we can check using the following query:
+
+\begin{Verbatim}[breaklines=true]
+tag=gravwell syslog Message=="Authentication failure" user 
+| stats count by user 
+| table user count
+\end{Verbatim}
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/lab-failed-logins.png}
+	\caption{Query showing failed login attempts.}
+	\label{fig:lab-failed-logins}
+\end{figure}
+
+We will use that query as the basis for a new flow. Select ``Flows'' from the ``Automation \& Flows'' section in the main menu, then click the ``+'' icon in the upper right to create a new flow. Drag the following nodes from the node palette out to the canvas:
+
+\begin{itemize}
+\item Run a Query
+\item If
+\item Gravwell Notification
+\end{itemize}
+
+Wire them up as seen in Figure \ref{fig:lab-nodes}
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/lab-nodes.png}
+	\caption{Node layout for lab.}
+	\label{fig:lab-nodes}
+\end{figure}
+
+Each node now needs to be configured. Begin with the Run a Query node; click it, then paste the Gravwell query above into the ``Query String'' config field. Note how the ``Search Timeframe'' defaults to the last hour, and ``Output Variable Name'' defaults to ``search''. This means the payload output by the Run a Query node will contain an item named ``search'' with information about the query which was executed.
+
+The If node should be configured to check \code{search.Count > 0}. This means that execution will continue if there were any results from the search.
+
+Finally, set a message in the Gravwell Notification node's Message field, something like ``Failed logins! Go check!''.
+
+Once all three nodes are configured, the Design Issues tab of the console should be empty. If there are issues reported, check your configuration on the associated node.
+
+To test the flow, click the debug icon in the toolbar. You should soon see a notification appear as in Figure \ref{fig:lab-notification}.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/lab-notification.png}
+	\caption{Example notification from flow.}
+	\label{fig:lab-notification}
+\end{figure}
+
+If no notification appears, double-check that the query given above actually returns results when run over the last hour, or try generating more failed login attempts.
+
+Once the flow is working, you can prepare the flow for deployment.  In the Run Query node's config, change the Search Timeframe dropdown from ``ISO Duration'' to ``Variable''. The value should change to the default \code{flow.Interval}. Then go to the Info \& Scheduling tab, set the schedule to ``* * * * *'' to make it run every minute, toggle the ``Disable scheduling'' slider, and hit Save. These two changes will make the flow run automatically every minute, and cause the query to run only over the last minute (this is the effect of setting the duration to \code{flow.Interval}).
+
+Test these changes by periodically creating failed login events. You should see a notification pop up after a failed login. Delete the notification; it should not come back again until you do another failed login.
+
+To clean up after the experiment, run:
+
+\code{docker kill \$(docker ps -a -q)}

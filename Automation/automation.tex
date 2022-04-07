@@ -1,13 +1,17 @@
 \chapter{Automation}
 
 Gravwell provides several utilities to enable automated operations.
-Users can schedule searches to be executed at specific times, for
-example every morning at 1:00. They can also schedule search
-\emph{scripts}, which can execute multiple searches, sift and parse search
-results, and send notifications via email or HTTP. These scheduled
+At the most basic level, users can schedule searches to be executed at specific times, for
+example every morning at 1:00. They can also schedule
+\emph{flows} and \emph{scripts}, which can execute multiple searches, sift and parse search
+results, and send notifications via email or HTTP. Flows are designed using a drag-and-drop
+graphical interface and are generally preferred over scripts, which should be reserved for legacy
+situations or very particular usecases which flows cannot cover.
+
+These scheduled
 operations are run by the \textbf{search agent}, a separate program which
 connects to the Gravwell webserver as a client. This chapter describes
-the search agent, scheduled searches, and scheduled scripts.
+the search agent, scheduled searches, flows, and scripts.
 
 \section{Configuring User Email Settings}
 
@@ -320,6 +324,11 @@ To clean up after the experiment, simply run:
 
 \code{docker kill \$(docker ps -a -q)}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FLOWS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{flows}
+
 \section{Search Scripting and Orchestration}
 
 Scripts provide an additional layer of power beyond scheduled
@@ -543,7 +552,7 @@ Some examples are:
 \item ``net''
 \item ``net/http''
 \item ``github.com/ziutek/telnet''
-\item "google/uuid'' (github.com/google/uuid)
+\item ``google/uuid'' (github.com/google/uuid)
 \end{itemize}
 
 Libraries must be imported using the import function before use:
@@ -669,7 +678,7 @@ otherwise manage.
   read entries etc.
 \item
   \code{getSearchStatus(searchID) (string, error)} - returns the status of
-  the specified search, which can be "ACTIVE", "ATTACHED", "DORMANT", "SAVED", "SAVING", or "UNKNOWN".
+  the specified search, which can be ``ACTIVE'', ``ATTACHED'', ``DORMANT'', ``SAVED'', ``SAVING'', or ``UNKNOWN''.
 \item
   \code{getAvailableEntryCount(search) (uint64, bool, error)} - returns
   the number of entries that can be read from the given search, a
@@ -751,7 +760,7 @@ The following functions provide basic HTTP functionality:
 \item
   \code{httpPost(url, contentType, data) (response, error)} - performs an
   HTTP POST request to the given URL with the specified content type
-  (e.g. "application/json") and the given data as the POST body.
+  (e.g. ``application/json'') and the given data as the POST body.
 \end{itemize}
 
 More elaborate HTTP operations are possible with the ``net/http''
@@ -791,7 +800,7 @@ script using the following functions:
 The entries returned by the \code{getEntries} function can be modified if
 desired and re-ingested via \code{ingestEntries}, or new entries can be created
 from scratch. For example, to re-ingest some entries from a previous search
-into the tag "newtag":
+into the tag ``newtag'':
 
 \begin{Verbatim}[breaklines=true]
     # Get the first 100 entries from the search
