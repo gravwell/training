@@ -1,13 +1,17 @@
 \chapter{Automation}
 
 Gravwell provides several utilities to enable automated operations.
-Users can schedule searches to be executed at specific times, for
-example every morning at 1:00. They can also schedule search
-\emph{scripts}, which can execute multiple searches, sift and parse search
-results, and send notifications via email or HTTP. These scheduled
+At the most basic level, users can schedule searches to be executed at specific times, for
+example every morning at 1:00. They can also schedule
+\emph{flows} and \emph{scripts}, which can execute multiple searches, sift and parse search
+results, and send notifications via email or HTTP. Flows are designed using a drag-and-drop
+graphical interface and are generally preferred over scripts, which should be reserved for legacy
+situations or very particular usecases which flows cannot cover.
+
+These scheduled
 operations are run by the \textbf{search agent}, a separate program which
 connects to the Gravwell webserver as a client. This chapter describes
-the search agent, scheduled searches, and scheduled scripts.
+the search agent, scheduled searches, flows, and scripts.
 
 \section{Configuring User Email Settings}
 
@@ -319,6 +323,11 @@ tag=syslog regex "DHCPREQUEST for (?P<ip>\S+)"
 To clean up after the experiment, simply run:
 
 \code{docker kill \$(docker ps -a -q)}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FLOWS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\include{flows}
 
 \section{Search Scripting and Orchestration}
 
