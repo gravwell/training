@@ -45,7 +45,7 @@ Each node receives a single incoming payload through its \emph{input} socket, th
 
 \subsubsection{Execution order}
 
-Nodes are always executed one at a time. A node can be executed if all nodes upstream of it (its \emph{dependencies}) have executed. If multiple nodes are ready to execute, one will be chosen at random. In Figure \ref{fig:execution}, both the ``Run a Query'' node and the ``HTTP'' node are candidates to run first. After the Query node finishes, the If node can execute; when it is done, the Slack Message node may run. We say that the If node is \emph{downstream} of the Query node, and the Slack node is \emph{downstream} of both the If and Query nodes.
+Nodes are always executed one at a time. A node can be executed if all nodes upstream of it (its \emph{dependencies}) have executed. If multiple nodes are ready to execute, one will be chosen at random. In Figure \ref{fig:execution}, both the ``Run a Query'' node and the ``HTTP'' node are candidates to run first. After the Query node finishes, the If node can execute; when it is done, the Slack Message node may run. We say that the ``If'' node is \emph{downstream} of the Query node, and the Slack node is \emph{downstream} of both the If and Query nodes.
 
 \begin{figure}
 	\includegraphics[width=0.7\linewidth]{images/execution.png}
