@@ -41,7 +41,9 @@ All nodes have a single output socket. Most have only a single input socket, but
 
 \emph{Payloads} are collections of data passed from node to node, representing the state of execution. For instance, the ``Run a Query'' node will insert an item named ``search'' into the payload, containing things like the query results and metadata about the search. The PDF node can \emph{read} that ``search'' item, format it into a nice PDF document, and insert the PDF file back into the payload with a name like ``gravwell.pdf''. Then the Email node can be configured to attach ``gravwell.pdf'' to the outgoing email.
 
-Each node receives a single incoming payload through its \emph{input} socket, then passes its outgoing payload via the \emph{output} socket. In most cases, the outgoing payload will be a modified version of the incoming payload.
+Most nodes receive a single incoming payload through a single \emph{input} socket, then pass a single outgoing payload via the \emph{output} socket. In most cases, the outgoing payload will be a modified version of the incoming payload.
+
+The \emph{merge} nodes are exceptions to this general rule. The Stack Merge and Nest Merge nodes take multiple incoming payloads (via multiple input sockets) and merge them into a single output. See Section \ref{sec:nodes} for more detailed descriptions of these nodes.
 
 \subsubsection{Execution order}
 
@@ -180,7 +182,9 @@ Clicking the ``X'' will minimize the note, leaving the start of the text visible
 	\label{fig:note-multiple}
 \end{figure}
 
+\clearpage
 \subsection{Nodes}
+\label{sec:nodes}
 
 The following nodes are currently implemented:
 
@@ -188,12 +192,13 @@ The following nodes are currently implemented:
 \item Email: send email messages.
 \item Flow Storage Read: read items from a persistent storage.
 \item Flow Storage Write: write items into a persistent storage.
-\item Gravwell Indexers: get information about Gravwell indexers.
-\item Gravwell Ingesters: get information about Gravwell ingesters.
 \item Gravwell Notification: set Gravwell notifications.
 \item HTTP: do HTTP requests.
 \item If: perform logical operations.
+\item Indexer Info: get information about Gravwell indexers.
 \item Ingest: ingest data into Gravwell.
+\item Ingester Info: get information about Gravwell ingesters.
+\item JavaScript: run small snippets of Javascript code for custom operations.
 \item Nest Merge: join multiple input payloads into one.
 \item PDF: create PDF documents.
 \item Query Log Ingest: convert search results to alert entries \& ingest.
@@ -215,6 +220,135 @@ The following nodes tend to be needed only in particular advanced cases:
 \item Get Text Results: get results from a search using the text renderer.
 \end{itemize}
 
+A selection of nodes are described in greater detail below. Documentation for every individual node is available on the Gravwell documentation website.\footnote{\href{https://docs.gravwell.io/\#!flows/flows.md}{https://docs.gravwell.io/\#!flows/flows.md}}
+
+\subsubsection{Nest Merge Node}
+The Nest Merge node can join multiple input payloads into a single output payload. It ``nests'' each input payload under a different name in the outgoing payload. Figures \ref{fig:nestmerge1} and \ref{fig:nestmerge2} show a simplified example of how this works. Two Set Variable nodes are instantiated, each injecting a variable named ``foo''; the first sets the value to \code{first value} and the other sets the value to \code{second value}. The outputs of these nodes are fed to the Nest Merge node, which has been configured with two input sockets named \code{x1} and \code{x2}. Figure \ref{fig:nestmerge2} shows how the Nest Merge node places the incoming payloads under new top-level names corresponding to the input sockets; thus the \code{foo: "first value"} output of the first Set Variable node is nested under the name \code{x1}.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/nestmerge1.png}
+	\caption{Nest merge inputs.}
+	\label{fig:nestmerge1}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/nestmerge2.png}
+	\caption{Nest merge output.}
+	\label{fig:nestmerge2}
+\end{figure}
+
+\subsubsection{Stack Merge Node}
+The Stack Merge node can join multiple input payloads into a single output payload. Where the Nest Merge node ``nests'' input payloads and thus always preserves the entirety of all inputs, the Stack Merge node ``overlays'' inputs. That is, it takes the first input payload, then merges in the second payload, \emph{overwriting} any variables with the same name. It repeats this process for all input payloads.
+
+Figures \ref{fig:stackmerge1} and \ref{fig:stackmerge2} show a simplified example of how this works. Two Set Variable nodes are instantiated, each injecting a variable named ``foo''; the first sets the value to \code{first value} and the other sets the value to \code{second value}. The first node also injects a variable named ``x'' with a value of \code{y}.
+
+The outputs of these nodes are fed to the Stack Merge node, which has been configured with two input sockets. Figure \ref{fig:stackmerge2} shows how the Stack Merge node overwrites values; thus the \code{foo: "first value"} output of the first Set Variable node is overwritten by the second node's \code{foo: "second value"} output, but the ``x'' variable is preserved since the second node does not set a variable with the same name.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/stackmerge1.png}
+	\caption{Stack merge inputs.}
+	\label{fig:stackmerge1}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/stackmerge2.png}
+	\caption{Stack merge output.}
+	\label{fig:stackmerge2}
+\end{figure}
+
+\subsubsection{Email Node}
+The Email node sends emails from within a flow. It can attach items from the payload. Note that the user who owns the flow \emph{must} configure an email server as described in Section \ref{sec:account-menu} for the Email node to function properly!
+
+\begin{itemize}
+\item Sender, required: This is the address which will appear in the ``From'' header of the email.
+\item Recipients, required: The email will be sent to this address or addresses.
+\item Subject, required: The subject line of the email.
+\item Body, required: The body text of the email message. Enter a string manually, or select a variable containing suitable text. The Text Template node provides powerful tools for formatting text in the flow.
+\item Attachments: An optional array of items to add as attachments on the email.
+\end{itemize}
+
+The Email node makes a best-effort attempt at determining the appropriate file type on the attachment. Naming payload items with appropriate file extensions (e.g. appending \code{.pdf} to the output name of the PDF node) helps the Email node figure out the correct type, but it can also make some deductions based on the structure of the data.
+
+\subsubsection{JavaScript Node}
+The JavaScript node can execute JavaScript code in a flow, allowing complex logic and custom operations on the payload. The configuration of a JavaScript node consists of three items:
+
+\begin{itemize}
+\item Code: the actual JavaScript code to execute.
+\item Libraries: a set of libraries to load; these are key-value pairs, where the key is the name of the library (for user reference only) and the value is the content of the library.
+\item Outputs: a list of variables to be output from the script (see below).
+\end{itemize}
+
+Scripts can read from and write to the payload by accessing the \code{payload} variable, e.g. \code{payload.flow.Scheduled}. Note that variables \emph{created} in the payload are only visible to downstream nodes if that variable is explicitly listed in the ``Outputs'' configuration field.
+
+Combining the HTTP node and the JavaScript node makes it trivially easy to load JS libraries from the Internet. For instance, the flow in Figure \ref{fig:js-flow} uses the HTTP node to fetch the Moment JavaScript library\footnote{https://momentjs.com/downloads/moment-with-locales.min.js}, then the JavaScript node loads the HTTP response as a library and uses it to format a timestamp.
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/js-flow.png}
+	\caption{Loading JavaScript libraries.}
+	\label{fig:js-flow}
+\end{figure}
+
+\subsubsection{PDF Node}
+The PDF node formats search results and other data into an attractive PDF document, which can then be sent to recipients using the Email node, the Slack node, the HTTP node, etc.
+
+There are many configuration options on the PDF node:
+
+\begin{itemize}
+\item Title, required: the title of the PDF.
+\item Subtitle: an optional sub-title.
+\item Contents, required: select one or more items from the payload to be included in the PDF. Query results will be automatically formatted.
+\item Page Size: change the size of the pages in the PDF.
+\item Include Flow Metadata Page: if set to true, the PDF will include a final page giving information about the execution of the flow.
+\item Password: if set, the PDF will be password-protected.
+\item Output Variable Name: sets the name for the output PDF in the payload.
+\end{itemize}
+
+The ``Contents'' field is perhaps the most critical. The node will attempt to format each item in this field as a section within the PDF document. It knows how to parse query results, meaning that a query using the table renderer will be inserted into the PDF as a proper table. Figure \ref{fig:pdf-contents} shows an example flow in which the outputs of several queries, plus the output of a Text Template node, are used as the Contents of a PDF. Figure \ref{fig:pdf-result} shows an example of what such a PDF may look like.
+
+\begin{figure}
+	\includegraphics[width=0.95\linewidth]{images/pdf-contents.png}
+	\caption{Including multiple query results in a PDF.}
+	\label{fig:pdf-contents}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/pdf-result.png}
+	\caption{Sample PDF output.}
+	\label{fig:pdf-result}
+\end{figure}
+
+The ``Output Variable Name'' config option specifies the name to use for the output PDF in the payload. Using a name which ends in \code{.pdf} will help inform other nodes that the object is a PDF file, for instance when included as an attachment on the Email node.
+
+Setting ``Include Flow Metadata Page'' to true causes the node to insert an additional page at the end of the document containing additional information about the user who executed the flow, the status of the Gravwell cluster, and the current Gravwell license. It will also insert the full query string, the timeframe, and the execution time for any queries which were packaged into the PDF.
+\clearpage
+
+\subsubsection{Slack File/Message Nodes}
+Two nodes can send to Slack: Slack Message and Slack File. As the names imply, one sends a text message to a Slack channel, while the other uploads a file. Both nodes have the following configuration options:
+
+\begin{itemize}
+\item Token, required: a Slack access token\footnote{\href{https://api.slack.com/authentication/token-types}{https://api.slack.com/authentication/token-types}} for the desired server.
+\item Channel, required: the channel that will receive the message, \emph{without} a preceding `\#' character.
+\item Message: the message body; Markdown is supported.
+\end{itemize}
+
+The Slack Message node also has a ``Verbatim Text'' config, which is optional text to be attached to the message verbatim, without being parsed as Markdown. This is useful for showing the result of an HTTP request or other unformatted data.
+
+The Slack File node also has a ``File to Send'' config, which is an item from the payload to be attached to the message. This works particularly well with the output of the PDF node.
+
+Note that any user with read access to the flow will be able to extract the token, giving them the ability to write to the same Slack server. For this reason, we recommend that flows with Slack nodes should not be shared with other users.
+
+\subsubsection{Teams Node}
+The Teams node can send a message to a Microsoft Teams channel. The configuration options are:
+
+\begin{itemize}
+\item Webhook, required: an incoming webhook\footnote{\href{https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/what-are-webhooks-and-connectors}{https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/what-are-webhooks-and-connectors}} URL for Microsoft Teams.
+\item Title: an optional title for the message.
+\item Message, required: the body of the message to send.
+\end{itemize}
+
+Note that any user with read access to the flow will be able to extract the webhook, giving them the ability to write to the same Teams channel. For this reason, we recommend that flows with Teams nodes should not be shared with other users.
+
+\clearpage
 \subsection{Hands-On Lab: Flows}
 
 This lab will demonstrate how to build a flow. The flow will send a notification whenever there have been failed login attempts to the Gravwell system. First, create a Gravwell webserver+indexer container:
