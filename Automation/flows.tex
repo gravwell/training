@@ -238,7 +238,7 @@ The Nest Merge node can join multiple input payloads into a single output payloa
 \end{figure}
 
 \subsubsection{Stack Merge Node}
-The Stack Merge node can join multiple input payloads into a single output payload. Where the Nest node ``nests'' input payloads and thus always preserves the entirety of all inputs, the Stack Merge node ``overlays'' inputs. That is, it takes the first input payload, then merges in the second payload, \emph{overwriting} any variables with the same name. It repeats this process for all input payloads.
+The Stack Merge node can join multiple input payloads into a single output payload. Where the Nest Merge node ``nests'' input payloads and thus always preserves the entirety of all inputs, the Stack Merge node ``overlays'' inputs. That is, it takes the first input payload, then merges in the second payload, \emph{overwriting} any variables with the same name. It repeats this process for all input payloads.
 
 Figures \ref{fig:stackmerge1} and \ref{fig:stackmerge2} show a simplified example of how this works. Two Set Variable nodes are instantiated, each injecting a variable named ``foo''; the first sets the value to \code{first value} and the other sets the value to \code{second value}. The first node also injects a variable named ``x'' with a value of \code{y}.
 
