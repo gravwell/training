@@ -1,5 +1,5 @@
 \chapter{Securing Gravwell}
-
+\index{Security}
 This chapter discusses security considerations for a Gravwell cluster.
 It will discuss indexer and webserver security, securing ingesters, and
 user authentication. It will also demonstrate some of the risks of an
@@ -35,7 +35,7 @@ stored in three different ways:
 
 
 \section{TLS/HTTPS}
-
+\index{Security!encryption}\index{Security!TLS}\index{Webservers!security}
 By default, Gravwell is configured to communicate via unencrypted
 channels. This means that communications between the webserver and the
 user, as well as communication between ingesters and indexers, will be
@@ -146,7 +146,7 @@ systemctl restart gravwell_searchagent.service
 \end{Verbatim}
 
 \section{Indexer Security}
-
+\index{Indexers!security}
 Gravwell indexers communicate with two components: ingesters, and
 webservers. Users never interact directly with indexers.
 
@@ -183,7 +183,7 @@ indexers should listen for TLS ingest connections on TCP port 4024.
 
 
 \section{Webserver Security}
-
+\index{Webservers!security}
 Webservers communicate with user clients, indexers, the search agent,
 and optionally the datastore. As the gateway into the Gravwell system,
 they are often accessible from public networks and should therefore be
@@ -252,7 +252,7 @@ setting up a Gravwell cluster with multiple webservers.
 
 
 \section{Ingester security}
-
+\index{Ingesters!security}
 Ingesters communicate only with indexers, using a shared ingest secret
 which can be stored via the methods described at the beginning of this
 chapter. As documented in the section on indexer security, ingesters may
@@ -270,7 +270,7 @@ your indexers. Consider deploying Federators (see Section \ref{sec:federator}) i
 order to segment your ingesters into different security enclaves to help ameliorate this risk.
 
 \section{User Authentication and Lockout}
-
+\index{Users}
 As mentioned in the webserver section, users are authenticated to the
 webserver by sending their username and password in an HTTP POST
 request. If the webserver is not configured to offer HTTPS connections,

@@ -9,3 +9,6 @@ images/*.tar.gz
 images/*.tgz
 dockerimages/
 gravwell_training.tgz
+*.idx
+*.ilg
+*.ind

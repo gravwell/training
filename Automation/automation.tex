@@ -1,5 +1,5 @@
 \chapter{Automation}
-
+\index{Automation}
 Gravwell provides several utilities to enable automated operations.
 At the most basic level, users can schedule searches to be executed at specific times, for
 example every morning at 1:00. They can also schedule
@@ -14,7 +14,7 @@ connects to the Gravwell webserver as a client. This chapter describes
 the search agent, scheduled searches, flows, and scripts.
 
 \section{Configuring User Email Settings}
-
+\index{Email configuration}
 In order to send emails from scheduled scripts, each user must input
 settings for their preferred email server. This will allow Gravwell to
 act as an SMTP client and send emails on the user's behalf. The email
@@ -53,7 +53,7 @@ located in \code{/opt/gravwell/log/web} by default.
 
 
 \section{The Search Agent}
-
+\index{Search agent}
 The search agent is the Gravwell component which actually handles the
 execution of scheduled searches and scripts. It is a separate process
 which connects to a Gravwell webserver as a client, obtains a list of
@@ -171,7 +171,7 @@ when setting this:
 
 
 \subsection{Scheduling Searches}
-
+\index{Automation!scheduled searches}\index{Scheduled searches|see {Automation}}
 Users can schedule searches to run at regular intervals. This enables
 several useful possibilities, such as automatically updating lookup
 tables (e.g. MAC address to IP mappings) or executing a very detailed /
@@ -330,7 +330,8 @@ To clean up after the experiment, simply run:
 \include{flows}
 
 \section{Search Scripting and Orchestration}
-
+\index{Automation!scripts}\index{Scheduled scripts|see {Automation}}
+\index{Anko}
 Scripts provide an additional layer of power beyond scheduled
 searches. A script can execute multiple searches, filter and enrich the
 results, then re-ingest the resulting entries under a different tag,

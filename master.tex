@@ -7,6 +7,8 @@
 \usepackage{float}
 \usepackage{xcolor}
 
+\usepackage{makeidx}
+
 \usepackage{import}
 \usepackage{fancyvrb}
 \usepackage{fvextra}
@@ -19,6 +21,9 @@
 \geometry{
  margin=1in,
 }
+
+% enable index commands
+\makeindex
 
 % always center images, tables, etc.
 \makeatletter
@@ -154,5 +159,7 @@
 \subimport{Security/}{security}
 
 %\subimport{CloudArchive/}{cloudarchive}
+
+\printindex
 
 \end{document}

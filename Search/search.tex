@@ -1,7 +1,7 @@
 \chapter{Searching}
 
 \section{Search Pipeline Architectural Overview}
-
+\index{Search}\index{Search!pipeline}
 Gravwell search is designed to be an asynchronous pipeline that behaves
 somewhat like a stream processor. The pipeline is transparently
 distributed across indexers, enabling distributed search without the
@@ -20,18 +20,18 @@ pipeline is made up of the following elements:
 
 \begin{itemize}
 \item
-  Tags. A tag is a data group which informs the indexers what set of
+  Tags.\index{Tags} A tag is a data group which informs the indexers what set of
   data to feed into a pipeline. Indexers use tags to transparently bind
   to the appropriate wells in order to feed data to the pipeline.
 \item
-  Data, composed of entries. These entries are stored on disk by
+  Data, composed of entries\index{Entries}. These entries are stored on disk by
   indexers until a search is run.
 \item
-  Search modules. These apply structure, extract elements, filter, and
+  Search modules.\index{Search!modules} These apply structure, extract elements, filter, and
   condense. Search modules do most of the ``heavy lifting'' in the
   pipeline.
 \item
-  Render module. Any given pipeline has only one render module which
+  Render module.\index{Search!renderers} Any given pipeline has only one render module which
   must be the last module. Once entries have been processed by the
   search modules, the render module formats them to display to the user.
   If no render module is specified in a search, the text module is
@@ -70,7 +70,7 @@ presented to a human, script, or outside API.
 
 
 \section{Query Entries and Tags}
-
+\index{Search!entries}\index{Entries}\index{Tags}
 The first part of any query is the \emph{tag set}; all queries operate on at
 least one tag, but a single query can operate on multiple tags. If no
 tag is specified, the \code{default} tag is assumed. Every entry in
@@ -237,7 +237,7 @@ docker kill $(docker ps -a -q)
 
 
 \section{Entries, Enumerated Values, and Field Extraction}
-
+\index{Search!enumerated values}\index{Enumerated Values}
 One of the most common operations any Gravwell user will perform is
 field extraction. Gravwell is designed to operate on unstructured data,
 meaning that you don't necessarily have to understand the form of your data
@@ -436,7 +436,7 @@ Exercises:
 
 
 \section{Search Modules}
-
+\index{Search!modules}
 Gravwell supports a wide variety of search modules that are designed to
 perform various functions. Many of the search modules are used to
 perform feature extraction such as \code{json}, \code{syslog}, \code{cef},
@@ -477,7 +477,7 @@ your own using anko, Gravwell may be able to implement the module for you.
 
 
 \section{Inline Filtering}
-
+\index{Search!filtering}
 Many search modules support what we call ``inline filtering''. Inline
 filtering allows the module to extract a value and filter on it using
 its native type without involving another module. There are some real
@@ -693,7 +693,7 @@ docker kill $(docker ps -a -q)
 
 
 \section{Render Modules}
-
+\index{Search!renderers}
 Gravwell provides a selection of render modules to help users display
 their results in the most comprehensible manner possible. Render modules
 are in charge of receiving data from the search module pipeline and
@@ -706,7 +706,7 @@ for archiving a view of data or saving the results even after the
 original data is expired or purposefully deleted.
 
 \subsection{Temporal vs. Non-Temporal Rendering}
-
+\index{Search!temporal vs. non-temporal}
 In discussing renderers, a distinction should be made between temporal
 and non-temporal mode. Most searches will operate in \emph{temporal mode},
 where the entries arrive at the renderer in order of their
@@ -817,7 +817,7 @@ during this lab. See the query optimization section (\ref{sec:query-optimization
 
 
 \subsection{Downloading Results}
-
+\index{Search!downloading}\index{Search!renderers}
 All renderers allow the user to download results in at least one
 format.
 
@@ -844,7 +844,7 @@ convenient way to export a lookup table to another Gravwell system.
 
 
 \subsection{Text/Raw Renderers}
-
+\index{Renderers!text}\index{Renderers!raw}
 These renderers provide only the most basic functionality but are
 useful when doing initial explorations on data. The text renderer is
 designed to show human readable entries in a text format, as seen in Figure \ref{fig:text-entries}. Any
@@ -897,7 +897,7 @@ The right-most icon shows the built-in fields and any enumerated values on the e
 \clearpage
 
 \subsection{Table Renderer}
-
+\index{Renderers!table}
 The table renderer is used to create tables. The renderer's arguments
 specify which columns should be shown in the table. Arguments must be
 enumerated values, ``DATA'', ``TAG'', ``TIMESTAMP'', or ``SRC''.
@@ -984,7 +984,7 @@ tag=jsonlogs json source | count by source | table -nt source count
 \clearpage
 
 \subsection{Chart Renderer}
-
+\index{Renderers!chart}
 The chart renderer is used display aggregate results such as trends,
 quantities, counts, and other numerical data. Charting will plot an
 enumerated value with an optional ``by'' parameter. For example, if
@@ -1023,7 +1023,7 @@ The results can be rendered in a variety of ways. By default, the UI will show a
 \clearpage
 
 \subsection{Mapping Modules}
-
+\index{Renderers!heatmap}\index{Renderers!pointmap}
 The \code{pointmap} and \code{heatmap} renderer modules translate search results onto
 a map. Both place entries on the map based on locations in enumerated
 values. By default, the modules look for an enumerated value called
@@ -1124,7 +1124,7 @@ tag=ipfix ipfix ip!~PRIVATE bytes
 \clearpage
 
 \subsection{Stackgraph Renderer}
-
+\index{Renderers!stack graph}
 The \code{stackgraph} renderer is used to display horizontal bar graphs
 with stacked data points. A stackgraph is useful in displaying the
 magnitude of results that are accumulated from multiple components
@@ -1198,8 +1198,8 @@ tag=ipfix ipfix ip!~PRIVATE port < 1024
 \clearpage
 
 \subsection{Force-Directed Graph Renderer}
-
-The force directed graph (fdg) module is used to generate a directed
+\index{Renderers!force-directed graph}
+The force-directed graph (fdg) module is used to generate a directed
 graph using node pairs and optional grouping. The fdg module accepts
 source and destination groups as well as a weight value for the
 resulting edge.
@@ -1260,7 +1260,7 @@ neighbors, as in Figure \ref{fig:fdg-context}.
 
 \section{Resources}
 \label{sec:resources}
-
+\index{Resources}
 \emph{Resources} are persistent data objects which can be used in search
 queries. Resources can be manually uploaded by a user or automatically
 created by search modules. Resources are used by the lookup module to
@@ -1476,7 +1476,7 @@ docker kill $(docker ps -a -q)
 \clearpage
 
 \section{Data Fusion}
-
+\index{Data fusion}\index{Search!data fusion}
 The Gravwell query pipeline supports what we call module interleaving,
 which is basically the ability to specify that a given module should only process
 specific tags. This allows Gravwell to operate on multiple data formats
@@ -1730,7 +1730,7 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
 
 \section{Query Optimization}
 \label{sec:query-optimization}
-
+\index{Search!optimization}
 The Gravwell query pipeline is very powerful. Searches are distributed
 to all nodes in the cluster, who intelligently share the load in order to
 maximize computing resources at top efficiency. It is possible, however,
@@ -1742,9 +1742,9 @@ For purposes of discussion, we are going to break modules
 down into three categories: parsers, operators, and condensers. Render
 modules are not a consideration when it comes to optimization, as they
 are always the final module in a pipeline.
+\index{Search!modules}
 
 \subsection{Parsing modules}
-
 A parsing module is one that performs field extraction over a data
 entry. Typically, these modules are slower than operating modules as
 they usually read and process the entire data entry and create
@@ -1765,7 +1765,7 @@ distributes these parsing modules to every indexer in the cluster and
 these are run very close to the data.
 
 \subsection{Parsing modules and Accelerators}
-
+\index{Acceleration}
 Accelerators are covered in Section \ref{sec:acceleration} and in the online
 Gravwell documentation, but they should be mentioned when discussing query optimization.
 When turned on, they provide very powerful filtering speedups using our hybrid
@@ -1948,7 +1948,7 @@ docker kill $(docker ps -a -q)
 
 
 \section{Auto-extractors}
-
+\index{Search!extractors}\index{Auto-extractors|see {Extractors}}\index{Extractors}
 Gravwell enables per-tag extraction definitions that can ease the
 complexity of interacting with unstructured data and data formats that
 are not self-describing. Unstructured data often requires complicated
@@ -2018,7 +2018,7 @@ all others can be left blank if desired (for example, the regex module
 does not take any arguments, so args will always be empty).
 
 \subsection{Managing Auto-Extractors in the GUI}
-
+\index{GUI!extractors}
 The Gravwell GUI can be used to manage extractors. The screenshot in Figure \ref{fig:extractors-page}
 shows the Extractors page with four defined extractors.
 
@@ -2519,7 +2519,7 @@ docker kill $(docker ps -a -q)
 
 
 \section{Backgrounded and Saved Searches}
-
+\index{Search!background searches}\index{Search!saved searches}
 Backgrounding a search allows a user to do other things while a search
 completes--it is conceptually similar to running a Unix command with
 an `\&' at the end of the command line. Searches can be launched in the
@@ -2681,7 +2681,7 @@ docker kill $(docker ps -a -q)
 
 \section{Dashboards}
 \label{sec:dashboards}
-
+\index{Dashboards}
 Gravwell dashboards put relevant information in a
 heads-up format suitable for continuous monitoring and situational
 awareness. Dashboards are a collection of searches that are all executed in
@@ -2740,7 +2740,7 @@ Figure \ref{fig:add-in-dashboard} shows how to add a tile from within the dashbo
 Once a few tiles have been added to the dashboard, they can be rearranged and resized by clicking and dragging the tiles. Note that after making a change, you must click the ``Save changes'' popup which appears in the lower right corner.
 
 \subsection{Live Update}
-
+\index{Dashboards!live update}
 Dashboards can be configured to \emph{live update}, meaning they will re-run queries and display new results after a set period of time. To enable this, click the 3-dot menu on the dashboard and select ``Settings''. Within the settings page, pick the ``Timeframe \& Live Update'' tab, then turn the ``Enable live update'' toggle on, as seen in Figure \ref{fig:live-update}. The update interval is configurable; if the queries in the dashboard cover a long timeframe or process a lot of data, consider setting the interval to a higher value so as to reduce the load on the system.
 
 \begin{figure}
@@ -2849,7 +2849,7 @@ docker kill $(docker ps -a -q)
 \end{Verbatim}
 
 \section{Templates}
-
+\index{Search!templates}\index{Dashboards!templates}
 Templates are stored Gravwell queries which require one or more variables to run. This lets you build advanced queries which can investigate a particular IP address. They are particularly effective when inserted into a dashboard (section \ref{sec:dashboards}), or when coupled with an actionable (\ref{sec:actionables}).
 
 Templates are managed via the templates page, accessed through the main menu under the `Tools and Resources' section. A template consists of a name, a description, and the query itself. Inside the query, use words wrapped inside doubled percent signs to denote variables, e.g. \code{\%\%IPADDR\%\%} as seen in Figure \ref{fig:template-editor}.
@@ -2878,7 +2878,7 @@ Templates can be included in dashboards by selecting ``Templates'' in the ``Add 
 
 \section{Actionables}
 \label{sec:actionables}
-
+\index{Actionables}\index{Dashboards!actionables}
 Actionables provide a way to create custom triggers and menus that key on any text rendered in a query and take one or more actions when selected. Similar to an HTML hyperlink, actionables can be used to open external URLs that key on data, but actionables can also be leveraged to submit new Gravwell queries, launch dashboards, and execute templates.
 
 Actionables are created by specifying one or more regular expressions, along with one or more actions. Gravwell automatically parses all text rendered with the table and chart renderers, bringing up appropriate actionable context menues when the text is clicked, as seen in Figure \ref{fig:actionables-overview}.
@@ -2945,7 +2945,7 @@ A trigger is a JavaScript regular expression that determines if an actionable sh
 
 \section{Compound Queries}
 \label{sec:compoundqueries}
-
+\index{Compound queries}\index{Search!compound queries}
 Compound Queries is an extension to the query language that allows you to
 perform multiple, in-order, queries, and use the output from a previous query
 anywhere in the pipeline of the next, similar to an SQL JOIN. You can combine

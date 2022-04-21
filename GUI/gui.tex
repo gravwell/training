@@ -2,10 +2,10 @@
 
 \section{Introduction}
 
-This chapter discusses the basic organization and usage of the Gravwell GUI. It begins with a general overview of the user interface, then discusses more specialized and advanced options. Feel free to skip ahead to the next chapter to begin searching with Gravwell immediately, referring back to this chapter when needed.
+This chapter discusses the basic organization and usage of the Gravwell GUI\index{GUI}\index{User Interface|see {GUI}}. It begins with a general overview of the user interface, then discusses more specialized and advanced options. Feel free to skip ahead to the next chapter to begin searching with Gravwell immediately, referring back to this chapter when needed.
 
 \section{Menus}
-
+\index{GUI!menus}
 By default, users will end up on the ``New Search'' page after logging in. This page, like all pages in the Gravwell GUI, includes a bar across the top containing the main menu, notifications, the account menu, and more. These menus are described further below.
 
 \begin{figure}
@@ -17,6 +17,7 @@ By default, users will end up on the ``New Search'' page after logging in. This 
 Clicking the Gravwell logo in the upper left will always take you back to your home page (see section \ref{sec:account-menu} for configuration options).
 
 \subsection{The Main Menu}
+\index{GUI!main menu}
 
 Clicking the ``hamburger'' button in the upper left will open the Main Menu, as shown in Figure \ref{fig:mainmenu}.
 
@@ -37,7 +38,7 @@ This menu is used to access all the primary functionalities of Gravwell, includi
 \clearpage
 
 \subsection{Notifications}
-
+\index{GUI!notifications}\index{Notifications}
 Important notifications are accessible under the bell icon in the upper right corner of the page. Regular notifications are indicated by a small red circle containing the number of notifications. A critical notification will change the entire icon to a more attention-catching red icon; see Figure \ref{fig:notifications-icons} for examples.
 
 \begin{figure}[H]
@@ -58,7 +59,7 @@ Depending on the type of notification, clicking the ``delete'' icon may clear th
 \end{figure}
 
 \subsection{The Account Menu}
-\label{sec:account-menu}
+\label{sec:account-menu}\index{GUI!account preferences}
 
 The round button in the upper-right of the page is the Account Menu button. It will display either the initials of the current user, or a profile image if set. Clicking it brings up a small drop-down menu (Figure \ref{fig:accountmenu}).
 
@@ -101,7 +102,7 @@ The ``Search Group Visibility'' option allows you to share the results of all se
 
 The ``Advanced Preferences'' section can be ignored by most users. Selecting ``Developer mode'' enables manual editing of JSON preferences, while toggling ``Experimental Features'' will enable the Experimental Features section in the main menu.
 
-The final tab, ``Email Server'' (Figure \ref{fig:email-prefs-gui}, is extremely important for users who intend to do automated email alerting via scheduled scripts. It must be set up with a valid SMTP configuration before emails can be sent.
+The final tab, ``Email Server''\index{GUI!email configuration}\index{Email configuration} (Figure \ref{fig:email-prefs-gui}, is extremely important for users who intend to do automated email alerting via scheduled scripts. It must be set up with a valid SMTP configuration before emails can be sent.
 
 \begin{figure}
 	\includegraphics[width=0.7\linewidth]{images/email-prefs.png}
@@ -114,7 +115,7 @@ The fields are mostly self-explanatory; ``Server'' is an SMTP server, ``Port'' i
 Once the fields have been populated, click ``Update Settings'' to save them, then click ``Test Configuration'' to send a test email.
 
 \section{Labels and Filtering}
-
+\index{GUI!labels}\index{Labels}
 Objects in Gravwell such as dashboards, resources, macros, etc. can be labeled for organizational purposes. Some objects distributed in kits may be pre-labeled for convenience. The following object types can be labeled:
 
 \begin{itemize}
@@ -207,7 +208,7 @@ Gravwell defines a handful of special labels and label prefixes for particular o
 The string \code{hidden} is a special label; applying it to an object will prevent the object from being displayed by default. To see the object, toggle the ``Show hidden record'' option in the filter menu, as detailed above.
 
 \subsubsection{Kit Label Prefixes}
-
+\index{Kits!kit labels}
 Three label prefixes are used to manage Gravwell-internal information about objects which were installed as part of a kit. You should never manually apply kit labels to objects; these labels are documented to prevent users from accidentally applying a conflicting label to an object. The following are considered reserved kit label prefixes:
 
 
@@ -221,7 +222,7 @@ Three label prefixes are used to manage Gravwell-internal information about obje
 Users should not create labels beginning with these strings, e.g. \code{kit/foo} or \code{kit/dependency:bar}. These labels are managed internally by Gravwell.
 
 \section{Playbooks}
-
+\index{Playbooks}
 Playbooks are hypertext documents within Gravwell which help guide users through common tasks, describe functionality, and record information about data in the system. Most Gravwell kits (see Chapter \ref{ch:kits}) include a playbook or two to help users get oriented in the kit, but regular users can also \emph{create} playbooks for themselves, documenting their data investigations with a mix of text, images, and \emph{executable queries}.
 
 The Playbooks page (Figure \ref{fig:playbooks}) lists the playbooks currently in the system and allows the creation of new ones.
@@ -241,7 +242,7 @@ Clicking a playbook will open it. It will look more or less like a regular web p
 \end{figure}
 
 \subsection{Playbook Markdown}
-
+\index{Markdown}
 Playbooks are written in Markdown. You can edit an existing playbook by clicking the edit button, or create your own new playbook. This will bring up an editor as shown in Figure \ref{fig:playbook-edit}
 
 \begin{figure}

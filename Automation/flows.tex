@@ -1,5 +1,5 @@
 \section{Flows}
-
+\index{Automation!flows|see {Flows}}\index{Flows}
 Flows provide a no-code method for developing advanced automations in Gravwell. A flow consists of one of more \emph{nodes}; each node performs a single action and passes the results (if any) on to the next node(s). By wiring together nodes in a drag-and-drop user interface, users can:
 
 \begin{itemize}
@@ -26,7 +26,7 @@ Flows are automations, meaning they are normally executed on a user-specified sc
 \end{enumerate}
 
 \subsubsection{Nodes}
-
+\index{Flows!nodes}
 A flow is a collection of \emph{nodes}, linked together to define an order of execution. Each node does a single task, such as running a query or sending an email. Figure \ref{fig:nodes} shows a simple flow of three nodes; the leftmost node runs a Gravwell query, then the middle node formats the results of that query into a PDF document, and finally the rightmost node sends that PDF document as an email attachment.
 
 \begin{figure}
@@ -38,7 +38,7 @@ A flow is a collection of \emph{nodes}, linked together to define an order of ex
 All nodes have a single output socket. Most have only a single input socket, but some nodes which merge \emph{payloads} (see below) have multiple input sockets. One node's output socket may be connected to the \emph{inputs} of multiple other nodes, but each input socket can only take one connection.
 
 \subsubsection{Payloads}
-
+\index{Flows!payloads}
 \emph{Payloads} are collections of data passed from node to node, representing the state of execution. For instance, the ``Run a Query'' node will insert an item named ``search'' into the payload, containing things like the query results and metadata about the search. The PDF node can \emph{read} that ``search'' item, format it into a nice PDF document, and insert the PDF file back into the payload with a name like ``gravwell.pdf''. Then the Email node can be configured to attach ``gravwell.pdf'' to the outgoing email.
 
 Most nodes receive a single incoming payload through a single \emph{input} socket, then pass a single outgoing payload via the \emph{output} socket. In most cases, the outgoing payload will be a modified version of the incoming payload.
@@ -58,6 +58,7 @@ Nodes are always executed one at a time. A node can be executed if all nodes ups
 Note that some nodes may block execution of downstream nodes. The \code{If} node is configured with a boolean logic expression; if that expression evaluates to \emph{false}, none of the If node's downstream nodes are executed. Nodes which can block downstream execution will always have a note to that effect in the online documentation.
 
 \subsection{The Flow Editor}
+\index{GUI!flow editor}
 Flows are created using the flow editor. Although the Gravwell flow editor can be intimidating at first glance, a few minutes' worth of experimentation and exploration should be enough to get started building flows. This section will go through the various components of the UI, explaining each component.
 
 Note: If you're not yet familiar with the basic components of a flow (nodes, sockets, payloads), refer to Section \ref{sec:flow-concepts} for an overview.

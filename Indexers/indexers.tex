@@ -1,5 +1,5 @@
 \chapter{Indexers and Well Configuration}
-
+\index{Indexers}\index{Data ingest}
 The two core components of a Gravwell deployment are the Indexer and
 Webserver. If either of those components are not properly configured,
 Gravwell will not function. The indexer is the most important
@@ -27,7 +27,7 @@ be able to read system logs.
 
 
 \section{Indexer Configuration}
-
+\index{gravwell.conf@\code{gravwell.conf}}
 Gravwell always ships with a functional gravwell.conf that provides a
 basic deployment right out of the box. However, with very large or very
 complex deployments, tuning the configuration can yield much better
@@ -39,7 +39,7 @@ represents a basic configuration. The shell installer and Debian
 package both contain logic to inject randomly generated tokens into each
 required authentication parameter. The published Docker image on Docker
 Hub\footnote{https://hub.docker.com/} contains
-environment variables preconfigured to set the authentication tokens.
+environment variables preconfigured to set the authentication tokens.\index{Docker}
 The preconfigured environment variables for the Docker deployment are
 not unique and not secure. If you plan to use Gravwell in Docker, you
 must override these configuration values using either Docker secrets or
@@ -164,7 +164,7 @@ address discovered earlier. Do not \code{rm} the test container, as we are
 going to use it again for the next lab.
 
 \section{Well Configuration}
-
+\index{Wells}
 Properly configuring a well can yield significant performance gains
 when querying data. Isolating data into different wells means that when
 you issue a query on a tag, the indexer can look at storage that is only
@@ -301,7 +301,7 @@ tag is there.}
 \end{figure}
 
 \section{Well Ageout}
-
+\index{Ageout}\index{Wells!ageout}
 Gravwell is designed to manage data sets with minimal user interaction;
 once a system is appropriately configured it will manage data sets and
 storage arrays on its own. Data ageout is one of the most critical
@@ -591,7 +591,7 @@ like this:
 \end{Verbatim}
 
 \section{Replication}
-
+\index{Replication}
 Hardware failures happen, drives crash, and humans mis-type commands;
 only a robust data backup solution can prevent catastrophic data loss.
 Gravwell implements a data replication system which enables transparent
@@ -745,7 +745,7 @@ pushing current hot shards to the hot pool.
 
 \section{Query Acceleration and Indexing}
 \label{sec:acceleration}
-
+\index{Acceleration}\index{Indexing|see {Acceleration}}
 Gravwell indexers provide a couple of different data management
 methodologies, ranging from raw storage with only temporal indexing to
 full feature extraction with and direct data indexing. This section
@@ -753,7 +753,7 @@ will explore indexer acceleration configuration and examine some of the
 pros and cons of methodology.
 
 A Gravwell well without any acceleration configuration will employ only
-temporal indexing, this means that every entry is grouped according to a
+temporal indexing, which means that every entry is grouped according to a
 timestamp that is indexed using a temporal index. The temporal index
 allows for specifying subsections of time without combing through data
 that isn't in the time region specified by the query. Wells can also be
@@ -1129,7 +1129,7 @@ even fewer entries off the disk than with the bloom engine, this query is even f
 \end{enumerate}
 
 \section{Indexer Optimization}
-
+\index{Tuning!indexers}
 Gravwell prides itself on not requiring specific machine specs and
 being able to scale across a broad range of hardware capabilities.
 While the software makes a best effort at scaling without human
@@ -1262,7 +1262,7 @@ queries.
 
 \section{Docker Configuration}
 \label{sec:docker-config}
-
+\index{Docker}
 Throughout the training so far we have made heavy use of Docker as a
 simple container platform that makes it easy to configure and run
 Gravwell. As you were working with Gravwell, there may have been a
