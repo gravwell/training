@@ -49,7 +49,7 @@ you build to share with friends and colleagues.
 The `Kits' section of the Gravwell web UI is the centralized place to work with kits. You can find the Kits page in the main menu, as shown in Figure \ref{fig:kit-menu}.
 
 \begin{figure}
-	\includegraphics[width=0.6\linewidth]{images/kit-menu.png}
+	\includegraphics[width=0.3\linewidth]{images/kit-menu.png}
 	\caption{Kits menu item}
 	\label{fig:kit-menu}
 \end{figure}
@@ -92,35 +92,35 @@ A kit may have \emph{dependencies} defined. Dependencies are other kits which th
 
 On a fresh Gravwell cluster, no kits are installed. Opening the `Kits' section will present an empty page (Figure \ref{fig:blank-kits}). If you click `Manage Kits', you will be taken directly to the list of kits on the Gravwell kit server, as shown in Figure \ref{fig:available-kits}.
 
-\begin{figure}[H]
-	\includegraphics[width=0.8\linewidth]{images/blank-kits.png}
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/blank-kits.png}
 	\caption{Kits page on a new Gravwell installation}
 	\label{fig:blank-kits}
 \end{figure}
 
-\begin{figure}[H]
-	\includegraphics[width=0.8\linewidth]{images/available-kits.png}
+\begin{figure}
+	\includegraphics[width=0.85\linewidth]{images/available-kits.png}
 	\caption{Browsing available kits}
 	\label{fig:available-kits}
 \end{figure}
 
 You can click the kit details button to learn more about a given kit. Once you've decided on a kit to install, click the install kit button. The system will download the kit, then pop up a wizard for installation. In Figure \ref{fig:wizard1}, we have selected the IPFIX kit for installation. The first page shows a list of items contained in the kit; after reviewing the contents, click the checkbox and select the Next button. The wizard will then display any licenses packaged with the kit, as seen in Figure \ref{fig:wizard2}. Note that if there are multiple licenses, you will have to select each one individually from the list on the left and click each checkbox before continuing.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/wizard1.png}
 	\caption{Installing IPFIX kit, step 1}
 	\label{fig:wizard1}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/wizard2.png}
 	\caption{Installing IPFIX kit, step 2}
 	\label{fig:wizard2}
 \end{figure}
 
-Next, the wizard will prompt for Configuration Macros, if any are defined by the kit. Figure \ref{fig:wizard3} shows this step. A configuration macro allows install-time configuration of the queries which are shipped by the kit; these will typically include a default value but also provide a description to help you figure out what to enter. In the screenshot, it needs to know which tag contains IPFIX records; because we intend to use the "ipfix" tag, we can leave the default value alone.
+Next, the wizard will prompt for Configuration Macros, if any are defined by the kit. Figure \ref{fig:wizard3} shows this step. A configuration macro allows install-time configuration of the queries which are shipped by the kit; these will typically include a default value but also provide a description to help you figure out what to enter. In the screenshot, it needs to know which tag contains IPFIX records; because we intend to use the \code{ipfix} tag, we can leave the default value alone.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/wizard3.png}
 	\caption{Installing IPFIX kit, step 3}
 	\label{fig:wizard3}
@@ -128,7 +128,7 @@ Next, the wizard will prompt for Configuration Macros, if any are defined by the
 
 The final page of the wizard (Figure \ref{fig:wizard4} prompts for additional options. ``Override Existing Items'', if checked, will overwrite any conflicting objects which may already exist on the system--for instance, if you have created a resource named ``foo'', but the kit will also create a resource named ``foo''. The ``Group Access'' dropdown allows you to optionally select a group which can see the contents of the kit. Admin users will also have the option to install the kit globally, meaning all users can see it.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/wizard4.png}
 	\caption{Installing IPFIX kit, step 4}
 	\label{fig:wizard4}
@@ -136,11 +136,13 @@ The final page of the wizard (Figure \ref{fig:wizard4} prompts for additional op
 
 When you click the ``Deploy'' button, the kit and any dependencies will be installed. The GUI will display kit installation status as it goes. It may take some time, but eventually the installation will complete as shown in Figure \ref{fig:install-done}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/install-done.png}
 	\caption{Kit deployment status}
 	\label{fig:install-done}
 \end{figure}
+
+\clearpage
 
 \subsection{Exploring a Kit}
 
