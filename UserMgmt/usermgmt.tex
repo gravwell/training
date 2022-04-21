@@ -20,7 +20,7 @@ administrator can create new users, modify existing users, or delete
 users. Figure \ref{fig:fresh-users} shows the User page on a freshly-installed
 Gravwell system; the only extant user is the default ``admin''.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics{images/users-admin.png}
 	\caption{A Freshly-Installed System's User List}
 	\label{fig:fresh-users}
@@ -48,7 +48,6 @@ again until the account is unlocked; this is a good way to deal with
 misbehaving users. Both of these icons are disabled for the `admin'
 user.
 
-
 \begin{figure}
 	\includegraphics[width=0.5\linewidth]{images/usertile.png}
 	\caption{The User Information Tile}
@@ -60,7 +59,7 @@ This allows you to reset the user's password, change their personal
 information, or even make them an administrator if needed.
 
 \begin{figure}
-	\includegraphics[width=0.7\linewidth]{images/edituser.png}
+	\includegraphics[width=0.55\linewidth]{images/edituser.png}
 	\caption{Editing User Information}
 	\label{fig:edituser}
 \end{figure}
@@ -71,12 +70,10 @@ aren't working, or to keep an eye on what users are trying to extract
 from your data.
 
 \begin{figure}
-	\includegraphics{images/userhistory.png}
+	\includegraphics[width=0.9\linewidth]{images/userhistory.png}
 	\caption{User Search History}
 	\label{fig:userhistory}
 \end{figure}
-
-
 
 \section{Managing Groups}
 
@@ -112,6 +109,7 @@ this group.
 	\label{fig:grouptile}
 \end{figure}
 
+\clearpage
 \section{Hands-on Lab: Managing Users and Groups}
 
 First, launch a Gravwell webserver+indexer container:

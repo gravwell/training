@@ -172,7 +172,7 @@ default renderer, just know that if you don't specify a renderer
 Gravwell will show you the raw entries and ensure they are in the
 correct order.
 
-
+\clearpage
 \subsection{Hands-on Lab: Basic Filtering}
 \label{sec:lab-filter}
 
@@ -380,7 +380,7 @@ If we were operating in a security context we might set up an alert due
 to the fact that the user ``Bayer3954'' is sending requests with someone
 else's username (``joe'').
 
-
+\clearpage
 \subsection{Hands-on Lab: Searching with Enumerated Values and Field Extraction}
 
 For this lab we are going to be using the same data set as the previous lab (Section \ref{sec:lab-filter}), but
@@ -610,6 +610,7 @@ If we were on a large network with many billions of flows per day, the
 accelerators would dramatically speed up that query, plus we get a cool
 chart to show us who is pushing a bunch of data around using SSH.
 
+\clearpage
 \subsection{Hands-on Lab: Inline Filtering}
 
 In this lab we will observe how the inline
@@ -729,7 +730,7 @@ possible, as shown in Figure \ref{fig:nontemporal-render}.
 	\label{fig:nontemporal-render}
 \end{figure}
 
-
+\clearpage
 \subsection{Hands-on Lab: Temporal vs. Non-Temporal Rendering}
 
 In this hands-on lab we will use netflow records to identify the top
@@ -893,7 +894,7 @@ The right-most icon shows the built-in fields and any enumerated values on the e
 	\label{fig:text-highlights}
 \end{figure}
 
-
+\clearpage
 
 \subsection{Table Renderer}
 
@@ -980,7 +981,7 @@ non-temporal mode, making the \code{count} module condense results instead of ta
 tag=jsonlogs json source | count by source | table -nt source count
 \end{Verbatim}
 
-
+\clearpage
 
 \subsection{Chart Renderer}
 
@@ -1019,6 +1020,7 @@ The results can be rendered in a variety of ways. By default, the UI will show a
 	\label{fig:chart-pie}
 \end{figure}
 
+\clearpage
 
 \subsection{Mapping Modules}
 
@@ -1119,6 +1121,7 @@ tag=ipfix ipfix ip!~PRIVATE bytes
 	\label{fig:heatmap-bytes}
 \end{figure}
 
+\clearpage
 
 \subsection{Stackgraph Renderer}
 
@@ -1164,7 +1167,7 @@ tag=ipfix ipfix src ~ PRIVATE port < 1024 bytes
 | stackgraph src port sum
 \end{Verbatim}
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/stackgraph-traffic.png}
 	\caption{Stackgraph of traffic volumes by IP \& Port}
 	\label{fig:stackgraph-traffic}
@@ -1185,13 +1188,14 @@ tag=ipfix ipfix ip!~PRIVATE port < 1024
 | stackgraph Country port count
 \end{Verbatim}
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/stackgraph-connections.png}
 	\caption{Stackgraph of connection count by country \& port}
 	\label{fig:stackgraph-connections}
 \end{figure}
 
 
+\clearpage
 
 \subsection{Force-Directed Graph Renderer}
 
@@ -1246,11 +1250,13 @@ tag=pcap packet ipv4.SrcIP ipv4.DstIP ipv4.Length
 Hovering the mouse over a node shows its label and the labels of its
 neighbors, as in Figure \ref{fig:fdg-context}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/fdg-context.png}
 	\caption{FDG context popup}
 	\label{fig:fdg-context}
 \end{figure}
+
+\clearpage
 
 \section{Resources}
 \label{sec:resources}
@@ -1390,6 +1396,7 @@ grey 'File' region or click to select a new file, exactly as when
 creating a new resource. Note that the Version, Hash, Size, and Last
 Modified fields change when a different file is uploaded.
 
+\clearpage
 \subsection{Hands-on Lab: Enriching Netflow with GeoIP}
 
 This lab will demonstrate how resources can be used to enrich entries
@@ -1433,7 +1440,7 @@ using tar; it should contain a file named \code{GeoLite2-City.mmdb}.
 
 Upload that file into a new resource named ``maxmind'', as shown in Figure \ref{fig:maxmind-upload}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.5\linewidth]{images/maxmind-upload.png}
 	\caption{Uploading maxmind database}
 	\label{fig:maxmind-upload}
@@ -1453,7 +1460,7 @@ resource named ``maxmind'' to look up the Location for each Src IP
 address. Finally, the pointmap renderer draws each location on a map, as
 seen in Figure \ref{fig:maxmind-pointmap}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.7\linewidth]{images/maxmind-pointmap.png}
 	\caption{Netflow source IP pointmap}
 	\label{fig:maxmind-pointmap}
@@ -1466,10 +1473,7 @@ docker kill $(docker ps -a -q)
 \end{Verbatim}
 
 
-
-
-
-
+\clearpage
 
 \section{Data Fusion}
 
@@ -1555,6 +1559,7 @@ the result into the enumerated value ``Y''. The output is a single data stream
 that essentially unifies the RED and BLUE data sets using a common key
 B.
 
+\clearpage
 \subsection{Hands-on Lab: Data Fusion}
 
 For this lab we are going to be fusing data from three different
@@ -1813,6 +1818,7 @@ webserver to be aggregated in total.
 Any modules following a condensing module will then be operating in
 series on the webserver, not in parallel on the indexers.
 
+\clearpage
 \subsection{Hands-on Lab: Optimizing Queries}
 
 Let's look at a few searches that all accomplishing the same end
@@ -2353,7 +2359,7 @@ Results in output that look like this:
 With some investigation, the packed binary structure was found to
 contain the structure shown in Table \ref{table:keg-structure}.
 
-\begin{table}[H]
+\begin{table}
 \begin{tabular}{p{0.1\linewidth}p{0.15\linewidth}p{0.2\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
 \hline
 \textbf{ID} & \textbf{Timestamp seconds} & \textbf{Timestamp nanoseconds} & \textbf{Temperature (32bit float)} & \textbf{ASCII name} \\
@@ -2427,7 +2433,8 @@ Using the auto-extractor and some basic math it is possible to dissect
 the binary data and clearly see a periodic engagement of the compressor,
 which causes an oscillation of temperature over time.
 
-\subsection{Hands-On Lab}
+\clearpage
+\subsection{Hands-On Lab: Extractors}
 
 In this lab, we will show how to create an extractor to help work with
 CSV data. First, launch a Gravwell webserver+indexer container:
@@ -2566,7 +2573,7 @@ Gravwell administrator may choose to place restrictions on how much disk
 space users are allowed to consume for search storage. It is good
 practice to delete old saved searches when no longer needed!
 
-
+\clearpage
 \section{Permissions, Groups, and Sharing Results}
 
 Any given user may belong to multiple groups, which are assigned by the
@@ -2610,7 +2617,8 @@ be set from the Preferences tab of the Account page (Figure \ref{fig:default-gro
 	\label{fig:default-group}
 \end{figure}
 
-\subsection{Hands-On Lab}
+\clearpage
+\subsection{Hands-On Lab: Groups and Sharing}
 
 This lab will demonstrate user groups and search result sharing. First,
 launch a Gravwell webserver+indexer container:
@@ -2682,10 +2690,66 @@ which can be reordered or resized as desired.
 
 Gravwell also supports ``live'' dashboards which automatically update
 the search data. Under the hood, this is done by re-launching the
-searches and swapping out the results when the new searches finish. On
-the future roadmap is the ability to specify ``machine time'' searches
-that operate continuously to provide data results.
+searches and swapping out the results when the new searches finish.
 
+Dashboards are managed from the Dashboards page, as seen in Figure \ref{fig:dashboards}. 
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/dashboards.png}
+	\caption{Dashboard management page.}
+	\label{fig:dashboards}
+\end{figure}
+
+New dashboards can be created by clicking the ``Add'' button in the upper right; this brings up the dialog box in Figure \ref{fig:dashboard-add}. The dashboard needs a name, a description, and a default timeframe. By default, all queries run within a dashboard use the same timeframe.
+
+\begin{figure}
+	\includegraphics[width=0.6\linewidth]{images/dashboard-add.png}
+	\caption{Creating a new dashboard.}
+	\label{fig:dashboard-add}
+\end{figure}
+
+A newly-created dashboard is quite boring, as Figure \ref{fig:dashboard-blank} shows. There are two ways to add a new tile to a dashboard. Figure \ref{fig:add-to-dashboard} shows how to add a tile from the query results page: open the 3-dot menu, click ``Add to dashboard'', then find the desired dashboard in the list, select it, and optionally specify a new name for the tile.
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/dashboard-blank.png}
+	\caption{An empty dashboard.}
+	\label{fig:dashboard-blank}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/add-to-dashboard.png}
+	\caption{Adding a search to a dashboard}
+	\label{fig:add-to-dashboard}
+\end{figure}
+
+Figure \ref{fig:add-in-dashboard} shows how to add a tile from within the dashboard page: click the ``+'' icon on the page, then fill out the resulting dialog. The ``Query Settings'' portion is where the query will be selected; clicking the pencil icon will open a sub-dialog with many different query sources, as seen in Figure \ref{fig:query-settings}. Queries may be typed in directly, selected from the query library, and so on. In Figure \ref{fig:add-in-dashboard}, we have chosen to enter a query manually and selected the line chart renderer.
+
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/add-in-dashboard.png}
+	\caption{Adding a tile to a dashboard}
+	\label{fig:add-in-dashboard}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.6\linewidth]{images/query-settings.png}
+	\caption{Query picker.}
+	\label{fig:query-settings}
+\end{figure}
+
+Once a few tiles have been added to the dashboard, they can be rearranged and resized by clicking and dragging the tiles. Note that after making a change, you must click the ``Save changes'' popup which appears in the lower right corner.
+
+\subsection{Live Update}
+
+Dashboards can be configured to \emph{live update}, meaning they will re-run queries and display new results after a set period of time. To enable this, click the 3-dot menu on the dashboard and select ``Settings''. Within the settings page, pick the ``Timeframe \& Live Update'' tab, then turn the ``Enable live update'' toggle on, as seen in Figure \ref{fig:live-update}. The update interval is configurable; if the queries in the dashboard cover a long timeframe or process a lot of data, consider setting the interval to a higher value so as to reduce the load on the system.
+
+\begin{figure}
+	\includegraphics[width=0.7\linewidth]{images/live-update.png}
+	\caption{Live update settings.}
+	\label{fig:live-update}
+\end{figure}
+
+\clearpage
 \subsection{Hands-on Lab: Network Activity Dashboard}
 \label{lab:dashboard}
 
@@ -2790,7 +2854,7 @@ Templates are stored Gravwell queries which require one or more variables to run
 
 Templates are managed via the templates page, accessed through the main menu under the `Tools and Resources' section. A template consists of a name, a description, and the query itself. Inside the query, use words wrapped inside doubled percent signs to denote variables, e.g. \code{\%\%IPADDR\%\%} as seen in Figure \ref{fig:template-editor}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.9\linewidth]{images/template-editor.png}
 	\caption{Editing a template}
 	\label{fig:template-editor}
@@ -2798,7 +2862,7 @@ Templates are managed via the templates page, accessed through the main menu und
 
 Once defined, a template can be run directly from the templates page by clicking the search button. A dialog (Figure \ref{fig:template-prompt}) will open prompting the user to fill in the variable before launching the search. More often, though, a template is executed either by launching an actionable from search results, or in a dashboard.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/template-prompt.png}
 	\caption{Launching a template}
 	\label{fig:template-prompt}
@@ -2806,7 +2870,7 @@ Once defined, a template can be run directly from the templates page by clicking
 
 Templates can be included in dashboards by selecting ``Templates'' in the ``Add query via'' dropdown when creating a new tile, as seen in Figure \ref{fig:dashboard-template}. When the dashboard is opened, the user is prompted for the variable values. Dashboards containing templates may also be launched from actionables (section \ref{sec:actionables}).
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/dashboard-template.png}
 	\caption{Adding a template to a dashboard tile}
 	\label{fig:dashboard-template}
@@ -2819,7 +2883,7 @@ Actionables provide a way to create custom triggers and menus that key on any te
 
 Actionables are created by specifying one or more regular expressions, along with one or more actions. Gravwell automatically parses all text rendered with the table and chart renderers, bringing up appropriate actionable context menues when the text is clicked, as seen in Figure \ref{fig:actionables-overview}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.7\linewidth]{images/actionables-overview.png}
 	\caption{Actionables context menu}
 	\label{fig:actionables-overview}
@@ -2829,7 +2893,7 @@ Actionables are made up of two components - triggers, which are simply regular e
 
 To get started with actionables, first open the Actionables menu, found in the main menu. Actionables are listed by name, and it's possible for two actionables to have the same name. By allowing actionables to have the same name, Gravwell can automatically group like actionables from different sources. For example, both the Netflow and CoreDNS kits provide actionables for IP addresses, and both are named "IP Address", as shown in Figure \ref{fig:actionables-menu}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/actionables-menu.png}
 	\caption{Actionables duplicate names}
 	\label{fig:actionables-menu}
@@ -2869,6 +2933,16 @@ Gravwell provides several actions, and an actionable can use any or all actions 
 
 \subsubsection{Triggers}
 
+A trigger is a JavaScript regular expression that determines if an actionable should be displayed for any given piece of text. For instance, one might use \code{(?:[0-9]\{1,3\}\.)\{3\}[0-9]\{1,3\}} as the trigger to match an IPv4 address. A trigger can be configured to highlight all matching text in query results with an underlined hyperlink which opens the actionables menu when clicked (``Click + text selection''), or it can be configured so that the actionable menu only pops up when the user explicitly selects text which matches the regular expression (``Text selection''). Figure \ref{fig:trigger} shows an example of a trigger on an actionable which will make any IPv4 addresses clickable.
+
+\begin{figure}
+	\includegraphics[width=0.9\linewidth]{images/trigger.png}
+	\caption{Example actionable trigger.}
+	\label{fig:trigger}
+\end{figure}
+
+\clearpage
+
 \section{Compound Queries}
 \label{sec:compoundqueries}
 
@@ -2887,7 +2961,7 @@ while inner queries are always wrapped in the notation
 \code{@<identifier>\{<query>\}}.  Queries are separated by a semicolon and
 whitespace is ignored.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.9\linewidth]{images/compound-breakdown.png}
 	\caption{Parts of a compound query}
 	\label{fig:compound-breakdown}
@@ -2950,7 +3024,7 @@ tag=dns json query answers | table query answers
 
 This produces a table seen in Figure \ref{fig:compound-table1}
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/compound-table1.png}
 	\caption{The beginning of an inner query}
 	\label{fig:compound-table1}
@@ -2992,7 +3066,7 @@ tag=conns json SrcIP DstIP SrcIPBytes DstIPBytes
 This gives us a table (Figure \ref{fig:compound-table2} of just those connections that \emph{didn't} have a corresponding DNS
 query.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/compound-table2.png}
 	\caption{Results from a complete compound query}
 	\label{fig:compound-table2}
