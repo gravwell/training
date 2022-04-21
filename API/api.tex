@@ -1,10 +1,10 @@
 \chapter{The Gravwell REST API}
-
+\index{API}
 \section{Introduction}
 Gravwell implements a REST API over HTTP. This API powers the Gravwell UI, but it can also be used to interface other systems with Gravwell. For instance, a Python script can run a Gravwell query by hitting a single API endpoint. This chapter discusses \emph{API Tokens}, which are special authentication tokens given to client applications for accessing the API, and demonstrates how to access perhaps the most userful REST endpoint: the direct search API.
 
-\section{Tokens}
-
+\section{API Tokens}
+\index{API!tokens}\index{Tokens|see {API}}
 Gravwell users can generate tokens which allow an application to act as that user, but with limited privileges. Tokens are passed to the Gravwell webserver with HTTP requests as a method of authentication. Tokens are managed through the Tokens page (Figure \ref{fig:token-page}), accessible in the Main Menu under the ``Tools and Resources'' section.
 
 \begin{figure}
@@ -40,7 +40,7 @@ Once permissions have been selected for the new token, clicking ``Save'' will br
 If the secret is lost, the token can be \emph{regenerated}, creating a new secret key, but any applications using the old secret will stop working until updated.
 
 \subsection{Token Permissions and Restrictions}
-
+\index{API!permissions}
 Token permissions are defined using specific allowances, in which the user selects exactly which functionality a given token is allowed to perform.  The Gravwell user interface provides some nice features to let you select groups of permissions that might be logically related, but in the end each token must declare exactly what APIs and systems it is allowed to access.  Most permissions are divided into read and write components.  This means a token might be configured so it can read resources but not write them, or a token can read the state of automation scripts but not create, update, or schedule them.
 
 Permissions on tokens are an overlay on the user's existing permissions.  This means that if the current user cannot access an API or feature, then the token cannot either--tokens can only restrict access, they cannot grant access that a user does not currently have.
@@ -60,6 +60,7 @@ There are many, many REST endpoints in the Gravwell API. A reasonably complete l
 \end{verbatim}
 
 \section{Direct Search API}
+\index{API!direct search}
 The Gravwell Direct Query API is designed to provide atomic, REST-powered access to the Gravwell query system.  This API allows for simple integration with external tools and systems that do not normally know how to interact with Gravwell.  The API is designed to be as flexible as possible and support any tool that knows how to interact with an HTTP API.
 
 The Direct Query API is authenticated and requires a valid Gravwell account with access to the Gravwell query system; a Gravwell token is the best way to access the API.
@@ -73,7 +74,7 @@ The Direct Query API is atomic: one request will execute an entire search and de
 The Direct Query API consists of two REST endpoints which can parse a search and execute a search.  The parse API is useful for testing whether a query is valid and could execute while the search API will actually execute a search and deliver the results.  Both the query and parse APIs require the user and/or token to have the `Search` permission.
 
 \subsubsection{Parse API}
-
+\index{API!parse}
 The parse API is used to validate the syntax of a Gravwell query before attempting to execute it. The parse API is accessed via a POST request to \code{/api/parse}.  The parse API a query string delivered by header value, URL parameter, or a ParseSearchRequest\footnote{https://pkg.go.dev/github.com/gravwell/gravwell/v3/client/types\#ParseSearchRequest} JSON object.  A ParseSearchResponse\footnote{https://pkg.go.dev/github.com/gravwell/gravwell/v3/client/types\#ParseSearchResponse} object and a 200 code will be returned if the query is valid.
 
 The following curl commands are all functionally equivalent:
@@ -139,7 +140,7 @@ An example response is shown below:
 \end{verbatim}
 
 \subsubsection{Query API}
-
+\index{API!direct search}
 The query API actually runs a search and returns the results. It is accessed via a POST to \code{/api/search/direct}. The search API requires the parameters in Table \ref{table:query-parameters} be delivered by header values, URL parameters, or a JSON object.
 
 \begin{table}[H]

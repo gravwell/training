@@ -1,6 +1,6 @@
 \chapter{Gravwell Kits}
 \label{ch:kits}
-
+\index{Kits}
 Gravwell Kits act like a sort of `app store' from which Gravwell users can
 install kits to gain out-of-box capabilities for common technologies. As
 an example, let's take an organization that uses Zeek for firewall/IDS
@@ -85,11 +85,11 @@ Dependencies: Kits can depend on other kits, like packages in a Linux distributi
 \end{itemize}
 
 \subsection{Dependencies}
-
+\index{Kits!dependencies}:
 A kit may have \emph{dependencies} defined. Dependencies are other kits which the kit requires for proper functionality. For example, many kits depend on the Network Enrichment kit, which provides some baseline resources for enriching network data, such as a GeoIP database. Dependencies are installed automatically when you deploy a kit, provided the dependency exists on the Gravwell kit server.
 
 \section{Browsing and Installing Kits}
-
+\index{Kits!installation}
 On a fresh Gravwell cluster, no kits are installed. Opening the `Kits' section will present an empty page (Figure \ref{fig:blank-kits}). If you click `Manage Kits', you will be taken directly to the list of kits on the Gravwell kit server, as shown in Figure \ref{fig:available-kits}.
 
 \begin{figure}
@@ -161,7 +161,7 @@ You can always re-visit an installed kit by opening the kit menu and clicking th
 \section{Managing Installed Kits}
 
 \subsection{Upgrading Kits}
-
+\index{Kits!upgrading}
 Once a kit has been installed, little administration is required. The sole point of manual intervention required is \emph{upgrading} a kit when a new version comes out. Gravwell will periodically push updates to the official kit server. When one of your installed kits has an update available, an ``Upgrade'' button will appear on that kit's tile, as shown in Figure \ref{fig:upgradekit}
 
 \begin{figure}[H]
@@ -175,7 +175,7 @@ Clicking the button will launch an upgrade wizard similar to the installation wi
 Be warned that upgrading a kit to a new version involves the complete deletion of the previous version's contents. Do not click the ``Deploy'' button at the end of the wizard until you are prepared for this to happen!
 
 \subsection{Uninstalling Kits}
-
+\index{Kits!uninstalling}
 To remove an installed kit, enter kit management mode by clicking the ``Manage Kits'' button in the upper-right corner of the main kits page. Then select the trash can icon on the desired kit. A dialog will pop up for confirmation, as shown in Figure \ref{fig:uninstall-confirm}. If you then click ``Uninstall'', the kit will be removed, \emph{unless} you have manually changed any of the kit contents. If you have modified any of the kit items, you will see a second dialog warning you of this fact and allowing one last chance to abort the process, as seen in Figure \ref{fig:uninstall-warn}
 
 \begin{figure}[H]
@@ -242,7 +242,7 @@ When installation is done, click the `Explore the kit' button, then open the pla
 When you're done, return to the `Manage kits' page and uninstall the kit. Verify that none of the Netflow dashboards or other objects still exist. Note that there is still a kit installed--which kit is it, and why was it installed?
 
 \section{Building Kits}
-
+\index{Kits!building}
 Although Gravwell distributes pre-built official kits, any user can build a kit themselves. This is a convenient way to share objects built on one Gravwell instance with another instance. Note that kits built like this are not signed by Gravwell and therefore can only be installed by administrators.
 
 You can build a kit by clicking the `Build' button on the Manage Kits page. This launches the kit-building wizard. On the first page, seen in Figure \ref{fig:buildwizard1}, you set general options. The name should be a user-friendly short name like ``Network Enrichment'', ``Zeek Kit'', etc. The kit ID should be a namespaced and unique ID for your kit; although the field is free-form, we recommend using domain namespaces, e.g. ``io.gravwell.example''. The Version field sets a version for the kit, which is useful for upgrades if you decide to set up your own kit server. The optional Gravwell minimum and maximum versions allow you to restrict the kit's compatiblity to particular versions of Gravwell. Finally, the kit icon field lets you optionally set a small image which may be used by Gravwell to help identify the kit to users.

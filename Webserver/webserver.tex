@@ -1,5 +1,5 @@
 \chapter{Webserver Configuration}
-
+\index{Webservers}
 Gravwell's webserver component provides users with access to Gravwell's
 search capabilities. The simplest system consists of one indexer and one
 webserver, both on the same machine. More complex variations are
@@ -8,7 +8,7 @@ webservers with one or more indexers. This chapter will discuss
 configuration options for the Gravwell webserver.
 
 \section{Basic Configuration}
-
+\index{gravwell.conf@\code{gravwell.conf}}
 The webserver is configured via \code{gravwell.conf}. The following basic options can be set
 in gravwell.conf, but defaults are usually functional:
 
@@ -123,7 +123,7 @@ two indexers, as in Figure \ref{fig:twoindexers}
 \end{enumerate}
 
 \section{Configuring Multiple Webservers}
-
+\index{Distributed webservers}\index{Webservers!distributed}\index{Datastore}
 Gravwell can use multiple webservers to load-balance user requests.
 These webservers must coordinate with each other to manage users,
 searches, etc. This coordination is handled through the \textbf{datastore}, a
@@ -243,7 +243,7 @@ necessary to refresh the page.
 % TODO: Kris please update this for the Gravwell load balancer
 %%%%%%%%%%
 \section{Setting Up a Load-Balancer}
-
+\index{Traefik}\index{Load balancer}
 Multiple webservers work well when placed behind a load-balancing
 proxy, such as nginx, Traefik, or Gravwell's own load-balancer. 
 When using a load-balancer, users simply access

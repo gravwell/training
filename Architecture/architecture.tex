@@ -15,52 +15,52 @@ important to start by establishing some terminology so that everyone can
 speak the same language.
 
 \begin{description}[font=\sffamily\bfseries, leftmargin=1cm, style=nextline]
-\item[Indexer]
+\item[Indexer]\index{Indexers}
 Stores data and manages wells.
 
-\item[Webserver]
+\item[Webserver]\index{Webservers}
 Serves web interface, controls and coordinates indexers.
 
-\item[Entry]
+\item[Entry]\index{Entries}
 A single tagged record or data item (line from a log file, Windows event, packet, etc.)
 
-\item[Enumerated Value]
+\item[Enumerated Value]\index{Enumerated Values}
 Named data item that is extracted from the raw entry during a search.
 
-\item[Tag]
+\item[Tag]\index{Tags}
 Human-readable name for a data group. The most basic grouping of data.
 
-\item[Well]
+\item[Well]\index{Wells}
 On-disk collection of entries. Every entry ends up in exactly one well, sorted by tag.
 
-\item[Shard]
+\item[Shard]\index{Shards}
 A slice of data within a well. Each shard contains about 1.5 days of entries.
 
-\item[Ingester]
+\item[Ingester]\index{Ingesters}
 Program that accepts raw data and packages it as entries for transport to an indexer.
 
-\item[Renderer]
+\item[Renderer]\index{Search!renderers}\index{Renderers}
 Query component that collects search output and presents results to a human.
 
-\item[Datastore]
+\item[Datastore]\index{Datastore}
 Central authority of users and user-owned objects for distributed webservers.
 
-\item[Search Agent]
+\item[Search Agent]\index{Search agent}
 Monitors and launches automated queries and scripts on behalf of users.
 
-\item[Cluster Deployment]
+\item[Cluster Deployment]\index{Clusters}
 Multiple Indexers all participating in a single Gravwell instance.
 
-\item[Distributed Webservers]
+\item[Distributed Webservers]\index{Distributed webservers}
 Multiple webservers sharing the load of GUI interactions and queries, but controlling the same set of indexers.
 
-\item[Load Balancer]
+\item[Load Balancer]\index{Load balancer}
 An HTTP reverse proxy which transparently balances load across multiple webservers.
 \end{description}
 
 \section{Gravwell Entries}
 
-Gravwell stores all data as \emph{entries}. An entry consists of a piece of data (just an array of bytes), a timestamp, a tag, and a source address. Each of these components deserves a bit of explanation, so we will cover each separately. Entries are stored in an efficient binary format on disk, but a user-friendly representation of an example entry would look something like this:
+Gravwell stores all data as \emph{entries}\index{Entries}. An entry consists of a piece of data (just an array of bytes), a timestamp, a tag, and a source address. Each of these components deserves a bit of explanation, so we will cover each separately. Entries are stored in an efficient binary format on disk, but a user-friendly representation of an example entry would look something like this:
 
 \begin{Verbatim}[breaklines=true]
 {
@@ -75,7 +75,7 @@ Gravwell stores all data as \emph{entries}. An entry consists of a piece of data
 
 \subsection{``Timestamp'' field}
 
-The timestamp is meant to indicate the creation time of the \emph{data}. This is typically extracted from the data itself by the ingester, e.g. by parsing out the timestamps on syslog messages. However, some ingesters such as the packet logger will instead set the timestamp to the current time, since the packet was captured ``now''.
+The timestamp\index{Timestamps} is meant to indicate the creation time of the \emph{data}. This is typically extracted from the data itself by the ingester, e.g. by parsing out the timestamps on syslog messages. However, some ingesters such as the packet logger will instead set the timestamp to the current time, since the packet was captured ``now''.
 
 \subsection{``Data'' field}
 
@@ -83,15 +83,15 @@ The data field contains the actual raw data of the entry. If log files are being
 
 \subsection{``Tag'' field}
 
-The tag field categorizes the entry. Users refer to tags by strings, e.g. "default" or "pcap" or "windows-logs", but under the hood Gravwell assigns each tag string a unique numeric ID for more efficient storage.
+The tag\index{Tags} field categorizes the entry. Users refer to tags by strings, e.g. ``default'' or ``pcap'' or ``windows-logs'', but under the hood Gravwell assigns each tag string a unique numeric ID for more efficient storage.
 
 \subsection{``Source'' field}
 
-The source field indicates where the entry originated. It is an IPv4 or IPv6 address. It is perhaps the most free-form field of the entry, because it can indicate the machine on which the ingester was located, the machine from which the ingester \emph{read} the entry data, or it can be an entirely arbitrary number chosen as a second layer of categorization beyond the tag. Most ingesters provide configuration options for how the source field should be set.
+The source\index{SRC|see {Source}}\index{Source} field indicates where the entry originated. It is an IPv4 or IPv6 address. It is perhaps the most free-form field of the entry, because it can indicate the machine on which the ingester was located, the machine from which the ingester \emph{read} the entry data, or it can be an entirely arbitrary number chosen as a second layer of categorization beyond the tag. Most ingesters provide configuration options for how the source field should be set.
 
 \section{Data Ingest}
 
-A core function of Gravwell is data ingest; \emph{ingesters} take raw data, package it as entries,
+A core function of Gravwell is data ingest\index{Data ingest}; \emph{ingesters}\index{Ingesters} take raw data, package it as entries,
 and transmit those entries to a Gravwell indexer (or
 indexers) for storage, indexing, and searching. The Gravwell
 ingest API\footnote{https://github.com/gravwell/gravwell/tree/master/ingest}
@@ -185,7 +185,7 @@ Webserver, and Search Agent), plus any number of ingesters (both on and off the 
 \subsection{Cluster Deployment}
 
 Gravwell deployments that need to handle large data volumes may require
-multiple indexers. A Gravwell cluster is comprised of multiple indexers
+multiple indexers. A Gravwell cluster\index{Clusters} is comprised of multiple indexers
 which are controlled by a single webserver as shown in Figure \ref{fig:cluster}. The webserver and
 search agent are typically on a separate node and connect to the indexers
 via an IPv4 or IPv6 link. When operating in a cluster topology Gravwell
@@ -208,7 +208,7 @@ bandwidth will affect query performance.
 \subsection{Distributed Webserver Architecture}
 
 Very large Gravwell deployments with many users may need to also employ
-multiple webservers to handle the load. Gravwell supports a distributed
+multiple webservers\index{Distributed webservers} to handle the load. Gravwell supports a distributed
 webserver topology by coordinating and synchronizing the webservers, 
 shown in Figure \ref{fig:distributed}.
 
@@ -219,7 +219,7 @@ shown in Figure \ref{fig:distributed}.
 \end{figure}
 
 Webservers coordinate and synchronize using a component called the
-\emph{datastore}. The datastore acts as a master storage system for user data,
+\emph{datastore}\index{Datastore}. The datastore acts as a master storage system for user data,
 search resources, scheduled queries, scripts, and any other component
 that can be uploaded or modified by a user. Webservers and the
 datastore will attempt to maintain a complete copy of all resources,
@@ -230,7 +230,7 @@ the datastore component requires minimal CPU resources, robust storage is advise
 
 \section{Replication}
 
-Gravwell supports full data replication, so that in the event of
+Gravwell supports full data replication\index{Replication}, so that in the event of
 hardware failure, data is not lost. Replication strategies depend on
 the type of deployment and general tolerance for distributed failures.
 Replication is controlled entirely by the indexers and is unaffected by
@@ -290,7 +290,7 @@ webserver topology the search agent may be located on its own node.
 \section{Cloud Archive}
 
 Gravwell supports remote, offline archival of data using the Cloud
-Archive service. Cloud Archive enables indexers to transmit shards to a
+Archive\index{Cloud archive} service. Cloud Archive enables indexers to transmit shards to a
 remote system with low-cost mass storage so that data can be held long
 term. Indexers can configure individual wells to participate in the
 archive process, giving fine-grained control over which entries are archived.

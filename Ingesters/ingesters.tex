@@ -1,5 +1,5 @@
 \chapter{Ingesters}
-
+\index{Ingesters}
 Ingesters are programs which collect entries from some data source and
 send them to one or more indexers.
 
@@ -106,7 +106,7 @@ unique to each ingester and are described in the individual ingester
 sections of this document.
 
 \subsection{Timestamp Format Overrides (Optional)}
-
+\index{Timestamps}
 Data values may contain multiple timestamps, which can cause some
 confusion when attempting to derive timestamps out of the data.
 Normally, the Listeners will grab the left most timestamp that can be
@@ -123,7 +123,7 @@ RFC3339 specification add \code{Timestamp-Format-Override=RFC3339} to the
 Listener config.
 
 \section{Simple Relay Ingester}
-
+\index{Ingesters!simple relay}
 Simple Relay is the go-to ingester for text based data sources that can
 be delivered over plaintext TCP and/or UDP network connections via
 either IPv4 or IPv6.
@@ -465,7 +465,7 @@ To clean up after the experiment, simply run:
 
 \clearpage
 \section{File Follower Ingester}
-
+\index{Ingesters!file follow}
 The File Follower ingester is the best way to ingest files on the local
 filesystem in situations where those files may be updated on the fly. It
 ingests each line of the files as a single entry.
@@ -823,7 +823,7 @@ To clean up after the experiment, simply run:
 % about the winlog module as the ingester itself
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Windows Event Ingester}
-
+\index{Ingesters!windows event}
 The Windows event ingester is designed to monitor the Windows event
 service and ingest raw events into Gravwell. Windows events are
 formatted in XML and frankly, can get a little unruly; as a result the
@@ -1034,7 +1034,7 @@ To clean up after the experiment, simply run:
 
 \clearpage
 \section{Netflow and IPFIX Ingester}
-
+\index{Ingesters!netflow}\index{Ingesters!IPFIX}
 The Netflow ingester acts as a Netflow collector, gathering records
 created by Netflow exporters and capturing them as Gravwell entries for
 later analysis. These entries can then be analyzed using the netflow
@@ -1142,7 +1142,7 @@ To clean up after the experiment, simply run:
 
 
 \section{Packet Capture Ingester}
-
+\index{Ingesters!packet capture}\index{PCAP}
 The packet capture ingester illustrates one of Gravwell's unique
 strengths: its ability to ingest raw, unprocessed binary data. This
 ingester listens on one or more network interfaces and ingests every
@@ -1260,7 +1260,7 @@ To clean up after the experiment, simply run:
 \clearpage
 \section{Tag Management / Federation}
 \label{sec:federator}
-
+\index{Federator}\index{Ingesters!federator}
 The Federator is an entry relay: ingesters connect to the Federator and
 send it entries, then the Federator passes those entries to an indexer.
 The Federator can act as a trust boundary, securely relaying entries
@@ -1424,7 +1424,7 @@ docker run --net gravnet --rm -it gravwell:generators \
 \end{Verbatim}
 
 \section{Ingester Caching}
-
+\index{Ingesters!caching}
 Ingester caching allows Gravwell ingesters to continue receiving data
 and generating entries even when there are no active connections to
 indexers. Entries are stored in an on-disk cache until indexer
@@ -1570,7 +1570,7 @@ To clean up after the experiment, simply run:
 \clearpage
 
 \section{Ingest API and Source Code}
-
+\index{Ingest API}
 Gravwell's ingest library is open-sourced for public use at
 \href{github.com/gravwell/gravwell/tree/master/ingest}{github.com/gravwell/gravwell/ingest}.
 This makes it relatively easy to write a custom ingester for a specific
@@ -1639,7 +1639,7 @@ connections are established:
 
 
 \subsection{Creating and Uploading Entries}
-
+\index{Entries}
 Once the muxer has been started and \code{WaitForHot} has returned
 successfully, entries can be sent to the indexer(s). Note, however, that
 indexers use a mapping of string tag names to numeric tag IDs, and that
@@ -1711,7 +1711,7 @@ igst.Close()
 
 
 \section{Permissions and Port Binding}
-
+\index{Troubleshooting!permissions}\index{Troubleshooting!ports}
 Gravwell is designed to execute with as few privileges as possible.
 The shell and Debian installers will create an unprivileged user and
 group named gravwell and create a directory structure in
@@ -1815,7 +1815,7 @@ docker kill $(docker ps -a -q)
 
 
 \section{Gravwell and Systemd}
-
+\index{SystemD}
 {Gravwell installers assume the availability of Systemd. While there are
 other init services out there, Systemd has steadily become the
 init system of choice for most popular Linux distributions. Systemd
@@ -1871,7 +1871,7 @@ using
 
 
 \section{Gravwell and Docker}
-
+\index{Docker}
 Gravwell supports Docker as a first class citizen (as you can tell by
 our heavy use for this training). Most components can use environment
 variables and Docker secrets for configuration and process control. Our
