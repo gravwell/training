@@ -135,9 +135,9 @@ line.
 Let's examine a query that uses successive filtering modules to find
 syslog data from a specific service originating from a specific machine.
 We will use the
-\code{grep}\footnote{Gravwell's ``grep'' module behaves much like the Unix tool of the same name: it searches text for patterns the user specifies. See https://docs.gravwell.io/\#!search/grep/grep.md for more information.} module
+\code{grep} module
 twice, first filtering for the machine name and then filtering for the
-service name. Our example query is:
+service name. Gravwell's \code{grep} module behaves much like the Unix tool of the same name: it searches text for patterns the user specifies. See \href{https://docs.gravwell.io/\#!search/grep/grep.md}{https://docs.gravwell.io/\#!search/grep/grep.md} for more information or refer to Section \ref{sec:grep}. Our example query is:
 
 \code{tag=syslog grep dunkel \textbar{} grep sshd}
 
@@ -172,6 +172,25 @@ default renderer, just know that if you don't specify a renderer
 Gravwell will show you the raw entries and ensure they are in the
 correct order.
 
+\subsection{The grep Module}
+\label{sec:grep}\index{grep}
+Grep is a very basic pipeline module that searches for a text string (not Unicode). Any record containing such text will match and be passed through the pipeline. Any record not containing the text is dropped from the pipeline. For example, \code{grep foo} will pass on any records containing the text ``foo'' and drop any records that do not contain ``foo'' anywhere. Grep is case sensitiveby default, so \code{grep foo} would match ``foo'' but drop ``Foo''.
+
+Grep supports the standard GNU wildcards as well as fast string and binary matching. For instance to look for all entries that start that contain ``foo'' and ``bar'' separated by 0 or more bytes, you can use \code{grep foo*bar}.
+
+Grep allows multiple patterns to be specified. If any pattern is matched, the entry is passed down the pipeline. If the -v flag is used to invert the search, the entry will be dropped if any pattern matches.
+
+The module supports the following option flags:
+
+\begin{itemize}
+\item \code{-v}: ``Inverse'' grep. For instance, \code{grep -v bar} would drop any records containing the text ``bar'' and pass on any records that do not contain ``bar''.
+\item \code{-i}: Match case insensitive values. Thus, \code{grep -i foo} would match ``Foo'' and ``foo''. Case insensitive search tends to be one of the slowest operations; put it later in your pipeline if possible to keep things fast.
+\item \code{-e <arg>}: Operate on an enumerated value instead of on the entire record. For example, to show packets that contain HTTP text but aren’t destined for port 80, run \code{tag=pcap packet ipv4.DstPort!=80 tcp.Payload | grep -e Payload "GET / HTTP/1.1"}
+\item \code{-s}: Strict match. All patterns must match, or in the case of a negated strict match, no pattern may match.`
+\item \code{-simple}: Simple match. With this flag, grep will match exactly the characters you specify, with no wildcard matching. This allows you to find asterisks and other normally-reserved characters: \code{grep -s *}
+\item \code{-w}: Word match. The entire match pattern must a full word as would be matched by the fulltext extractors.
+\end{itemize}
+
 \clearpage
 \subsection{Hands-on Lab: Basic Filtering}
 \label{sec:lab-filter}
@@ -202,7 +221,7 @@ Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080},
 
 \begin{enumerate}
 \item
-  Filter the syslog tag to only include logs from the sshd daemon on the
+  Using the \code{grep} module, filter the syslog tag to only include logs from the sshd daemon on the
   host \code{porter}.
 	\begin{enumerate}
 	\item
@@ -212,7 +231,7 @@ Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080},
   Filter the syslog tag to include sshd logs from all hosts \emph{except} \code{porter}.
 	\begin{enumerate}
 	\item
-	  Hint: The grep module has a -v option that inverts the filter logic.
+	  Hint: The grep module has a -v option that inverts the filter logic, meaning any entries which match the pattern will be \emph{dropped}.
 	\end{enumerate}
 \item
   Filter the syslog tag to find successful logins on the host \code{porter}.
@@ -425,7 +444,7 @@ Exercises:
   Filter to only include sshd messages by matching on the \code{app} enumerated value.
 	\begin{enumerate}
 	\item
-	  Generate a table with the count of \code{app} events by each \code{host}.
+	  Generate a table with the count of \code{app} events by each \code{host}. Hint: \code{count by host}
 	\end{enumerate}
 \item
   .Extract the \code{ip} and \code{user} for all SSH login events.
@@ -548,6 +567,44 @@ on the \code{country} field, the json module can tell the acceleration system
 about our filter. As a result, only entries that have a country value of
 ``Brazil'' are ever retrieved from the disk or enter into the
 pipeline.
+
+Table \ref{table:filter-ops} shows the filtering operations supported by Gravwell. Note that the greater than/less than operations can only operate on numeric enumerated values; Table \ref{table:filter-compatibility} shows which enumerated value types are compatible with which filters. In this context, ``subset'' means that the enumerated value \emph{contains} the argument, so \code{foo\textasciitilde "well"} would match the strings ``well'', ``wellbeing'', and ``Gravwell''.
+
+\begin{table}[H]
+\begin{tabular}{ll}
+\textbf{Operator} & \textbf{Name} \\
+\hline
+\code{==} &	Equal \\
+\code{!=} &	Not equal  \\
+\code{<} &	Less than  \\
+\code{>} &	Greater than \\
+\code{<=} &	Less than or equal \\
+\code{>=} &	Greater than or equal \\
+\code{\textasciitilde} &	Subset \\
+\code{!\textasciitilde} &	Not subset \\
+\end{tabular}
+\caption{Filter operations}
+\label{table:filter-ops}
+\end{table}
+
+\begin{table}[H]
+\begin{tabular}{ll}
+\textbf{Enumerated Value Type} & \textbf{Compatible Filters} \\
+\hline
+string & \code{==}, \code{!=}, \code{\textasciitilde}, \code{!\textasciitilde} \\
+byte slice & \code{==}, \code{!=}, \code{\textasciitilde}, \code{!\textasciitilde} \\
+MAC address & \code{==}, \code{!=} \\
+IP address & \code{==}, \code{!=}, \code{\textasciitilde}, \code{!\textasciitilde} \\
+integer & \code{==}, \code{!=}, \code{<}, \code{>}, \code{<=}, \code{>=} \\
+floating point & \code{==}, \code{!=}, \code{<}, \code{>}, \code{<=}, \code{>=} \\
+boolean & \code{==}, \code{!=} \\
+duration & \code{==}, \code{!=}, \code{<}, \code{>}, \code{<=}, \code{>=} \\
+\end{tabular}
+\caption{Filter compatibility}
+\label{table:filter-compatibility}
+\end{table}
+
+The subset and not-subset operators have a special meaning when the enumerated value is an IP address: they check if the IP address is part of a \emph{subnet}. Thus \code{ip\textasciitilde 192.168.0.0/16} evaluates to true \emph{if} the value in \code{ip} is in the 192.168.0.0/16 subnet.
 
 If we haven't indexed on the \code{country} field, we still get a speedup
 because the filter allows the json module to be more efficient. The
@@ -691,7 +748,7 @@ docker kill $(docker ps -a -q)
 
 
 
-
+\clearpage
 \section{Render Modules}
 \index{Search!renderers}
 Gravwell provides a selection of render modules to help users display
@@ -1571,6 +1628,8 @@ query. Let's start by ingesting our dataset and building extractions
 that pull the appropriate data from each tag. We will be using the
 tags ``dhcp'' and ``switch''.
 
+Note that this lab is one of the most challenging in this training document. It makes use of the powerful but complex regex (\href{https://docs.gravwell.io/\#!search/regex/regex.md}{https://docs.gravwell.io/\#!search/regex/regex.md}) and eval (\href{https://docs.gravwell.io/\#!search/eval/eval.md}{https://docs.gravwell.io/\#!search/eval/eval.md}) modules. We recommend carefully reading the examples shown in the lab instructions and those in the preceding section; these should demonstrate any necessary invocations of the modules. We also recommend using \href{https://regex101.com/}{https://regex101.com/} to help build and test regular expressions if needed.
+
 First, we'll start the Gravwell container:
 
 \begin{Verbatim}[breaklines=true]
@@ -1803,11 +1862,11 @@ the Gravwell webserver. These are the modules that do counting, sum
 fields, strip non-unique values, etc. They require the entirety of data
 to be present in order to provide accurate results.
 
-These modules are all of the \href{https://docs.gravwell.io/#!search/math/math.md}{math
+These modules are all of the \href{https://docs.gravwell.io/\#!search/math/math.md}{math
 modules}(count, sum, max, etc),
-\href{https://docs.gravwell.io/#!search/stats/stats.md}{stats},
-\href{https://docs.gravwell.io/#!search/anko/anko.md}{anko}, and
-\href{https://docs.gravwell.io/#!search/eval/eval.md}{eval}.
+\href{https://docs.gravwell.io/\#!search/stats/stats.md}{stats},
+\href{https://docs.gravwell.io/\#!search/anko/anko.md}{anko}, and
+\href{https://docs.gravwell.io/\#!search/eval/eval.md}{eval}.
 
 Let's use the query \code{json field1 \textbar{} stats max(field1)} as an
 example where we are looking to find the maximum value of field1 in our
