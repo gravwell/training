@@ -174,7 +174,7 @@ correct order.
 
 \subsection{The grep Module}
 \label{sec:grep}\index{grep}
-Grep is a very basic pipeline module that searches for a text string (not Unicode). Any record containing such text will match and be passed through the pipeline. Any record not containing the text is dropped from the pipeline. For example, \code{grep foo} will pass on any records containing the text ``foo'' and drop any records that do not contain ``foo'' anywhere. Grep is case sensitiveby default, so \code{grep foo} would match ``foo'' but drop ``Foo''.
+Grep is a very basic pipeline module that searches for a text string (not Unicode). Any record containing such text will match and be passed through the pipeline. Any record not containing the text is dropped from the pipeline. For example, \code{grep foo} will pass on any records containing the text ``foo'' and drop any records that do not contain ``foo'' anywhere. Grep is case sensitive by default, so \code{grep foo} would match ``foo'' but drop ``Foo''.
 
 Grep supports the standard GNU wildcards as well as fast string and binary matching. For instance to look for all entries that start that contain ``foo'' and ``bar'' separated by 0 or more bytes, you can use \code{grep foo*bar}.
 
@@ -188,7 +188,7 @@ The module supports the following option flags:
 \item \code{-e <arg>}: Operate on an enumerated value instead of on the entire record. For example, to show packets that contain HTTP text but aren’t destined for port 80, run \code{tag=pcap packet ipv4.DstPort!=80 tcp.Payload | grep -e Payload "GET / HTTP/1.1"}
 \item \code{-s}: Strict match. All patterns must match, or in the case of a negated strict match, no pattern may match.`
 \item \code{-simple}: Simple match. With this flag, grep will match exactly the characters you specify, with no wildcard matching. This allows you to find asterisks and other normally-reserved characters: \code{grep -s *}
-\item \code{-w}: Word match. The entire match pattern must a full word as would be matched by the fulltext extractors.
+\item \code{-w}: Word match. The entire match pattern must be a full word as would be matched by the fulltext extractors.
 \end{itemize}
 
 \clearpage
@@ -351,6 +351,7 @@ table ip user method data
 	\label{fig:extract-ev}
 \end{figure}
 
+\begin{samepage}
 We can see that the data is hex encoded, so let's pass it to the
 \code{hexlify}\footnote{https://docs.gravwell.io/\#!search/hexlify/hexlify.md} module
 and decode it.
@@ -362,12 +363,14 @@ regex -e url "data=(?P<data>[\da-z]+)" |
 hexlify -d data as decoded |
 table ip user method decoded
 \end{Verbatim}
+\end{samepage}
 
 \begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/hex-decode-url.png}
 	\caption{Hex-decoded URL}
 	\label{fig:hex-decode-url} 
 \end{figure}
+
 
 We were able to chain multiple pipeline modules to extract multiple
 fields and then operate on those extracted fields to make machine data
@@ -429,7 +432,7 @@ This expression extracts the username (``user'') and IP address (``ip'') from an
 ^(?P<action>\S+)\spassword\sfor\s(?P<user>\S+)\sfrom\s(?P<ip>[\d\.]+)\s
 \end{Verbatim}
 
-Exercises:
+\subsubsection{LabTasks}
 
 \begin{enumerate}
 \item
@@ -1673,7 +1676,7 @@ tag=switch grep "new MAC address"
 \end{Verbatim}
 
 Next let's extract our hostnames from the DHCP log. Here is an example
-entry where a client ACKs a DCHP lease; it contains the hostname,
+entry where a client ACKs a DHCP lease; it contains the hostname,
 IP, and MAC address:
 
 \begin{Verbatim}[breaklines=true]
@@ -2217,7 +2220,7 @@ define arbitrary delimiters and field rules in order to extract data.
 Many popular security applications like Bro/Zeek default to TSV (tab
 separated values) for data export. Other custom applications may use
 weird separators like ``\textbar{}'' or a series of bytes like ``//''. The
-fields extractor you can handle them all, and when combined with
+fields extractor can handle them all, and when combined with
 auto-extractors users don't have to worry about the details of the data
 format.
 
@@ -2687,8 +2690,7 @@ docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
 Next, we'll use the ingesters container to feed some entries into the
-indexer using the JSON generator. We'll specify that the entries should
-cover 10 days:
+indexer using the JSON generator:
 
 \begin{Verbatim}[breaklines=true]
 docker run --net gravnet --rm -i --name ingesters gravwell:ingesters \
@@ -2829,7 +2831,7 @@ networkstatic/nflow-generator -t ingesters -p 2055
 \end{Verbatim}
 
 With Netflow data flowing in we can start to get our queries ready for
-addition to a dashboard. The goal if this dashboard is to break down
+addition to a dashboard. The goal of this dashboard is to break down
 network communications in some nice visuals that help us understand, at
 a glance, what the most common hosts are, what traffic is being
 utilized, where that traffic is going geographically, and potentially
@@ -2854,9 +2856,8 @@ here, so let's do so (Figure \ref{fig:new-dashboard}).
 
 Click ``View Dashboard'' from the resulting popup message after you
 save. You should see the newly-created dashboard with the chart sitting nicely in a
-tile. Let's add one more search. Click the Gravwell logo in the upper left or use
-the main menu to return to the new search page. This time, let's get a table
-together of which hosts are communicating the most:
+tile. Let's add one more search. Use the main menu to return to the new search page.
+This time, let's get a table together of which hosts are communicating the most:
 
 \begin{Verbatim}[breaklines=true]
 tag=netflow netflow IP Bytes | stats sum(Bytes) by IP | table IP sum
