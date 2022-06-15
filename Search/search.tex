@@ -432,7 +432,7 @@ This expression extracts the username (``user'') and IP address (``ip'') from an
 ^(?P<action>\S+)\spassword\sfor\s(?P<user>\S+)\sfrom\s(?P<ip>[\d\.]+)\s
 \end{Verbatim}
 
-\subsubsection{LabTasks}
+\subsubsection{Lab Tasks}
 
 \begin{enumerate}
 \item
@@ -1935,34 +1935,57 @@ docker run --net gravnet --rm -it --name jsoningesters gravwell:ingesters\
  /opt/gravwell/bin/jsonGenerator -clear-conns gravwell:4023 -entry-count 100000
 \end{Verbatim}
 
-This will generate some sample entries that look like this:
+Let's begin by examining the data:
+
+\begin{Verbatim}
+tag=json
+\end{Verbatim}
+
+Here is an example of the data we're looking at:
 
 \begin{Verbatim}[breaklines=true]
 {
-    "address": "50 Adams Pkwy,\nBuffalo City, DE, 24232",
-    "class": 56451,
-    "country": "Mauritius",
-    "data": "But what sort of language would we have the world speak, 
-if we were told the miracle of Babel was presently to be reversed?",
-    "email": "avawilliams758@test.net",
-    "group": "kitten",
-    "ip": "188.8.249.164",
-    "name": "Sofia Taylor",
-    "phone": "+371 07 971772781",
-    "state": "WV",
-    "time": "2019-03-22T23:37:16.34706728Z",
-    "user": "avawilliams758",
-    "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2;
- WOW64; Trident/5.0)"
+   "time":"2022-06-09T13:03:36Z",
+   "account":{
+      "user":"jacobbrown802",
+      "name":"Jacob Jones",
+      "email":"jacobbrown802@example.org",
+      "phone":"+850 169 94 122 338",
+      "address":"58 Adams Circle, Ransom Canyon, PW, 97213",
+      "state":"AZ",
+      "country":"Netherlands Antilles"},
+   "class":43294,
+   "groups":["mouse","falcon"],
+   "user_agent":"Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko",
+   "ip":"102.115.187.35",
+   "data":"One dog rolled before him, well-nigh slashed in half; but a second had him by the thigh, a third gripped his collar be- hind, and a fourth had the blade of the sword between its teeth, tasting its own blood."
 }
 \end{Verbatim}
 
+The data generated is random. To complete this lab, examine the entries and make note of values found for user\_agent, groups, and some random words found in data.
+For example, in our sample entry above, we may note the following:
+\begin{itemize}
+\item user\_agent
+\subitem "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko"
+\item groups
+\subitem "mouse"
+\subitem "falcon"
+\item random words found in data
+\subitem "dog"
+\subitem "collar"
+\subitem "sword"
+\end{itemize}
+
+In the searches below, make replacements using your pre-selected values.
+
 Let's start with the base search that's looking to see how many entries
-for each group except 'kitten' have a specific user agent we are
-investigating and are not talking about puppies.
+for each group except 'mouse' have a specific user agent we are
+investigating and are not talking about a dog.
 
 \begin{Verbatim}[breaklines=true]
-tag=json json class user email group ip data user_agent | eval user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)" | grep -e data -v "[pP]uppies" | stats count by group | grep -v -e group "kitten" | table group count
+tag=json json -x groups groups account.user account.email ip data class user_agent 
+| eval user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| grep -e data -v "[dD]og" | stats count by groups | grep -v -e groups "mouse" | table groups count
 \end{Verbatim}
 
 That query invokes a parsing module and then immediately condenses with
@@ -1971,24 +1994,19 @@ We can improve this query by moving the user agent match into the
 parsing module:
 
 \begin{Verbatim}[breaklines=true]
-tag=json json class user email group ip data 
-user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)"
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| grep -v -e group "kitten" 
-| table group count
+tag=json json -x groups groups account.user account.email ip data class 
+user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| grep -e data -v "[dD]og" | stats count by groups | grep -v -e groups "mouse" | table groups count
 \end{Verbatim}
 
-This query is also performing the check to remove the 'kitten' group
+This query is also performing the check to remove the 'mouse' group
 after the pipeline has condensed. This filtering can also be moved into
 the parser module:
 
 \begin{Verbatim}[breaklines=true]
-tag=json json class user email group!="kitten" ip data 
-user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)"
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| table group count
+tag=json json -x groups groups!="mouse" account.user account.email ip data class 
+user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| grep -e data -v "[dD]og" | stats count by groups | table groups count
 \end{Verbatim}
 
 This is looking a lot better but, depending on whether or not we have
@@ -2000,12 +2018,9 @@ Gravwell pipeline when operating on the raw data entries. Let's improve
 further:
 
 \begin{Verbatim}[breaklines=true]
-tag=json 
-grep "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)"
-| json class user email group!="kitten" ip data user_agent 
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| table group count
+tag=json grep "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| json -x groups groups!="mouse" account.user account.email ip data class user_agent
+| grep -e data -v "[dD]og" | stats count by groups | table groups count
 \end{Verbatim}
 
 We have optimized the query but beware, as this query now has
@@ -2017,17 +2032,14 @@ further optimize for performance (and not for query length), we can put
 the filter back in the parsing module to ensure correctness of results:
 
 \begin{Verbatim}[breaklines=true]
-tag=json 
-grep "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)" 
-| json class user email group!="kitten" ip data 
-user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)" 
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| table group count
+tag=json grep "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| json -x groups groups!="mouse" account.user account.email ip data class 
+user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko"
+| grep -e data -v "[dD]og" | stats count by groups | table groups count
 \end{Verbatim}
 
 Something to keep in mind is that if accelerators \emph{are} enabled, then the
-initial grep would be a detriment to performance.See section \ref{sec:acceleration} for additional
+initial grep would be a detriment to performance. See section \ref{sec:acceleration} for additional
 details on query acceleration.
 
 As an exercise, try and sort the above queries from worst to best by
