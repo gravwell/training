@@ -103,7 +103,7 @@ Figure \ref{fig:tag-data-table} shows an example of the output from this search.
 the data tagged as \code{pcap} is binary (actual packets) it can't really
 be printed as text, thus the ``noise''. Later in this chapter, we will show how to
 process this binary data.
-
+\pagebreak
 \begin{figure}
 	\includegraphics{images/table-tag-data.png}
 	\caption{Table showing tags and raw data}
@@ -450,11 +450,16 @@ This expression extracts the username (``user'') and IP address (``ip'') from an
 	  Generate a table with the count of \code{app} events by each \code{host}. Hint: \code{count by host}
 	\end{enumerate}
 \item
-  .Extract the \code{ip} and \code{user} for all SSH login events.
+  Extract the \code{ip} and \code{user} for all SSH login events.
 \end{enumerate}
 
 \textbf{BONUS}: generate a table with success and failure counts for each IP.
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 
 \section{Search Modules}
@@ -909,6 +914,11 @@ performance impacts if used early on in a search pipeline. It should
 generally be the last module before the render module, which is `table'
 during this lab. See the query optimization section (\ref{sec:query-optimization}) for more on this topic.
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 
 \subsection{Downloading Results}
@@ -1824,6 +1834,11 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
   worlds''?}
 \end{enumerate}
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 \section{Query Optimization}
 \label{sec:query-optimization}
