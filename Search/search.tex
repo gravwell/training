@@ -109,7 +109,7 @@ process this binary data.
 	\caption{Table showing tags and raw data}
 	\label{fig:tag-data-table}
 \end{figure}
-
+\clearpage
 
 
 
@@ -174,7 +174,7 @@ correct order.
 
 \subsection{The grep Module}
 \label{sec:grep}\index{grep}
-Grep is a very basic pipeline module that searches for a text string (not Unicode). Any record containing such text will match and be passed through the pipeline. Any record not containing the text is dropped from the pipeline. For example, \code{grep foo} will pass on any records containing the text ``foo'' and drop any records that do not contain ``foo'' anywhere. Grep is case sensitiveby default, so \code{grep foo} would match ``foo'' but drop ``Foo''.
+Grep is a very basic pipeline module that searches for a text string (not Unicode). Any record containing such text will match and be passed through the pipeline. Any record not containing the text is dropped from the pipeline. For example, \code{grep foo} will pass on any records containing the text ``foo'' and drop any records that do not contain ``foo'' anywhere. Grep is case sensitive by default, so \code{grep foo} would match ``foo'' but drop ``Foo''.
 
 Grep supports the standard GNU wildcards as well as fast string and binary matching. For instance to look for all entries that start that contain ``foo'' and ``bar'' separated by 0 or more bytes, you can use \code{grep foo*bar}.
 
@@ -188,7 +188,7 @@ The module supports the following option flags:
 \item \code{-e <arg>}: Operate on an enumerated value instead of on the entire record. For example, to show packets that contain HTTP text but aren’t destined for port 80, run \code{tag=pcap packet ipv4.DstPort!=80 tcp.Payload | grep -e Payload "GET / HTTP/1.1"}
 \item \code{-s}: Strict match. All patterns must match, or in the case of a negated strict match, no pattern may match.`
 \item \code{-simple}: Simple match. With this flag, grep will match exactly the characters you specify, with no wildcard matching. This allows you to find asterisks and other normally-reserved characters: \code{grep -s *}
-\item \code{-w}: Word match. The entire match pattern must a full word as would be matched by the fulltext extractors.
+\item \code{-w}: Word match. The entire match pattern must be a full word as would be matched by the fulltext extractors.
 \end{itemize}
 
 \clearpage
@@ -351,6 +351,7 @@ table ip user method data
 	\label{fig:extract-ev}
 \end{figure}
 
+\begin{samepage}
 We can see that the data is hex encoded, so let's pass it to the
 \code{hexlify}\footnote{https://docs.gravwell.io/\#!search/hexlify/hexlify.md} module
 and decode it.
@@ -362,12 +363,14 @@ regex -e url "data=(?P<data>[\da-z]+)" |
 hexlify -d data as decoded |
 table ip user method decoded
 \end{Verbatim}
+\end{samepage}
 
 \begin{figure}
 	\includegraphics[width=0.8\linewidth]{images/hex-decode-url.png}
 	\caption{Hex-decoded URL}
 	\label{fig:hex-decode-url} 
 \end{figure}
+
 
 We were able to chain multiple pipeline modules to extract multiple
 fields and then operate on those extracted fields to make machine data
@@ -429,7 +432,7 @@ This expression extracts the username (``user'') and IP address (``ip'') from an
 ^(?P<action>\S+)\spassword\sfor\s(?P<user>\S+)\sfrom\s(?P<ip>[\d\.]+)\s
 \end{Verbatim}
 
-Exercises:
+\subsubsection{Lab Tasks}
 
 \begin{enumerate}
 \item
@@ -447,11 +450,16 @@ Exercises:
 	  Generate a table with the count of \code{app} events by each \code{host}. Hint: \code{count by host}
 	\end{enumerate}
 \item
-  .Extract the \code{ip} and \code{user} for all SSH login events.
+  Extract the \code{ip} and \code{user} for all SSH login events.
 \end{enumerate}
 
 \textbf{BONUS}: generate a table with success and failure counts for each IP.
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 
 \section{Search Modules}
@@ -509,33 +517,65 @@ invoke the acceleration engine, inline filtering allows for fast type-native ope
 
 Let's start by examining some modules that support inline filtering and
 examine a query that would not invoke the accelerators and then adapt it
-so that it can invoke the accelerator. Let's assume we have the same
-dataset that we used in the indexer acceleration section. Here is an
-example of the data we're looking at:
+so that it can invoke the accelerator. 
+
+Let's begin by examining the data:
+
+\begin{Verbatim}
+tag=json
+\end{Verbatim}
+
+Here is an example of the data we're looking at:
 
 \begin{Verbatim}[breaklines=true]
 {
-    "time": "2019-03-19T11:37:57.218963031-06:00",
-    "class": 38702,
-    "user": "masontaylor164",
-    "name": "Andrew Jones",
-    "email": "masontaylor164@example.org",
-    "phone": "+224 5 0995 784625",
-    "address": "23 Adams Rd,\nRansom Canyon, DE, 84826",
-    "state": "DC",
-    "country": "Brazil",
-    "group": "dagger",
-    "ip": "132.59.131.32"
+      "time":"2022-06-08T19:14:31Z",
+      "account":{
+         "user":"miawilson242",
+         "name":"Michael Moore",
+         "email":"miawilson242@test.org",
+         "phone":"+81 43 3387494435",
+         "address":"15 Lincoln Rd,Newstead, OH, 13188", 
+         "state":"IA",
+         "country":"Brazil"},
+      "class":40234,
+      "groups":["dagger","jester"],
+      "user_agent":"Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko",
+      "ip":"194.50.167.70",
+      "data":"But what sort of language would we have the world speak, if we were told the miracle of Babel was presently to be reversed?"
 }
 \end{Verbatim}
 
+The data generated is random. To complete this lab, examine the entries and make note of values found for country and groups.
+For example, in our sample entry above, we may note the following:
+\begin{itemize}
+\item country
+\subitem "Brazil"
+\item groups
+\subitem "dagger"
+\subitem "jester"
+\end{itemize}
+
+In the searches below, make replacements using your pre-selected values.
+
 Let's say we were looking to perform some analytics and we wanted to see
-what group activity looked like from users in Brazil. We might write the
-following query:
+what group activity looked like from users in Brazil. 
+
+Because groups is an array of values, we will extract 
+the array and pass the output name to the \code{-x} flag:
+
+\begin{Verbatim}
+json -x groups groups account.country
+\end{Verbatim}
+
+This will turn the single entry into two entries, one with enumerated values \code{country=Brazil} and
+\code{groups=dagger}, one with \code{country=Brazil} and \code{groups=jester}. 
+
+We might write the following query:
 
 \begin{Verbatim}[breaklines=true]
-tag=logs json country group | grep -e country Brazil |
-count by group | chart count by group
+tag=json json -x groups groups account.country | grep -e country Brazil |
+count by groups | chart count by groups
 \end{Verbatim}
 
 This query will show us a plot of activity groups that are registered
@@ -557,8 +597,8 @@ We can make a small adaptation to the query that will:
 \end{enumerate}
 
 \begin{Verbatim}[breaklines=true]
-tag=logs json country==Brazil group | count by group |
-chart count by group
+tag=json json -x groups groups account.country==Brazil | count by groups |
+chart count by groups
 \end{Verbatim}
 
 The new query doesn't look much different and the output is identical,
@@ -738,6 +778,9 @@ entries by clicking on the stats tab of the query results.
   group ``dagger'' for each country sorted by largest count first.
 \end{enumerate}
 
+If these queries do not yield results, review the data or your list
+of pre-selected values. Adapt the query to search for a different group or country.
+
 To clean up after the experiment, simply run:
 
 \begin{Verbatim}[breaklines=true]
@@ -871,6 +914,11 @@ performance impacts if used early on in a search pipeline. It should
 generally be the last module before the render module, which is `table'
 during this lab. See the query optimization section (\ref{sec:query-optimization}) for more on this topic.
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 
 \subsection{Downloading Results}
@@ -1673,7 +1721,7 @@ tag=switch grep "new MAC address"
 \end{Verbatim}
 
 Next let's extract our hostnames from the DHCP log. Here is an example
-entry where a client ACKs a DCHP lease; it contains the hostname,
+entry where a client ACKs a DHCP lease; it contains the hostname,
 IP, and MAC address:
 
 \begin{Verbatim}[breaklines=true]
@@ -1786,6 +1834,11 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
   worlds''?}
 \end{enumerate}
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 \section{Query Optimization}
 \label{sec:query-optimization}
@@ -1897,34 +1950,57 @@ docker run --net gravnet --rm -it --name jsoningesters gravwell:ingesters\
  /opt/gravwell/bin/jsonGenerator -clear-conns gravwell:4023 -entry-count 100000
 \end{Verbatim}
 
-This will generate some sample entries that look like this:
+Let's begin by examining the data:
+
+\begin{Verbatim}
+tag=json
+\end{Verbatim}
+
+Here is an example of the data we're looking at:
 
 \begin{Verbatim}[breaklines=true]
 {
-    "address": "50 Adams Pkwy,\nBuffalo City, DE, 24232",
-    "class": 56451,
-    "country": "Mauritius",
-    "data": "But what sort of language would we have the world speak, 
-if we were told the miracle of Babel was presently to be reversed?",
-    "email": "avawilliams758@test.net",
-    "group": "kitten",
-    "ip": "188.8.249.164",
-    "name": "Sofia Taylor",
-    "phone": "+371 07 971772781",
-    "state": "WV",
-    "time": "2019-03-22T23:37:16.34706728Z",
-    "user": "avawilliams758",
-    "user_agent": "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2;
- WOW64; Trident/5.0)"
+   "time":"2022-06-09T13:03:36Z",
+   "account":{
+      "user":"jacobbrown802",
+      "name":"Jacob Jones",
+      "email":"jacobbrown802@example.org",
+      "phone":"+850 169 94 122 338",
+      "address":"58 Adams Circle, Ransom Canyon, PW, 97213",
+      "state":"AZ",
+      "country":"Netherlands Antilles"},
+   "class":43294,
+   "groups":["mouse","falcon"],
+   "user_agent":"Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko",
+   "ip":"102.115.187.35",
+   "data":"One dog rolled before him, well-nigh slashed in half; but a second had him by the thigh, a third gripped his collar be- hind, and a fourth had the blade of the sword between its teeth, tasting its own blood."
 }
 \end{Verbatim}
 
+The data generated is random. To complete this lab, examine the entries and make note of values found for user\_agent, groups, and some random words found in data.
+For example, in our sample entry above, we may note the following:
+\begin{itemize}
+\item user\_agent
+\subitem "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko"
+\item groups
+\subitem "mouse"
+\subitem "falcon"
+\item random words found in data
+\subitem "dog"
+\subitem "collar"
+\subitem "sword"
+\end{itemize}
+
+In the searches below, make replacements using your pre-selected values.
+
 Let's start with the base search that's looking to see how many entries
-for each group except 'kitten' have a specific user agent we are
-investigating and are not talking about puppies.
+for each group except 'mouse' have a specific user agent we are
+investigating and are not talking about a dog.
 
 \begin{Verbatim}[breaklines=true]
-tag=json json class user email group ip data user_agent | eval user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)" | grep -e data -v "[pP]uppies" | stats count by group | grep -v -e group "kitten" | table group count
+tag=json json -x groups groups account.user account.email ip data class user_agent 
+| eval user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| grep -e data -v "[dD]og" | stats count by groups | grep -v -e groups "mouse" | table groups count
 \end{Verbatim}
 
 That query invokes a parsing module and then immediately condenses with
@@ -1933,24 +2009,19 @@ We can improve this query by moving the user agent match into the
 parsing module:
 
 \begin{Verbatim}[breaklines=true]
-tag=json json class user email group ip data 
-user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)"
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| grep -v -e group "kitten" 
-| table group count
+tag=json json -x groups groups account.user account.email ip data class 
+user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| grep -e data -v "[dD]og" | stats count by groups | grep -v -e groups "mouse" | table groups count
 \end{Verbatim}
 
-This query is also performing the check to remove the 'kitten' group
+This query is also performing the check to remove the 'mouse' group
 after the pipeline has condensed. This filtering can also be moved into
 the parser module:
 
 \begin{Verbatim}[breaklines=true]
-tag=json json class user email group!="kitten" ip data 
-user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)"
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| table group count
+tag=json json -x groups groups!="mouse" account.user account.email ip data class 
+user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| grep -e data -v "[dD]og" | stats count by groups | table groups count
 \end{Verbatim}
 
 This is looking a lot better but, depending on whether or not we have
@@ -1962,12 +2033,9 @@ Gravwell pipeline when operating on the raw data entries. Let's improve
 further:
 
 \begin{Verbatim}[breaklines=true]
-tag=json 
-grep "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)"
-| json class user email group!="kitten" ip data user_agent 
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| table group count
+tag=json grep "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| json -x groups groups!="mouse" account.user account.email ip data class user_agent
+| grep -e data -v "[dD]og" | stats count by groups | table groups count
 \end{Verbatim}
 
 We have optimized the query but beware, as this query now has
@@ -1979,17 +2047,15 @@ further optimize for performance (and not for query length), we can put
 the filter back in the parsing module to ensure correctness of results:
 
 \begin{Verbatim}[breaklines=true]
-tag=json 
-grep "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)" 
-| json class user email group!="kitten" ip data 
-user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5.0)" 
-| grep -e data -v "[pP]uppies" 
-| stats count by group 
-| table group count
+tag=json grep "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" 
+| json -x groups groups!="mouse" account.user account.email ip data class 
+user_agent=="Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko"
+| grep -e data -v "[dD]og" | stats count by groups | table groups count
 \end{Verbatim}
 
 Something to keep in mind is that if accelerators \emph{are} enabled, then the
-initial grep would be a detriment to performance.
+initial grep would be a detriment to performance. See section \ref{sec:acceleration} for additional
+details on query acceleration.
 
 As an exercise, try and sort the above queries from worst to best by
 writing numbers in the margins. On the left margin, put the number
@@ -2217,7 +2283,7 @@ define arbitrary delimiters and field rules in order to extract data.
 Many popular security applications like Bro/Zeek default to TSV (tab
 separated values) for data export. Other custom applications may use
 weird separators like ``\textbar{}'' or a series of bytes like ``//''. The
-fields extractor you can handle them all, and when combined with
+fields extractor can handle them all, and when combined with
 auto-extractors users don't have to worry about the details of the data
 format.
 
@@ -2687,8 +2753,7 @@ docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
 Next, we'll use the ingesters container to feed some entries into the
-indexer using the JSON generator. We'll specify that the entries should
-cover 10 days:
+indexer using the JSON generator:
 
 \begin{Verbatim}[breaklines=true]
 docker run --net gravnet --rm -i --name ingesters gravwell:ingesters \
@@ -2829,7 +2894,7 @@ networkstatic/nflow-generator -t ingesters -p 2055
 \end{Verbatim}
 
 With Netflow data flowing in we can start to get our queries ready for
-addition to a dashboard. The goal if this dashboard is to break down
+addition to a dashboard. The goal of this dashboard is to break down
 network communications in some nice visuals that help us understand, at
 a glance, what the most common hosts are, what traffic is being
 utilized, where that traffic is going geographically, and potentially
@@ -2854,9 +2919,8 @@ here, so let's do so (Figure \ref{fig:new-dashboard}).
 
 Click ``View Dashboard'' from the resulting popup message after you
 save. You should see the newly-created dashboard with the chart sitting nicely in a
-tile. Let's add one more search. Click the Gravwell logo in the upper left or use
-the main menu to return to the new search page. This time, let's get a table
-together of which hosts are communicating the most:
+tile. Let's add one more search. Use the main menu to return to the new search page.
+This time, let's get a table together of which hosts are communicating the most:
 
 \begin{Verbatim}[breaklines=true]
 tag=netflow netflow IP Bytes | stats sum(Bytes) by IP | table IP sum
