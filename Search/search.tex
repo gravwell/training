@@ -512,33 +512,65 @@ invoke the acceleration engine, inline filtering allows for fast type-native ope
 
 Let's start by examining some modules that support inline filtering and
 examine a query that would not invoke the accelerators and then adapt it
-so that it can invoke the accelerator. Let's assume we have the same
-dataset that we used in the indexer acceleration section. Here is an
-example of the data we're looking at:
+so that it can invoke the accelerator. 
+
+Let's begin by examining the data:
+
+\begin{Verbatim}
+tag=json
+\end{Verbatim}
+
+Here is an example of the data we're looking at:
 
 \begin{Verbatim}[breaklines=true]
 {
-    "time": "2019-03-19T11:37:57.218963031-06:00",
-    "class": 38702,
-    "user": "masontaylor164",
-    "name": "Andrew Jones",
-    "email": "masontaylor164@example.org",
-    "phone": "+224 5 0995 784625",
-    "address": "23 Adams Rd,\nRansom Canyon, DE, 84826",
-    "state": "DC",
-    "country": "Brazil",
-    "group": "dagger",
-    "ip": "132.59.131.32"
+      "time":"2022-06-08T19:14:31Z",
+      "account":{
+         "user":"miawilson242",
+         "name":"Michael Moore",
+         "email":"miawilson242@test.org",
+         "phone":"+81 43 3387494435",
+         "address":"15 Lincoln Rd,Newstead, OH, 13188", 
+         "state":"IA",
+         "country":"Brazil"},
+      "class":40234,
+      "groups":["dagger","jester"],
+      "user_agent":"Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko",
+      "ip":"194.50.167.70",
+      "data":"But what sort of language would we have the world speak, if we were told the miracle of Babel was presently to be reversed?"
 }
 \end{Verbatim}
 
+The data generated is random. To complete this lab, examine the entries and make note of values found for country and groups.
+For example, in our sample entry above, we may note the following:
+\begin{itemize}
+\item country
+\subitem "Brazil"
+\item groups
+\subitem "dagger"
+\subitem "jester"
+\end{itemize}
+
+In the searches below, make replacements using your pre-selected values.
+
 Let's say we were looking to perform some analytics and we wanted to see
-what group activity looked like from users in Brazil. We might write the
-following query:
+what group activity looked like from users in Brazil. 
+
+Because groups is an array of values, we will extract 
+the array and pass the output name to the \code{-x} flag:
+
+\begin{Verbatim}
+json -x groups groups account.country
+\end{Verbatim}
+
+This will turn the single entry into two entries, one with enumerated values \code{country=Brazil} and
+\code{groups=dagger}, one with \code{country=Brazil} and \code{groups=jester}. 
+
+We might write the following query:
 
 \begin{Verbatim}[breaklines=true]
-tag=logs json country group | grep -e country Brazil |
-count by group | chart count by group
+tag=json json -x groups groups account.country | grep -e country Brazil |
+count by groups | chart count by groups
 \end{Verbatim}
 
 This query will show us a plot of activity groups that are registered
@@ -560,8 +592,8 @@ We can make a small adaptation to the query that will:
 \end{enumerate}
 
 \begin{Verbatim}[breaklines=true]
-tag=logs json country==Brazil group | count by group |
-chart count by group
+tag=json json -x groups groups account.country==Brazil | count by groups |
+chart count by groups
 \end{Verbatim}
 
 The new query doesn't look much different and the output is identical,
@@ -740,6 +772,9 @@ entries by clicking on the stats tab of the query results.
   Adapt the query to generate a count of unique users in the
   group ``dagger'' for each country sorted by largest count first.
 \end{enumerate}
+
+If these queries do not yield results, review the data or your list
+of pre-selected values. Adapt the query to search for a different group or country.
 
 To clean up after the experiment, simply run:
 
@@ -1992,7 +2027,8 @@ user_agent=="Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.2; WOW64; Trident/5
 \end{Verbatim}
 
 Something to keep in mind is that if accelerators \emph{are} enabled, then the
-initial grep would be a detriment to performance.
+initial grep would be a detriment to performance.See section \ref{sec:acceleration} for additional
+details on query acceleration.
 
 As an exercise, try and sort the above queries from worst to best by
 writing numbers in the margins. On the left margin, put the number
