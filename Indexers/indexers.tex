@@ -89,7 +89,7 @@ docker exec -it test /bin/sh
 
 \end{enumerate}
 
-\subsubsection{Questions}
+\subsubsection{Lab Questions}
 
 \begin{enumerate}
 \item
@@ -746,11 +746,11 @@ pushing current hot shards to the hot pool.
 \section{Query Acceleration and Indexing}
 \label{sec:acceleration}
 \index{Acceleration}\index{Indexing|see {Acceleration}}
-Gravwell indexers provide a couple of different data management
+Gravwell indexers provide a couple different data management
 methodologies, ranging from raw storage with only temporal indexing to
-full feature extraction with and direct data indexing. This section
+full feature extraction with direct data indexing. This section
 will explore indexer acceleration configuration and examine some of the
-pros and cons of methodology.
+pros and cons of this methodology.
 
 A Gravwell well without any acceleration configuration will employ only
 temporal indexing, which means that every entry is grouped according to a
@@ -889,7 +889,7 @@ against complete matches, not substrings.
 
 Accelerator configurations can be changed at any time, however indexers
 will only apply the new accelerator configuration on new shards, old
-shards maintain their old configuration. This means that changing and
+shards maintain their old configuration. This means that changing
 accelerator configurations does not cause Indexers to reindex old data.
 The query system will re-evaluate the applicability of a query for
 acceleration on each shard. For example, if we added the field
@@ -1136,7 +1136,7 @@ While the software makes a best effort at scaling without human
 intervention, there are several tuning parameters that can improve
 storage and query efficiency on very large machines, and protect very
 small machines from memory exhaustion. The tuning parameters are
-focused on how the indexers organized discrete units of data and how
+focused on how the indexers organize discrete units of data and how
 many of those units can be ``in flight'' at any given time. Varying
 each parameter allows machines with lots of CPU cores and significant
 memory to scale out and feed those cores as well as make more efficient

@@ -2,8 +2,7 @@
 \index{Security}
 This chapter discusses security considerations for a Gravwell cluster.
 It will discuss indexer and webserver security, securing ingesters, and
-user authentication. It will also demonstrate some of the risks of an
-improperly-secured Gravwell installation through hands-on labs.
+user authentication.
 
 This chapter makes frequent references to \textbf{shared secrets}. These are
 strings used by Gravwell components to communicate with each other
@@ -267,7 +266,7 @@ trusted networks.
 If all ingesters use the same ingest secret, and one is compromised, the attacker
 could theoretically use that compromised ingest secret to upload entries to
 your indexers. Consider deploying Federators (see Section \ref{sec:federator}) in
-order to segment your ingesters into different security enclaves to help ameliorate this risk.
+order to segment your ingesters into different security enclaves to help mitigate this risk.
 
 \section{User Authentication and Lockout}
 \index{Users}

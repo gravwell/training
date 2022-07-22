@@ -135,13 +135,7 @@ Save Location (default: /tmp)>  /tmp
 Saving to  /tmp/569547375.text
 \end{Verbatim}
 
-To clean up after the experiment, run:
-
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
-\subsection{Lab Questions}
+\subsubsection{Lab Questions}
 
 \begin{enumerate}
 \item
@@ -150,3 +144,9 @@ docker kill $(docker ps -a -q)
   What happens when you leave out the ``-b'' flag while launching the
   search?
 \end{enumerate}
+
+To clean up after the experiment, run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
