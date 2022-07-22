@@ -1555,7 +1555,7 @@ output may look different depending on the state the cache was in when you
 ingested the data):}
 
 \begin{Verbatim}[breaklines=true]
-/opt/gravwell/cache # ls -lRh
+# ls -lRh /opt/gravwell/cache
 .:
 total 4K     
 drwxr-x---    4 root     root        4.0K Jul 22 18:49 simple_relay
@@ -1589,7 +1589,7 @@ And verify that the cache has been emptied within the ingester
 container:
 
 \begin{Verbatim}[breaklines=true]
-/opt/gravwell/cache # ls -lRh
+# ls -lRh /opt/gravwell/cache
 .:
 total 4K
 drwxr-x---    4 root     root        4.0K Jul 22 18:49 simple_relay
