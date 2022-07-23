@@ -1,7 +1,7 @@
 \chapter{The Gravwell REST API}
 \index{API}
 \section{Introduction}
-Gravwell implements a REST API over HTTP. This API powers the Gravwell UI, but it can also be used to interface other systems with Gravwell. For instance, a Python script can run a Gravwell query by hitting a single API endpoint. This chapter discusses \emph{API Tokens}, which are special authentication tokens given to client applications for accessing the API, and demonstrates how to access perhaps the most userful REST endpoint: the direct search API.
+Gravwell implements a REST API over HTTP. This API powers the Gravwell UI, but it can also be used to interface other systems with Gravwell. For instance, a Python script can run a Gravwell query by hitting a single API endpoint. This chapter discusses \emph{API Tokens}, which are special authentication tokens given to client applications for accessing the API, and demonstrates how to access perhaps the most useful REST endpoint: the direct search API.
 
 \section{API Tokens}
 \index{API!tokens}\index{Tokens|see {API}}
@@ -158,7 +158,7 @@ duration  & Go-encoded duration & yes \\
 \label{table:query-parameters}
 \end{table}
 
-Note that while the `start', `end', and `duration' parameters are optional at last one complete set must be provided, either `start' and `end' or `duration'.
+Note that while the `start', `end', and `duration' parameters are optional at least one complete set must be provided, either `start' and `end' or `duration'.
 
 The results of the query are returned in the body of the response. Each query renderer will support a different set of output formats. If the specified output format is not supported a 400 BadRequest response will be returned.
 

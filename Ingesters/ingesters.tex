@@ -42,7 +42,7 @@ Note that it specifies the \code{[Global]} section and a single
 \code{[Sniffer]} section. The \code{[Sniffer]} section describes where to get
 data (from interface p1p1), which tag to apply to the entries, and some
 other options. The \code{[Global]} section mostly describes how the
-ingester should connect to an ingester (in this case via Unix pipe) and
+ingester should connect to an indexer (in this case via Unix pipe) and
 how to authenticate, but it also sets up a cache and defines the level
 of logging to output.
 
@@ -314,7 +314,7 @@ below:
     Default-Tag=users_other
 \end{Verbatim}
 
-This configuration will example the ``user'' element for a sub-element
+This configuration will examine the ``user'' element for a sub-element
 named ``country''. It will compare the value of the ``country''
 element to the two Tag-Match values ``Japan'' and ``USA''; if there is a
 match, it will tag the entry \code{users\_jp} or \code{users\_usa},
@@ -453,10 +453,6 @@ We can verify that the entries have been ingested by running the search
 	\label{fig:simple-relay-lab}
 \end{figure}
 
-To clean up after the experiment, simply run:
-
-\code{docker kill \$(docker ps -a -q)}
-
 \subsubsection{Lab Questions}
 
 \begin{enumerate}
@@ -466,6 +462,10 @@ To clean up after the experiment, simply run:
   How would you make the Listener listen for incoming UDP rather than
   TCP?
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\code{docker kill \$(docker ps -a -q)}
 
 \clearpage
 \section{File Follower Ingester}
@@ -807,10 +807,6 @@ confirm this, as shown in Figure \ref{fig:file-follow-lab}.
 	\label{fig:file-follow-lab}
 \end{figure}
 
-To clean up after the experiment, simply run:
-
-\code{docker kill \$(docker ps -a -q)}
-
 \subsubsection{Lab Questions}
 
 \begin{enumerate}
@@ -819,6 +815,10 @@ To clean up after the experiment, simply run:
   \code{/var/log}, including files in subdirectories. Configure a Follower that
   would accomplish this.
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\code{docker kill \$(docker ps -a -q)}
 
 \clearpage
 
@@ -1021,11 +1021,6 @@ Log into the web GUI (\href{http://localhost:8080}{http://localhost:8080}) and p
 \item Extract the Computer and CommandLine fields and make a table with those columns
 \end{enumerate}
 
-To clean up after the experiment, simply run:
-
-\code{docker kill \$(docker ps -a -q)}
-
-
 \subsubsection{Lab Questions:}
 
 \begin{enumerate}
@@ -1035,6 +1030,10 @@ To clean up after the experiment, simply run:
 	\item How would you do it?
 	\end{enumerate}
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\code{docker kill \$(docker ps -a -q)}
 
 \clearpage
 \section{Netflow and IPFIX Ingester}
