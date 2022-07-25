@@ -111,7 +111,7 @@ two indexers, as in Figure \ref{fig:twoindexers}
 	\label{fig:twoindexers}
 \end{figure}
 
-\subsubsection{Lab questions}
+\subsubsection{Lab Questions}
 
 \begin{enumerate}
 \item
@@ -121,6 +121,12 @@ two indexers, as in Figure \ref{fig:twoindexers}
   How would you configure the webserver to \emph{only} communicate with
   the indexer on the indexer0 container, not the local instance?
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 \section{Configuring Multiple Webservers}
 \index{Distributed webservers}\index{Webservers!distributed}\index{Datastore}
@@ -231,13 +237,21 @@ On one webserver, create a new group; before long, that new group
 should be visible on the other webserver's Groups screen too. It may be
 necessary to refresh the page.
 
-\subsubsection{Lab questions}
+\subsubsection{Lab Questions}
 
 \begin{enumerate}
 \item
   Why does it take some seconds for the new group to appear on the
   second webserver? How might this be sped up?
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
+
+
 
 %%%%%%%%%%
 % TODO: Kris please update this for the Gravwell load balancer

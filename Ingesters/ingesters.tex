@@ -1426,6 +1426,13 @@ docker run --net gravnet --rm -it gravwell:generators \
 -ingest-secret enclaveBSecrets -tag-name testB
 \end{Verbatim}
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
+
+
 \section{Ingester Caching}
 \index{Ingesters!caching}
 Ingester caching allows Gravwell ingesters to continue receiving data
@@ -2017,3 +2024,9 @@ docker run --net gravnet --rm -it gravwell:generators \
   Why is this configuration system essential for deployment using
   something like Kubernetes or OpenShift?
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}

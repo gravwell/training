@@ -300,6 +300,9 @@ tag is there.}
 	\caption{Tags}
 \end{figure}
 
+Do not \code{rm} the test container, as we are
+going to use it again for the next lab.
+
 \section{Well Ageout}
 \index{Ageout}\index{Wells!ageout}
 Gravwell is designed to manage data sets with minimal user interaction;
@@ -508,12 +511,13 @@ cd ~/gravwell_training/Indexers/Lab-Ageout
 \end{Verbatim}
 
 Then we'll use the ingesters container (make sure you've loaded the ingesters container image as described in Section \ref{sec:load-lab-images}) to import the syslog data:
-
+\begin{samepage}
 \begin{Verbatim}[breaklines=true]
 docker run -v $PWD/data:/tmp/data --rm -i --net gravnet \
 gravwell:ingesters /opt/gravwell/bin/reimport -rebase-timestamp \
 -clear-conns test:4023 -i /tmp/data/syslogdata -import-format json
 \end{Verbatim}
+\end{samepage}
 
 In the command above, we spin up a new container and run the \code{reimport} ingester, telling it to read json-formatted entries from standard input.
 
@@ -588,6 +592,12 @@ like this:
     Hot-Duration=7d
     Max-Cold-Storage-GB=1
     Delete-Frozen-Data=true
+\end{Verbatim}
+
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
 \end{Verbatim}
 
 \section{Replication}
@@ -742,6 +752,12 @@ pushing current hot shards to the hot pool.
 	\end{enumerate}
 	\item Why would we want to restore shards to the cold well on replication recovery?
 \end{enumerate}
+
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
 
 \section{Query Acceleration and Indexing}
 \label{sec:acceleration}
@@ -1128,6 +1144,12 @@ even fewer entries off the disk than with the bloom engine, this query is even f
 	\end{enumerate}
 \end{enumerate}
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
+
 \section{Indexer Optimization}
 \index{Tuning!indexers}
 Gravwell prides itself on not requiring specific machine specs and
@@ -1410,3 +1432,9 @@ activity in the hardware monitoring page, as shown in Figures \ref{fig:idx-hardw
 	\caption{Wells Page with Four Indexers}
 	\label{fig:idx-wells}
 \end{figure}
+
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}

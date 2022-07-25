@@ -241,6 +241,12 @@ When installation is done, click the `Explore the kit' button, then open the pla
 
 When you're done, return to the `Manage kits' page and uninstall the kit. Verify that none of the Netflow dashboards or other objects still exist. Note that there is still a kit installed--which kit is it, and why was it installed?
 
+To clean up after the experiment, simply run:
+
+\begin{Verbatim}[breaklines=true]
+docker kill $(docker ps -a -q)
+\end{Verbatim}
+
 \section{Building Kits}
 \index{Kits!building}
 Although Gravwell distributes pre-built official kits, any user can build a kit themselves. This is a convenient way to share objects built on one Gravwell instance with another instance. Note that kits built like this are not signed by Gravwell and therefore can only be installed by administrators.

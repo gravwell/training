@@ -248,12 +248,8 @@ Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080},
 	\end{enumerate}
 \end{enumerate}
 
-To clean up after the experiment, simply run:
-
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
+Do not \code{rm} the test container, as we are
+going to use it again for the next lab.
 
 \section{Entries, Enumerated Values, and Field Extraction}
 \index{Search!enumerated values}\index{Enumerated Values}
@@ -1797,13 +1793,13 @@ so it is important to strictly order the data by time in the pipeline
 so that the switch logs occur before the DHCP logs so that a mac address
 from the DHCP log can be looked up against a MAC address from the switch log.
 
+The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keeping an eye on what devices are on your network. Note that some MAC addresses don't have a hostname associated with them; those are devices we may want to investigate!
+
 \begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/mac-host-table.png}
 	\caption{MAC / Hostname / Switch Port table}
 	\label{fig:mac-host-table}
 \end{figure}
-
-The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keeping an eye on what devices are on your network. Note that some MAC addresses don't have a hostname associated with them; those are devices we may want to investigate!
 
 \subsubsection{Lab Tasks}
 
@@ -1820,9 +1816,8 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
   Can you find any hosts on more than one vlan?
 \end{enumerate}
 
-
+\begin{samepage}
 \subsubsection{Lab Questions}
-
 \begin{enumerate}
 \item
   {When would data fusion enrichment make more sense than creating a
@@ -1833,6 +1828,7 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
   {How would you combine the two methods to get ``the best of both
   worlds''?}
 \end{enumerate}
+\end{samepage}
 
 To clean up after the experiment, simply run:
 
