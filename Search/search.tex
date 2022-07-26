@@ -248,12 +248,8 @@ Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080},
 	\end{enumerate}
 \end{enumerate}
 
-To clean up after the experiment, simply run:
-
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
+Do not \code{rm} the test container, as we are
+going to use it again for the next lab.
 
 \section{Entries, Enumerated Values, and Field Extraction}
 \index{Search!enumerated values}\index{Enumerated Values}
@@ -1820,9 +1816,8 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
   Can you find any hosts on more than one vlan?
 \end{enumerate}
 
-
+\begin{samepage}
 \subsubsection{Lab Questions}
-
 \begin{enumerate}
 \item
   {When would data fusion enrichment make more sense than creating a
@@ -1833,6 +1828,7 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
   {How would you combine the two methods to get ``the best of both
   worlds''?}
 \end{enumerate}
+\end{samepage}
 
 To clean up after the experiment, simply run:
 
