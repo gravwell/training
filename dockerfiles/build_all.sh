@@ -1,7 +1,7 @@
 #!/bin/bash
 LOGFILE=/tmp/build.log
 OUTDIR=../dockerimages/
-VER=${VERSION:-5.0.1}
+VER=${VERSION:-5.0.5}
 
 if [ ! -d "$GOPATH" ]; then
 	echo "Must set GOPATH"
@@ -108,8 +108,8 @@ build "offlinereplication"
 moveTarget "/tmp/offlinereplication.tar.gz"
 build "datastore"
 moveTarget "/tmp/datastore.tar.gz"
-build "cloudarchive"
-moveTarget "/tmp/cloudarchive_server.tar.gz"
+#build "cloudarchive"
+#moveTarget "/tmp/cloudarchive_server.tar.gz"
 build "permissions"
 moveTarget "/tmp/perms.tar.gz"
 build "brokenperms"
