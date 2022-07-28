@@ -148,7 +148,7 @@ options are available:
   \code{Datastore-Port} (default 9405): specifies the port on which the
   datastore should listen
 \item
-  Control-Auth: the shared secret by which webservers authenticate to
+  \code{Control-Auth}: the shared secret by which webservers authenticate to
   the datastore. This must be the same on the datastore and webservers!
 \end{itemize}
 
@@ -167,6 +167,8 @@ the following options:
 \item
   \code{Datastore-Update-Interval} (default 10): how often (in seconds) the
   webserver should check in with the datastore. 10 is a good default.
+\item
+  \code{Datastore-Insecure-Skip-TLS-Verify}: if set to true, the webserver will not verify the datastore's TLS certificate. You should never use this in production, but it can be useful for testing.
 \end{itemize}
 
 After configuring the webserver's gravwell.conf, restart the webserver
@@ -175,19 +177,25 @@ Repeat this for all webservers
 
 \subsection{Hands-on Lab: Configuring multiple webservers}
 
+This lab will configure an indexer, two webservers, and a datastore. Note that for
+simplicity, we will be using self-signed TLS certificates for communications between
+the webservers and the datastore and will therefore be disabling TLS verification in
+our configs. For actual deployments we strongly recommend configuring properly-signed
+TLS certificates as explained in Section \ref{sec:tls}.
+
 First, verify that you have the gravwell:webserver, gravwell:indexer, and gravwell:datastore
 images available. If not, load them from your images directory as detailed in
 Section \ref{sec:load-lab-images}.
 
-Next, we start four containers. One indexer, two webservers, and the
+Next, we start four containers: one indexer, two webservers, and the
 datastore. Note that webserver0 is forwarded to localhost:8080, and
 webserver1 is forwarded to localhost:8081:
 
 \begin{Verbatim}[breaklines=true]
-docker run --rm -d --name indexer0 gravwell:indexer
-docker run --rm -p 8080:80 -d --name webserver0 gravwell:webserver
-docker run --rm -p 8081:80 -d --name webserver1 gravwell:webserver
-docker run --rm -d --name datastore gravwell:datastore
+docker run --net gravnet --rm -d --name indexer0 gravwell:indexer
+docker run --net gravnet --rm -p 8080:80 -d --name webserver0 gravwell:webserver
+docker run --net gravnet --rm -p 8081:80 -d --name webserver1 gravwell:webserver
+docker run --net gravnet --rm -d --name datastore gravwell:datastore
 \end{Verbatim}
 
 Next, we configure each webserver to talk to the datastore. Do the
@@ -195,23 +203,42 @@ following for both webserver0 and webserver1, taking care to set the
 \code{External-Addr} field properly for each:
 
 Copy the config file to the local system
-(e.g. \code{docker exec -it webserver0 vi /opt/gravwell/etc/gravwell.conf})
+(e.g. \code{docker cp webserver0:/opt/gravwell/etc/gravwell.conf /tmp/gravwell.conf})
 and add the following in the \code{[Global]} section:
 
 \begin{Verbatim}[breaklines=true]
     Remote-Indexers=net:indexer0:9404
     Datastore=datastore
     External-Addr=webserver0
+    Datastore-Insecure-Skip-TLS-Verify=true
 \end{Verbatim}
 
-Copy the config file back (\code{docker cp /tmp/gravwell.conf webserver:/opt/gravwell/etc/gravwell.conf})
+Copy the config file back (\code{docker cp /tmp/gravwell.conf webserver0:/opt/gravwell/etc/gravwell.conf})
 and restart the webserver:
 
 \begin{Verbatim}[breaklines=true]
 docker restart webserver0
 \end{Verbatim}
 
-\textbf{Make sure you do this for both webserver0 and webserver1!}
+Now we repeat the process for webserver1; \textbf{note that the External-Addr field is changed below!}
+
+Copy the config file to the local system
+(e.g. \code{docker cp webserver1:/opt/gravwell/etc/gravwell.conf /tmp/gravwell.conf})
+and add the following in the \code{[Global]} section:
+
+\begin{Verbatim}[breaklines=true]
+    Remote-Indexers=net:indexer0:9404
+    Datastore=datastore
+    External-Addr=webserver1
+    Datastore-Insecure-Skip-TLS-Verify=true
+\end{Verbatim}
+
+Copy the config file back (\code{docker cp /tmp/gravwell.conf webserver1:/opt/gravwell/etc/gravwell.conf})
+and restart the webserver:
+
+\begin{Verbatim}[breaklines=true]
+docker restart webserver1
+\end{Verbatim}
 
 Now connect to
 \href{http://localhost:8080}{http://localhost:8080} and
