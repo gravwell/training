@@ -286,21 +286,3 @@ webserver topology the search agent may be located on its own node.
 	\caption{Scheduled Search and Orchestration}
 	\label{fig:scheduledsearch}
 \end{figure}
-
-\section{Cloud Archive}
-
-Gravwell supports remote, offline archival of data using the Cloud
-Archive\index{Cloud archive} service. Cloud Archive enables indexers to transmit shards to a
-remote system with low-cost mass storage so that data can be held long
-term. Indexers can configure individual wells to participate in the
-archive process, giving fine-grained control over which entries are archived.
-Data is archived prior to deletion based on ageout
-rules. It is important to know that indexers \emph{will not} delete the data
-until a successful archive has been completed, so if your indexers
-cannot authenticate and upload data for archiving, they will not delete
-it.
-
-\begin{figure}
-	\includegraphics{images/cloudarchive.png}
-	\caption{Cloud Archive}
-\end{figure}
