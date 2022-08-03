@@ -114,6 +114,8 @@ github.com/gravwell/filewatch/v3 v3.3.10/go.mod h1:bYKlX6Pxr5n+DX+TLrujXwRT+9mvZ
 github.com/gravwell/gcfg v1.2.5/go.mod h1:lWsvu9YGmTXgqdrR4W926Ok7Vh8jvrwIhFMkn91PgU4=
 github.com/gravwell/gcfg v1.2.8 h1:aS+W5u5xBpjjZ4QuSiI1Hy6Qb3+ygn9cQRXFf5XLmA8=
 github.com/gravwell/gcfg v1.2.8/go.mod h1:N+S2rmWz+IHo5zTQaDshQr+qEVGldBRzAnlRkf1yO8c=
+github.com/gravwell/gencert v3.2.3+incompatible h1:L7htwkYVwA6xe2Ai+Lqbv8rI1n1dvP9lOxSdnon50AE=
+github.com/gravwell/gencert v3.2.3+incompatible/go.mod h1:1YfQx+DqTKbCu8gG6osoRw1EozZSLrZPWuRObaDQyLc=
 github.com/gravwell/gravwell/v3 v3.5.0 h1:ajoEQm0wWvb7L264EzMZErVPD9O/uGPlSaqqFnvb51g=
 github.com/gravwell/gravwell/v3 v3.5.0/go.mod h1:qNig7ryaE+vx36Z+plRm2nwcDV/mQJcOzqfY3BOOtXY=
 github.com/gravwell/ingest v3.2.2+incompatible h1:ZppzqTOgMi/YHIbvIhb3/mirrTYj/76n/7WdR3KMWdk=

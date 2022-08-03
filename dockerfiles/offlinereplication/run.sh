@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+go install github.com/gravwell/gencert
 TGT="/tmp/offlinereplication.tar.gz"
 $GOPATH/bin/gencert -host offlinereplicator
 docker build -t gravwell:offlinereplication --build-arg VER=$VER .
