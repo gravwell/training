@@ -286,7 +286,7 @@ The JavaScript node can execute JavaScript code in a flow, allowing complex logi
 
 Scripts can read from and write to the payload by accessing the \code{payload} variable, e.g. \code{payload.flow.Scheduled}. Note that variables \emph{created} in the payload are only visible to downstream nodes if that variable is explicitly listed in the ``Outputs'' configuration field.
 
-Combining the HTTP node and the JavaScript node makes it trivially easy to load JS libraries from the Internet. For instance, the flow in Figure \ref{fig:js-flow} uses the HTTP node to fetch the Lodash JavaScript library\footnote{https://raw.githubusercontent.com/lodash/lodash/4.17.15-npm/lodash.js}, then the JavaScript node loads the HTTP response as a library and uses it to round a number. (Note that the Lodash library loads itself into a variable named \code{\_}, so calling the round function from the Lodash library looks like \code{\_.round(4.5)})
+Combining the HTTP node and the JavaScript node makes it trivially easy to load JS libraries from the Internet. For instance, the flow in Figure \ref{fig:js-flow} uses the HTTP node to fetch the Lodash JavaScript library\footnote{https://raw.githubusercontent.com/lodash/lodash/4.17.15-npm/lodash.js}, then the JavaScript node loads the HTTP response as a library and uses it to round a number. (Note that the Lodash library loads itself into a variable named \code{\_}, so calling the round function from the Lodash library looks like \code{\_.round(4.123)})
 
 \begin{figure}
 	\includegraphics[width=0.85\linewidth]{images/js-flow.png}
