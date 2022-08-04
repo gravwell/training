@@ -200,18 +200,23 @@ The following nodes are currently implemented:
 \item Ingest: ingest data into Gravwell.
 \item Ingester Info: get information about Gravwell ingesters.
 \item JavaScript: run small snippets of Javascript code for custom operations.
+\item JSON Encode/Decode: encode and decode JSON.
+\item Mattermost Message: send a Mattermost message.
 \item Nest Merge: join multiple input payloads into one.
 \item PDF: create PDF documents.
 \item Query Log Ingest: convert search results to alert entries \& ingest.
+\item Read Macros: read Gravwell macros.
 \item Rename: rename variables in the payload.
 \item Run a Query: run a Gravwell query.
 \item Set Variables: inject variables into the payload.
 \item Slack File: upload a file to a Slack channel.
 \item Slack Message: send a message to a Slack channel.
 \item Sleep: pause flow execution for a given period of time.
+\item Splunk Query: run a Splunk query.
 \item Stack Merge: join multiple input payloads into one.
 \item Teams Message: send a Microsoft Teams message.
 \item Text Template: format text.
+\item Throttle: limit execution frequency of certain nodes within a flow.
 \end{itemize}
 
 The following nodes tend to be needed only in particular advanced cases:
@@ -281,7 +286,7 @@ The JavaScript node can execute JavaScript code in a flow, allowing complex logi
 
 Scripts can read from and write to the payload by accessing the \code{payload} variable, e.g. \code{payload.flow.Scheduled}. Note that variables \emph{created} in the payload are only visible to downstream nodes if that variable is explicitly listed in the ``Outputs'' configuration field.
 
-Combining the HTTP node and the JavaScript node makes it trivially easy to load JS libraries from the Internet. For instance, the flow in Figure \ref{fig:js-flow} uses the HTTP node to fetch the Moment JavaScript library\footnote{https://momentjs.com/downloads/moment-with-locales.min.js}, then the JavaScript node loads the HTTP response as a library and uses it to format a timestamp.
+Combining the HTTP node and the JavaScript node makes it trivially easy to load JS libraries from the Internet. For instance, the flow in Figure \ref{fig:js-flow} uses the HTTP node to fetch the Lodash JavaScript library\footnote{https://raw.githubusercontent.com/lodash/lodash/4.17.15-npm/lodash.js}, then the JavaScript node loads the HTTP response as a library and uses it to round a number. (Note that the Lodash library loads itself into a variable named \code{\_}, so calling the round function from the Lodash library looks like \code{\_.round(4.123)})
 
 \begin{figure}
 	\includegraphics[width=0.85\linewidth]{images/js-flow.png}
