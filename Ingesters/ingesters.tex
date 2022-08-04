@@ -465,7 +465,7 @@ We can verify that the entries have been ingested by running the search
 
 To clean up after the experiment, simply run:
 
-\code{docker kill \$(docker ps -a -q)}
+\code{docker rm \$(docker ps -a -q)}
 
 \clearpage
 \section{File Follower Ingester}
@@ -788,7 +788,7 @@ Recall that we passed the -v flag to \code{gravwell\_file\_follow}
 when we created the container; this enables verbose mode, which allows us to see every entry
 the ingester reads \emph{and} the timestamp it derived from the log entry.
 Most ingesters support the -v flag. You can view the log output by running
-the command \code{docker log ingesters}; the following is a sample:
+the command \code{docker logs ingesters}; the following is a sample:
 
 \code{GOT 2019-03-09T13:12:59-07:00 Mar ~9 13:12:59 bombadil kernel:
 {[}7955880.007543{]} hub 2-1:1.0: 3 ports detected}
@@ -1007,7 +1007,7 @@ Now we'll push in some data with the reimport ingester:
 cd ~/gravwell_training/Ingesters/Lab-Winevent
 docker run -v $PWD/data:/tmp/data --rm -i --net gravnet \
 gravwell:ingesters /opt/gravwell/bin/reimport -rebase-timestamp \
--clear-conns test:4023 -i /tmp/data/winlog.json -import-format json
+-clear-conns test:4023 -i /tmp/data/winlog.json.gz -import-format json
 \end{Verbatim}
 
 Log into the web GUI (\href{http://localhost:8080}{http://localhost:8080}) and perform the following queries:

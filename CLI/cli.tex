@@ -111,7 +111,7 @@ will find all entries containing the name ``David'':
 \begin{Verbatim}[breaklines=true]
 $ docker exec -it gravwell /bin/sh
 / # gravwell -insecure-no-https -b search
-query>  tag=default grep David
+query>  tag=json grep David
 time range> -6h
 Background search with ID 569547375 launched
 \end{Verbatim}

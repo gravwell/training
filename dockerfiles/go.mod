@@ -9,5 +9,5 @@ require (
 	github.com/gravwell/manager/v3 v3.3.12 // indirect
 	github.com/nerdalert/nflow-generator v0.0.0-20220501044009-5cc1c43806c2 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	golang.org/x/sys v0.0.0-20220731174439-a90be440212d // indirect
+	golang.org/x/sys v0.0.0-20220804182731-e052cef7d300 // indirect
 )
