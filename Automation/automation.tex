@@ -780,7 +780,7 @@ Gravwell, the email function is a very simple way to send an email:
 \tightlist
 \item
   \code{email(from, to, subject, message) error} - sends an email via SMTP.
-  The from field is simply a string, while to should be a slice of
+  The from field is simply a string, while the to field should be a slice of
   strings containing email addresses. The subject and message fields are
   also strings which should contain the subject line and body of the
   email.
@@ -1039,6 +1039,8 @@ Within that shell, run the Gravwell CLI client and execute the script:
 
 \begin{Verbatim}[breaklines=true]
 $ gravwell -insecure-no-https script
+Username:  admin
+Password:  changeme
 script file path>  /tmp/email-netflow.ank
 \end{Verbatim}
 
