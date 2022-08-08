@@ -89,6 +89,7 @@ The tag\index{Tags} field categorizes the entry. Users refer to tags by strings,
 
 The source\index{SRC|see {Source}}\index{Source} field indicates where the entry originated. It is an IPv4 or IPv6 address. It is perhaps the most free-form field of the entry, because it can indicate the machine on which the ingester was located, the machine from which the ingester \emph{read} the entry data, or it can be an entirely arbitrary number chosen as a second layer of categorization beyond the tag. Most ingesters provide configuration options for how the source field should be set.
 
+\clearpage
 \section{Data Ingest}
 
 A core function of Gravwell is data ingest\index{Data ingest}; \emph{ingesters}\index{Ingesters} take raw data, package it as entries,
@@ -150,6 +151,7 @@ For more information about available
 Gravwell ingesters, visit the Gravwell documentation site at
 {\href{https://docs.gravwell.io}{https://docs.gravwell.io}
 
+\clearpage
 \section{Example Gravwell Deployments}
 
 Gravwell can be deployed on a single node, a cluster of indexers and one webserver, a
@@ -175,7 +177,7 @@ query pipeline is minimal, typically only running the renderer module.
 The complete Gravwell deployment contains three core components (Indexer,
 Webserver, and Search Agent), plus any number of ingesters (both on and off the node) as shown in Figure \ref{fig:singlenode}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/singlenode.png}
 	\caption{Single-node deployment}
 	\label{fig:singlenode}
@@ -199,7 +201,7 @@ bandwidth. While it is possible to geographically separate a webserver
 from an indexer over a WAN link, the increased latency and decreased
 bandwidth will affect query performance.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/cluster.png}
 	\caption{Cluster Deployment}
 	\label{fig:cluster}
@@ -212,7 +214,7 @@ multiple webservers\index{Distributed webservers} to handle the load. Gravwell s
 webserver topology by coordinating and synchronizing the webservers, 
 shown in Figure \ref{fig:distributed}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/distributed.png}
 	\caption{Distributed Webserver Architecture}
 	\label{fig:distributed}
@@ -227,7 +229,7 @@ which allows webservers to fail and be restored by simply rejoining the
 cluster. However, the datastore is treated as the master copy, so while
 the datastore component requires minimal CPU resources, robust storage is advised.
 
-
+\clearpage
 \section{Replication}
 
 Gravwell supports full data replication\index{Replication}, so that in the event of
@@ -245,7 +247,7 @@ hot-failover, meaning that if an indexer fails the other indexers in the
 replication group will detect the failure and serve the failed node's
 data during a query.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/onlinereplication.png}	
 	\caption{Online Replication}
 	\label{fig:onlinereplication}
@@ -261,7 +263,7 @@ event of a failure. A single offline replicator may service many
 indexers (provided that it has adequate storage). The offline
 replicator can be onsite or offsite.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/offlinereplication.png}
 	\caption{Offline Replication}
 	\label{fig:offlinereplication}
@@ -281,7 +283,7 @@ search agent in a deployment, and the default Gravwell deployment
 colocates the searchagent with the webserver. However, in a distributed
 webserver topology the search agent may be located on its own node.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.6\linewidth]{images/soar.png}
 	\caption{Scheduled Search and Orchestration}
 	\label{fig:scheduledsearch}

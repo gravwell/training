@@ -21,7 +21,7 @@ Clicking the Gravwell logo in the upper left will always take you back to your h
 
 Clicking the ``hamburger'' button in the upper left will open the Main Menu, as shown in Figure \ref{fig:mainmenu}.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.45\linewidth]{images/menu.png}
 	\caption{The main menu}
 	\label{fig:mainmenu}
@@ -29,7 +29,7 @@ Clicking the ``hamburger'' button in the upper left will open the Main Menu, as 
 
 This menu is used to access all the primary functionalities of Gravwell, including dashboards, the query library, and playbooks. Note that several items within the menu are actually sub-menus, which can be expanded to show additional options as shown in Figure \ref{fig:submenu}. Items within these sub-menus will typically be used less frequently that the top-level items and are therefore collapsed to save space.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics[width=0.45\linewidth]{images/menu-expanded.png}
 	\caption{Expanded submenu}
 	\label{fig:submenu}
@@ -41,7 +41,7 @@ This menu is used to access all the primary functionalities of Gravwell, includi
 \index{GUI!notifications}\index{Notifications}
 Important notifications are accessible under the bell icon in the upper right corner of the page. Regular notifications are indicated by a small red circle containing the number of notifications. A critical notification will change the entire icon to a more attention-catching red icon; see Figure \ref{fig:notifications-icons} for examples.
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics{images/notif-normal.png}
 	\includegraphics{images/notif-severe.png}
 	\caption{Notification icons, normal (left) and critical (right)}
@@ -58,12 +58,13 @@ Depending on the type of notification, clicking the ``delete'' icon may clear th
 	\label{fig:notification-menu}
 \end{figure}
 
+\clearpage
 \subsection{The Account Menu}
 \label{sec:account-menu}\index{GUI!account preferences}
 
 The round button in the upper-right of the page is the Account Menu button. It will display either the initials of the current user, or a profile image if set. Clicking it brings up a small drop-down menu (Figure \ref{fig:accountmenu}).
 
-\begin{figure}[H]
+\begin{figure}
 	\includegraphics{images/user-dropdown.png}
 	\caption{The account menu}
 	\label{fig:accountmenu}
@@ -114,6 +115,7 @@ The fields are mostly self-explanatory; ``Server'' is an SMTP server, ``Port'' i
 
 Once the fields have been populated, click ``Update Settings'' to save them, then click ``Test Configuration'' to send a test email.
 
+\clearpage
 \section{Labels and Filtering}
 \index{GUI!labels}\index{Labels}
 Objects in Gravwell such as dashboards, resources, macros, etc. can be labeled for organizational purposes. Some objects distributed in kits may be pre-labeled for convenience. The following object types can be labeled:
@@ -221,6 +223,7 @@ Three label prefixes are used to manage Gravwell-internal information about obje
 
 Users should not create labels beginning with these strings, e.g. \code{kit/foo} or \code{kit/dependency:bar}. These labels are managed internally by Gravwell.
 
+\clearpage
 \section{Playbooks}
 \index{Playbooks}
 Playbooks are hypertext documents within Gravwell which help guide users through common tasks, describe functionality, and record information about data in the system. Most Gravwell kits (see Chapter \ref{ch:kits}) include a playbook or two to help users get oriented in the kit, but regular users can also \emph{create} playbooks for themselves, documenting their data investigations with a mix of text, images, and \emph{executable queries}.

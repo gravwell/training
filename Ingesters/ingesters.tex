@@ -1,7 +1,11 @@
 \chapter{Ingesters}
 \index{Ingesters}
 Ingesters are programs which collect entries from some data source and
-send them to one or more indexers.
+send them to one or more indexers. The ingesters described in this chapter
+are all intended to run continuously, receiving newly-generated data
+and packaging it for Gravwell. If you have pre-existing data (archive
+files on disk, PCAP files, data in Splunk), see Chapter \ref{chapter:migration}
+for information on how best to import it.
 
 \section{Configuration}
 \label{sec:global-config}
@@ -481,6 +485,8 @@ as \code{/var/log}. It intelligently handles log rotation, detecting when
 ingest files matching a specific pattern in a directory, optionally
 recursively descending into the subdirectories of that top-level
 directory.
+
+Note that if you instead wish to ingest existing/archive files (which will not be updated), the File Follower is not the most efficient option; please see Chapter \ref{chapter:migration} instead.
 
 The File Follower ingester uses the unified global configuration block
 described in Section \ref{sec:global-config}. Like most other Gravwell ingesters,
