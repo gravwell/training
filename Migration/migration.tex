@@ -138,7 +138,7 @@ The \code{Files} configuration element can contain the parameters in Table \ref{
 Base-Directory   &   yes      & A full path to the directory containing flat files to be ingested. & \code{Base-Directory=/var/log/auth} \\
 File-Filter      &   yes      & A comma separated list of file glob patterns that specify which files to consume. & \code{File-Filter="*.log,file.txt"} \\
 Tag-Name         &   yes      & The tag name that the migrate tool should ingest all files into.  This must be a valid tag name. & \code{Tag-Name=auth} \\
-Ignore-Timestamps &         & A Boolean value indicating if the migrate tool should not attempt to resolve timestamps, but should instead the timestamp of now. The default value is false. & \code{Ignore-Timestamps=true} \\
+Ignore-Timestamps &         & A Boolean value indicating if the migrate tool should not attempt to resolve timestamps, but should instead use the timestamp of now. The default value is false. & \code{Ignore-Timestamps=true} \\
 Assume-Local-Timezone &     & A Boolean indicating that if the resolved timestamps do not have a timezone, use the local timezone. The default is false, meaning use UTC. & \code{Assume-Local-Timezone=true} \\
 Timezone-Override &         & A string indicating that if the resolved timestamps do not have a timezone, use the given timezone. The timezone must be specified in IANA format. & \code{Timezone-Override="America/New\_York"} \\
 Recursive &                 & A Boolean indicating that the tool should recurse into any sub-directories found in the \code{Base-Directory} and attempt to match and consume files. Default is false. & \code{Recursive=true} \\
@@ -407,7 +407,7 @@ Most of these flags are optional, but the following are required: At least one i
 The following ingests the packets in \code{/tmp/netflow-capture.pcap} to an indexer on the local machine. Each packet is ingested as a single entry.
 
 \begin{verbatim}
-/usr/local/sbin/gravwell_pcap_file_ingester -pipe-conns /opt/gravwell/comms/pipe 
+/usr/local/sbin/gravwell_pcap_file_ingester -pipe-conns /opt/gravwell/comms/pipe \
 -ingest-secret MyIngestSecret -pcap-file /tmp/netflow-capture.pcap
 \end{verbatim}
 
