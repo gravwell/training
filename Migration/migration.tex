@@ -306,7 +306,7 @@ You can exit the migration tool at any time by hitting Ctrl-C, or by backing all
 
 \section{Importing One File}
 \index{Ingesters!single file}
-The single file ingester is one of the most basic ingesters.  It is designed to ingest a single line-delimited file to a specific tag.  It can transparently decompress files and has some limited parsing ability.  If you have a single large Apache access log or just need to script up some one off file ingestion, it can be the simplest option. The ingester is included in the `gravwell-tools` package for Debian and Redhat, and is also available as a standalone shell installer.. Once installed, the program is located at \code{/usr/local/sbin/gravwell\_single\_file\_ingester}.
+The single file ingester is one of the most basic ingesters.  It is designed to ingest a single line-delimited file to a specific tag.  It can transparently decompress files and has some limited parsing ability.  If you have a single large Apache access log or just need to script up some one off file ingestion, it can be the simplest option. The ingester is included in the `gravwell-tools` package for Debian and Redhat, and is also available as a standalone shell installer. Once installed, the program is located at \code{/usr/local/sbin/gravwell\_single\_file\_ingester}.
 
 The ingester is a standalone ingester that is designed to operate using flags rather than a config file.  This means that it lacks some of the additional functionality of other ingesters such as custom timestamp definitions and preprocessor support.  Pass the \code{-h} flag to the command to get a listing of options:
 
@@ -316,13 +316,13 @@ The ingester is a standalone ingester that is designed to operate using flags ra
   -clean-quotes
     	clean quotes off lines
   -clear-conns string
-    	comma seperated server:port list of cleartext targets
+    	comma-separated server:port list of cleartext targets
   -i string
     	Input file to process (specify - for stdin)
   -ignore-prefix string
     	Ignore lines that start with the prefix
   -ignore-ts
-    	Ignore timetamp
+    	Ignore timestamp
   -ingest-secret string
     	Ingest key (default "IngestSecrets")
   -pipe-conn string
@@ -330,7 +330,7 @@ The ingester is a standalone ingester that is designed to operate using flags ra
   -quotable-lines
     	Allow lines to contain quoted newlines
   -source-override string
-    	Override source with address, hash, or integeter
+    	Override source with address, hash, or integer
   -status
     	Output ingest rate stats as we go
   -tag-name string
@@ -342,7 +342,7 @@ The ingester is a standalone ingester that is designed to operate using flags ra
   -timezone-override string
     	Timezone override e.g. America/Chicago
   -tls-conns string
-    	comma seperated server:port list of TLS connections
+    	comma-separated server:port list of TLS connections
   -tls-private-key string
     	Path to TLS private key
   -tls-public-key string
@@ -373,7 +373,7 @@ The ingester is a standalone ingester that is designed to operate using flags ra
 
 \begin{verbatim}
   -clear-conns string
-    	comma seperated server:port list of cleartext targets
+    	comma-separated server:port list of cleartext targets
   -ingest-secret string
     	Ingest key (default "IngestSecrets")
   -no-ingest
@@ -383,13 +383,13 @@ The ingester is a standalone ingester that is designed to operate using flags ra
   -pipe-conn string
     	Path to pipe connection
   -source-override string
-    	Override source with address, hash, or integeter
+    	Override source with address, hash, or integer
   -tag-name string
     	Tag name for ingested data (default "default")
   -timeout int
     	Connection timeout in seconds (default 1)
   -tls-conns string
-    	comma seperated server:port list of TLS connections
+    	comma-separated server:port list of TLS connections
   -tls-private-key string
     	Path to TLS private key
   -tls-public-key string
