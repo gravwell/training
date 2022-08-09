@@ -711,12 +711,10 @@ filtering system can improve query performance and simplify the query,
 especially when combined with acceleration (see Section \ref{sec:acceleration} for more information
 on acceleration).
 
-First, we'll get into the lab subdirectory, then stop and remove any existing containers:
+First, we'll get into the lab subdirectory:
 
 \begin{Verbatim}[breaklines=true]
 cd gravwell_training/Search/Lab-Filtering/
-docker kill $(docker ps -a -q)
-docker rm $(docker ps -a -q)
 \end{Verbatim}
 
 Create a new container using the gravwell:base image, upload our lab-specific

@@ -45,6 +45,7 @@ not unique and not secure. If you plan to use Gravwell in Docker, you
 must override these configuration values using either Docker secrets or
 custom values.
 
+\clearpage
 \subsection{Hands-on Lab: Misconfigured Indexer}
 \label{sec:MisconfiguredIndexer}
 
@@ -205,6 +206,7 @@ are specifying well storage locations outside of
 appropriate permissions. It should be owned by the user/group
 \code{gravwell/gravwell} and have RWX permissions enabled for the owner.
 
+\clearpage
 \subsection{Hands-on Lab: Well Definitions}
 
 {For this lab we are going to modify the }{gravwell.conf}{~file to
@@ -241,7 +243,6 @@ Log-Level=INFO
 Pipe-Ingest-Path=/opt/gravwell/comms/pipe
 
 ### Paths
-
 [Default-Well]
         Location=/opt/gravwell/storage/default/
 
@@ -257,10 +258,8 @@ docker cp gravwell.conf test:/opt/gravwell/etc
 docker restart test
 \end{Verbatim}
 
-Obtain a shell within the docker container (\code{docker exec -it test
-/bin/sh}) and check that the indexer process started, and that the well
-storage location was created. You should see some shards already in the
-storage folder.
+Obtain a shell within the docker container as shown below. Check that the indexer 
+process has started and the well storage location was created. You should see some shards already in the default folder.
 
 \begin{Verbatim}[breaklines=true]
 user@training:~/gravwell_training$ docker exec -it test /bin/sh
@@ -272,16 +271,22 @@ PID   COMMAND
    18 gravwell_indexe
    55 sh
    60 ps
-/ # ls -al /opt/gravwell/storage/default/
+/ # ls -l /opt/gravwell/storage
 total 8
-drwxr-x---    2 root     root          4096 Mar 24 20:17 .
-drwxr-x---    8 gravwell gravwell      4096 Mar 24 20:17 ..
+drwxr-x---    3 root     root          4096 Aug  5 17:32 default
+drwxr-x---    3 root     root          4096 Aug  5 17:33 syslog
+/ # ls -al /opt/gravwell/storage/default/
+total 12
+drwxr-x---    3 root     root          4096 Aug  5 17:32 .
+drwxrwx---    1 gravwell gravwell      4096 Aug  5 17:33 ..
+drwxr-xr-x    2 root     root          4096 Aug  5 17:32 76d3f
 / #
 \end{Verbatim}
 
-We can also validate that the new well was created within the GUI,
-expand the left sidebar navigation menu and click ``Wells \& Indexers''.
-You should see two wells, default and syslog, as shown in Figure \ref{fig:wells}
+We can also validate that the new well was created within the GUI.
+Expand the left sidebar navigation menu and click ``Storage, Indexers, \& Wells'' under
+``Systems \& Health''. From there, click on the indexer to see the two wells, 
+default and syslog, as shown in Figure \ref{fig:wells}.
 
 \begin{figure}
 	\includegraphics{images/wells.png}
@@ -289,11 +294,20 @@ You should see two wells, default and syslog, as shown in Figure \ref{fig:wells}
 	\label{fig:wells}
 \end{figure}
 
-{The indexer also automatically created the syslog tag when it found the
-new well configuration. You can click the tags menu item and see that
-Gravwell now knows about the }{syslog}{~tag, enabling you to search with
-it. ~There are no entries yet, as we haven't ingested anything, but the
-tag is there.}
+Select the Configuration tab at the top to view configuration details for the wells
+as shown in Figure \ref{fig:wells-config}.
+
+\begin{figure}
+	\includegraphics{images/wells-config.png}
+	\caption{Wells Configuration Details}
+	\label{fig:wells-config}
+\end{figure}
+
+The indexer also automatically created the syslog tag when it found the
+new well configuration. Select ``Tags'' from the navigation menu and see that
+Gravwell now knows about the syslog tag, enabling you to search with
+it. There are no entries yet, as we haven't ingested anything, but the
+tag is there.
 
 \begin{figure}
 	\includegraphics{images/tags.png}
@@ -496,6 +510,7 @@ shards trying to hit the storage reserve.
 does not have exclusive control over an entire storage device can yield
 unexpected ageout behavior.
 
+\clearpage
 \subsection{Hands-on Lab: Ageout}
 
 This hands-on lab will continue to use the Gravwell docker instance
@@ -511,13 +526,12 @@ cd ~/gravwell_training/Indexers/Lab-Ageout
 \end{Verbatim}
 
 Then we'll use the ingesters container (make sure you've loaded the ingesters container image as described in Section \ref{sec:load-lab-images}) to import the syslog data:
-\begin{samepage}
 \begin{Verbatim}[breaklines=true]
 docker run -v $PWD/data:/tmp/data --rm -i --net gravnet \
 gravwell:ingesters /opt/gravwell/bin/reimport -rebase-timestamp \
 -clear-conns test:4023 -i /tmp/data/syslogdata -import-format json
 \end{Verbatim}
-\end{samepage}
+
 
 In the command above, we spin up a new container and run the \code{reimport} ingester, telling it to read json-formatted entries from standard input.
 
@@ -559,26 +573,28 @@ docker cp config/gravwell.conf test:/opt/gravwell/etc/
 docker restart test
 \end{Verbatim}
 
-Check the ``Wells \& Indexers'' page on the GUI to verify that your
-indexer is properly configured. You should see about 20k entries in the
-\code{syslog} well in hot storage.
+\clearpage
+Check the well configuration details in the GUI to verify that your
+indexer is properly configured. Selecting the Health tab for the indexer
+will show about 20k entries in the \code{syslog} well in hot storage.
 
 \begin{figure}
 	\includegraphics{images/hotstore.png}
 	\caption{Data in Hot Store}
 \end{figure}
 
-In a few minutes, the indexer will age the hot data into the cold
-well.
+The indexer will age the hot data into the cold well. Please wait to
+observe this change; it may take some time. You can also
+click on each individual well to see details for that one alone.
 
 \begin{figure}
 	\includegraphics{images/coldstore.png}
 	\caption{Data in Hot and Cold Stores}
 \end{figure}
 
+\clearpage
 Your modified \code{gravwell.conf} well definitions should look something
 like this:
-
 \begin{Verbatim}[breaklines=true]
 [Default-Well]
     Location=/opt/gravwell/storage/default/
@@ -594,12 +610,10 @@ like this:
     Delete-Frozen-Data=true
 \end{Verbatim}
 
-To clean up after the experiment, simply run:
+Do not \code{rm} the test container, as we are
+going to use it again for the next lab.
 
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
+\clearpage
 \section{Replication}
 \index{Replication}
 Hardware failures happen, drives crash, and humans mis-type commands;
@@ -650,9 +664,8 @@ still needs to track how much of its own data has been replicated.
 
 There are a few important security considerations associated with the
 above config:
-
 \begin{enumerate}
-	\item \code{Replication-Secret-Override}is not specified.
+	\item \code{Replication-Secret-Override} is not specified.
 	\begin{enumerate}
 		\item The indexer will use the \code{Control-Secret} for authentication.
 	\end{enumerate}
@@ -668,6 +681,7 @@ above config:
 	\end{enumerate}
 \end{enumerate}
 
+\clearpage
 \subsection{Hands-on Lab: Replication}
 
 We will be instantiating an offline replication server and configuring
@@ -756,7 +770,8 @@ pushing current hot shards to the hot pool.
 To clean up after the experiment, simply run:
 
 \begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
 \end{Verbatim}
 
 \section{Query Acceleration and Indexing}
@@ -977,6 +992,7 @@ a query that examined 8TB of data complete in
 less than 1 second once indexing was properly configured, where un-accelerated queries
 had previously taken over 30 minutes.
 
+\clearpage
 \subsection{Hands-on Lab: Acceleration}
 
 For this lab, we are going to configure a well that will store JSON
@@ -986,23 +1002,20 @@ using the JSON generator. Once the data is ingested we will query
 it and examine how the accelerator reduces the number of entries that
 enter the pipeline, thus speeding up the query.
 
-First, we'll get into the lab subdirectory, then stop and remove any existing containers:
+First, we'll get into the lab subdirectory:
 
 \begin{Verbatim}[breaklines=true]
 cd gravwell_training/Indexers/Lab-Acceleration/
-docker stop test
-docker rm test
 \end{Verbatim}
 
-Create a new container using the gravwell:base image and pull the
-default \code{gravwell.conf} from it:
+Create a new container using the gravwell:base image:
 
 \begin{Verbatim}[breaklines=true]
 docker create --net gravnet --name test gravwell:base
-docker cp test:/opt/gravwell/etc/gravwell.conf .
 \end{Verbatim}
 
-Edit the gravwell.conf to create a new well named ``json'' with the
+We have provided a copy of the base gravwell.conf in the config/ subdirectory, 
+so modify it to create a new well named ``json'' with the
 following specifications:
 
 \begin{enumerate}
@@ -1019,7 +1032,7 @@ Copy the edited gravwell.conf file into the container, start it, and inspect it
 to find its IP:
 
 \begin{Verbatim}[breaklines=true]
-docker cp gravwell.conf test:/opt/gravwell/etc/gravwell.conf
+docker cp config/gravwell.conf test:/opt/gravwell/etc/gravwell.conf
 docker start test
 \end{Verbatim}
 
@@ -1062,6 +1075,7 @@ the disk or look at in any way.
 \hypertarget{h.cpnsaxr7kale}{%
 \subsubsection{\texorpdfstring{{}}{}}\label{h.cpnsaxr7kale}}
 
+\clearpage
 Next, we'll add two additional wells to the indexer.
 The second well will enable query acceleration that is almost identical
 to the well we have already configured, but instead of using the default
@@ -1092,7 +1106,7 @@ into it, and then restart it:
 
 \begin{Verbatim}[breaklines=true]
 docker stop test
-docker cp gravwell.conf test:/opt/gravwell/etc/gravwell.conf
+docker cp config/gravwell.conf test:/opt/gravwell/etc/gravwell.conf
 docker start test
 \end{Verbatim}
 
@@ -1147,7 +1161,8 @@ even fewer entries off the disk than with the bloom engine, this query is even f
 To clean up after the experiment, simply run:
 
 \begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
 \end{Verbatim}
 
 \section{Indexer Optimization}
@@ -1336,6 +1351,7 @@ variables are NOT a secure way to configure Gravwell, so if you are going
 to use Docker, Kubernetes, or Openshift in production, use secrets
 for the auth tokens.
 
+\clearpage
 \subsection{Hands-on Lab: Docker Configuration}
 
 For this lab we are going to use Docker environment variables to stand
@@ -1345,14 +1361,7 @@ configuration parameters using Docker. If you are using a community
 license you can complete the lab, but will only be able to configure a
 single indexer.
 
-Start by cleaning up your docker environment:
-
-\begin{Verbatim}[breaklines=true]
-docker stop test
-docker rm test
-\end{Verbatim}
-
-Now look at \code{gravwell\_training/Indexers/Lab-Docker/config/gravwell.conf}
+Look at \code{gravwell\_training/Indexers/Lab-Docker/config/gravwell.conf}
 and note that we have removed the \code{Remote-Indexers}
 configuration parameter so that we can inject a list of
 indexers at runtime. First, fire up a container that is only running the
@@ -1417,7 +1426,7 @@ docker inspect --format \
 '{{.NetworkSettings.Networks.gravnet.IPAddress}}' webserver
 \end{Verbatim}
 
-Let's open up or Gravwell GUI and check out our indexer and hardware
+Let's open up our Gravwell GUI and check out our indexer and hardware
 tabs. You should see several indexers connected with a lot more
 activity in the hardware monitoring page, as shown in Figures \ref{fig:idx-hardware} and \ref{fig:idx-wells}.
 
@@ -1436,5 +1445,6 @@ activity in the hardware monitoring page, as shown in Figures \ref{fig:idx-hardw
 To clean up after the experiment, simply run:
 
 \begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
 \end{Verbatim}
