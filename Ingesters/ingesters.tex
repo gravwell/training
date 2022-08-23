@@ -7,6 +7,152 @@ and packaging it for Gravwell. If you have pre-existing data (archive
 files on disk, PCAP files, data in Splunk), see Chapter \ref{chapter:migration}
 for information on how best to import it.
 
+\section{Dealing with Timestamps}
+\label{sec:timestamps}
+\index{timestamps}
+All ingesters attach a timestamp to each entry sent to an indexer. Most ingesters extract timestamps directly from the data being ingested; some, such as Kinesis and Pub/Sub, can use a timestamp obtained directly from the upstream data source. When an ingester cannot extract a timestamp, the current time will be applied to the entry.
+
+To find a timestamp in the source data, the ingester will try a list of possible timestamp formats attempting to find a match in the data.
+It will always try to re-apply the most recent successful format first. For example, if an entry has a timestamp \code{02 Jan 06 15:04 MST}, the ingester will attempt to parse the \emph{next} entry with the same timestamp format. If it does not match, then the ingester will attempt all other timestamp formats.
+
+There are several ways to change the behavior of how timestamps are parsed, detailed in the next section. Additionally, fully custom timestamp formats can be provided in some ingesters.
+
+\subsection{Time Zones}
+
+Dealing with time zones can be one of the most challenging and frustrating aspects of ingestion. If a log's timestamp includes an explicit UTC offset (e.g. ``-0700''), things are relatively easy, but many log formats do not include any time zone information at all! Sometimes, the system generating the log entry is in a local time zone, while the Gravwell ingester's system is set to UTC, or vice versa.
+
+If you believe you have configured your ingester properly, but you're not seeing any data in a query, try expanding your query timeframe to include the future using the "Date Range" timeframe selection: just set the End Date to some time tomorrow. If the Gravwell ingest system is set to a US time zone, but the logs are in UTC time with no offset included, the incoming data will be ingested in the "future".
+
+The \code{Timezone-Override} parameter (described below) is the surest way to fix time zone problems. If your data has a UTC timestamp but the system clock is set to another time zone, set \code{Timezone-Override="Etc/UTC"}. If your data is in US Eastern time, but the system clock is set to UTC, set \code{Timezone-Override="America/New\_York"}, and so on.
+
+\subsection{Time Parsing Overrides}
+
+Most ingesters attempt to apply a timestamp to each entry by extracting a timestamp from the data. There are several options which can be applied to each data consumer for fine-tuning of this timestamp extraction:
+
+\begin{itemize}
+\item
+    \code{Ignore-Timestamps} (boolean): setting \code{Ignore-Timestamps=true} will make the ingester apply the current time to each entry rather than attempting to extract a timestamp. This can be the only option for ingesting data when you have extremely incoherent incoming data.
+\item
+    \code{Assume-Local-Timezone} (boolean): By default, if a timestamp does not include a time zone the ingester will assume it is a UTC timestamp. Setting \code{Assume-Local-Timezone=true} will make the ingester instead assume whatever the local computer's timezone is. This is mutually exclusive with the \code{Timezone-Override} option.
+\item
+    \code{Timezone-Override} (string): Setting \code{Timezone-Override} tells the ingester that timestamps which don't include a timezone should be parsed in the specified timezone. Thus \code{Timezone-Override=US/Pacific} would tell the ingester to treat incoming timestamps as if they were in US Pacific time. Mutually exclusive with \code{Assume-Local-Timezone}.
+\item
+    \code{Timestamp-Format-Override} (string): This parameter tells the ingester to look for a specific timestamp format in the data, e.g. \code{Timestamp-Format-Override="RFC822"}. Refer to the timegrinder documentation for a full list of possible overrides, with examples.
+\end{itemize}
+
+\subsection{Ingester Custom Time Formats}
+
+Many ingesters can support the inclusion of custom time formats that can extend the capability of the Gravwell timegrinder time resolution system.  Gravwell's timestamp extraction engine has a wide array of timestamp formats that it can automatically identify and resolve.  However, in the real world with real developers there is no telling what time format a system may decide to use.  That is why we enable users to specify custom time formats for inclusion in the timegrinder system.
+
+Custom time formats are a fallback when the usual timestamp extraction fails; refer to section \ref{sec:timestamps} for more general information on timestamp extraction.
+
+\subsubsection{Defining a Custom Format}
+
+A custom format requires three items to function:
+
+\begin{itemize}
+\item Name
+\item Regular Expression
+\item Format
+\end{itemize}
+
+The given name for a custom time format must be unique across other custom time formats and the included timegrinder formats.  For a complete up-to-date listing of included time formats and their names, refer to the timegrinder documentation\footnote{\href{https://pkg.go.dev/github.com/gravwell/gravwell/v3/timegrinder\#pkg-constants}{https://pkg.go.dev/github.com/gravwell/gravwell/v3/timegrinder\#pkg-constants}}.
+
+Custom time formats are declared in the configuration files for supported ingesters by specifying a named \code{TimeFormat} block.  Here is an example format named ``foo'' which handles timestamps that are delimited using underscores:
+
+\begin{verbatim}
+[TimeFormat "foo"]
+	Format="2006_01_02_15_04_05"
+	Regex=`\d{4}_\d{1,2}_\d{1,2}_\d{1,2}_\d{1,2}_\d{1,2}`
+\end{verbatim}
+
+This format would properly handle the timestamps in the following logs:
+
+\begin{verbatim}
+2021_02_05_09_00_00 and my id is 1
+2021_02_05_09_00_00 and my id is 2
+2021_02_05_09_00_00 and my id is 3
+2021_02_05_09_00_00 and my id is 4
+2021_02_05_09_00_00 and my id is 5
+2021_02_05_09_00_00 and my id is 6
+\end{verbatim}
+
+Here is another format that handles logs with only a timestamp:
+
+\begin{verbatim}
+[TimeFormat "foo2"]
+	Format="15^04^05"
+	Regex=`\d{1,2}\^\d{1,2}\^\d{1,2}`
+\end{verbatim}
+
+This format would handle the following logs, appropriately applying the current date to each extracted timestamp:
+
+\begin{verbatim}
+09^00^00 and my id is 1
+09^00^00 and my id is 2
+09^00^00 and my id is 3
+09^00^00 and my id is 4
+09^00^00 and my id is 5
+09^00^00 and my id is 6
+\end{verbatim}
+
+These custom timestamp definitions will be automatically added to the list used for timestamp extraction, but the name can also be explicitly specified in the \code{Timestamp-Format-Override} parameter.  For example, we can force the timestamp format to our custom format using \code{Timestamp-Format-Override="foo"}.
+
+\subsubsection{Time Formats}
+
+The \code{Format} component uses the Go standard time format specification\footnote{\href{https://golang.org/pkg/time/\#pkg-constants}{https://golang.org/pkg/time/\#pkg-constants}}. In short, to define a format, specify the date `Mon Jan 2 15:04:05 MST 2006' using whatever format you choose.
+
+Time formats can omit the date component.  When the custom format system identifies that a custom time format does not include a date component, it will automatically update the extracted timestamp's date to the current day.
+
+\subsubsection{Time Zones}
+
+All custom time formats will attempt to operate in UTC unless otherwise indicated using the \code{Format} directive.  This means that if you have a time format without a date component you must pay special attention to the timezone.  If an application emits a timestamp of ``12:00:00'' in MST and there is no timezone component or timezone overrides, timegrinder will interpret the timestamp as UTC and the extracted date will be 7 hours in the past.
+
+If your timestamp does contain a timezone you must include that in your \code{Format} directive so that the timegrinder system knows to interpret the timestamp in the correct time zone.  For example here is the previously described ``foo'' custom format but with a timezone component:
+
+\begin{verbatim}
+[TimeFormat "foo"]
+	Format="2006_01_02_15_04_05_MST"
+	Regex=`\d{4}_\d{1,2}_\d{1,2}_\d{1,2}_\d{1,2}_\d{1,2}_\S+`
+\end{verbatim}
+
+This example will properly handle timestamps in their respective time zones and apply the correct timestamp on extraction.
+
+\subsubsection{Example}
+
+Here is an example File Follower configuration which adds two custom time formats:
+
+\begin{verbatim}
+[Global]
+Ingester-UUID="463c1889-2954-40a0-a3b4-705ea66459f6"
+Ingest-Secret = IngestSecrets
+Connection-Timeout = 0
+Pipe-Backend-Target=/opt/gravwell/comms/pipe #a named pipe connection, this should be used when ingester is on the same machine as a backend
+State-Store-Location=/opt/gravwell/etc/file_follow.state
+Log-Level=INFO #options are OFF INFO WARN ERROR
+Log-File=/opt/gravwell/log/file_follow.log
+Max-Files-Watched=64 # Maximum number of files to watch before rotating out old ones, this can be bumped but will need sysctl flags adjusted
+
+#basic default logger, all entries will go to the default tag
+#no Tag-Name means use the default tag
+[Follower "auth"]
+	Base-Directory="/tmp/logs/"
+	File-Filter="*.log" #we are looking for all authorization log files
+	Tag-Name=test
+	Assume-Local-Timezone=true #Default for assume localtime is false
+
+[TimeFormat "foo"]
+	Format="2006_01_02_15_04_05"
+	Regex=`\d{4}_\d{1,2}_\d{1,2}_\d{1,2}_\d{1,2}_\d{1,2}`
+
+[TimeFormat "foo2"]
+	Format="15!04!05"
+	Regex=`\d{1,2}!\d{1,2}!\d{1,2}`
+\end{verbatim}
+
+The file follower will handle timestamps that are specified as ``2021\_02\_14\_12\_33\_52'' and ``15!05!22'' properly due to the additional custom time formats.
+
+
 \section{Configuration}
 \label{sec:global-config}
 
