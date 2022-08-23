@@ -13,7 +13,7 @@ for information on how best to import it.
 All ingesters attach a timestamp to each entry sent to an indexer. Most ingesters extract timestamps directly from the data being ingested; some, such as Kinesis and Pub/Sub, can use a timestamp obtained directly from the upstream data source. When an ingester cannot extract a timestamp, the current time will be applied to the entry.
 
 To find a timestamp in the source data, the ingester will try a list of possible timestamp formats attempting to find a match in the data.
-It will always try the re-apply the most recent successful format first. For example, if an entry has a timestamp \code{02 Jan 06 15:04 MST}, the ingester will attempt to parse the \emph{next} entry with the same timestamp format. If it does not match, then the ingester will attempt all other timestamp formats.
+It will always try to re-apply the most recent successful format first. For example, if an entry has a timestamp \code{02 Jan 06 15:04 MST}, the ingester will attempt to parse the \emph{next} entry with the same timestamp format. If it does not match, then the ingester will attempt all other timestamp formats.
 
 There are several ways to change the behavior of how timestamps are parsed, detailed in the next section. Additionally, fully custom timestamp formats can be provided in some ingesters.
 
