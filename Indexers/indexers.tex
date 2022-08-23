@@ -1008,7 +1008,7 @@ For example, let's assume the tag ``test'' is using fulltext acceleration and we
 
 \textit{Query acceleration is not order of operation dependent.}
 
-Modules which can accelerate queries will hint about their ability to accelerate no matter where they are in the query string.  Consider the following query: \code{tag=test grep foo* | regex "my name is (?P<name>\S+)" | words foobar}.  The `words` module is capable of invoking query acceleration on a fulltext accelerator and will hint to the acceleration system that it wants the word "foobar" and the accelerator will use that hint.  You may notice that very few entries actually enter the pipeline even though words came much later in the query.
+Modules which can accelerate queries will hint about their ability to accelerate no matter where they are in the query string.  Consider the following query: \code{tag=test grep foo* | regex "my name is (?P<name>$\backslash$S+)" | words foobar}.  The `words` module is capable of invoking query acceleration on a fulltext accelerator and will hint to the acceleration system that it wants the word "foobar" and the accelerator will use that hint.  You may notice that very few entries actually enter the pipeline even though words came much later in the query.
 
 \textit{Query acceleration is on a shard-by-shard basis.}
 
