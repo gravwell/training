@@ -280,9 +280,6 @@ docker kill $(docker ps -a -q)
 
 
 
-%%%%%%%%%%
-% TODO: Kris please update this for the Gravwell load balancer
-%%%%%%%%%%
 \section{Setting Up a Load-Balancer}
 \index{Traefik}\index{Load balancer}
 Multiple webservers work well when placed behind a load-balancing
@@ -296,6 +293,81 @@ It is essential that the load balancer be configured with ``sticky''
 sessions. This ensures that a given user will be directed to the same
 webserver every time.
 
+The Gravwell provided loadbalancer takes much of the guess work out of
+configuration and hot failover.  While any HTTP loadbalancer that can
+perform session pinning will work, the native Gravwell load balancer
+makes configuration easy by directly integrating with the Gravwell
+datastore so that it can automatically discover available webservers
+and intelligently failover without the need for a user request to fail.
+
+The Gravwell Loadbalancer is available as a Debian, Redhat, or shell
+installer; we also publish a docker container in the Docker Hub.
+
+The load balancer configuration is named ``loadbalancer.conf'' and is
+typically located in the Gravwell ``etc'' directory.
+
+Here is an example ``loadbalancer.conf'' configuration which is serving
+HTTP requests on port 8080 and communicating with the datastore without
+a TLS conection:
+
+
+\begin{Verbatim}[breaklines=true]
+[Global]
+	Disable-HTTP-Redirector=true
+	Insecure-Disable-HTTPS=true
+	Web-Port=8080
+	Update-Interval=10
+	Session-Timeout=10
+	Log-Dir=/opt/gravwell/log/loadbalancer
+	Log-Level=info
+	Enable-Access-Log=true
+
+	Control-Secret=ControlSecrets
+	Datastore=172.19.0.2
+	Datastore-Insecure-Disable-TLS=true
+	#Datastore-Insecure-Skip-TLS-Verify=true
+\end{Verbatim}
+
+In this case, the loadbalancer will probe the datastore and automatically
+discover available webservers.  As webservers come online or go offline
+the load balancer will dynamically add and remove the webservers from its
+available pool.
+
+However, you may wish to manually set some specific webservers that should
+be considered always online.  This does not mean that these webservers will
+always be used, just that the load balancer will assume they are always
+supposed to be available.  Even with "override" webservers the loadbalancer
+will route users to an available webserver.
+
+Here is an example configuration with two webservers that have a custom configuration:
+
+\begin{Verbatim}[breaklines=true]
+[Global]
+	Disable-HTTP-Redirector=false
+	Insecure-Disable-HTTPS=false
+	Web-Port=443
+	Update-Interval=10
+	Session-Timeout=10
+	Log-Dir=/opt/gravwell/log/loadbalancer
+	Log-Level=info
+	Enable-Access-Log=true
+
+	Control-Secret=ControlSecrets
+	Datastore=172.19.0.2
+	#Datastore-Insecure-Disable-TLS=true
+	Datastore-Insecure-Skip-TLS-Verify=true
+
+# Example setting up an override webserver that may not be in the datastore
+[Overrides "example1"]
+	Webserver=172.19.0.100
+	Insecure-Disable-HTTPS=true
+
+[Overrides "example2"]
+	Webserver=172.19.0.101
+	Insecure-Disable-HTTPS=true
+\end{Verbatim}
+
+\subsection{Using Traefik}
 The Traefik load-balancing proxy has been shown to work well with
 Gravwell. The following is a sample configuration which load-balances
 between two Gravwell webservers at 10.0.0.1 and 10.0.0.2:
