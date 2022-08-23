@@ -1,12 +1,9 @@
-FROM ubuntu:latest
+ARG VER=latest
+FROM gravwell/network_capture:${VER}
 MAINTAINER training@gravwell.io
+ARG CONFIG=network_capture.conf
+COPY $CONFIG /opt/gravwell/etc/$CONFIG
 
-COPY network_capture.sh /tmp/network_capture.sh
-COPY network_capture.conf /tmp/network_capture.conf
-COPY zoneinfo /usr/share/zoneinfo
-
-RUN /bin/bash /tmp/network_capture.sh --no-questions --no-start --no-crash-report --use-config /tmp/network_capture.conf
-RUN rm /tmp/network_capture.sh /tmp/network_capture.conf
 ENV GRAVWELL_INGEST_AUTH=IngestSecrets
 ENV GRAVWELL_INGEST_SECRET=IngestSecrets
 ENV GRAVWELL_CONTROL_AUTH=ControlSecrets
