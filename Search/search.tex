@@ -1105,6 +1105,8 @@ tag=syslog grep sshd
 | chart count by username limit 10
 \end{Verbatim}
 
+The ``other'' data group is a combined calculation of all remaining data groups that will not fit in the specified set of data series.  In the above examples we have limited the data series to 10 using the \code{limit 10} argument to chart, this means that the chart module will first survey the data as it comes in to pick the best data set to include and then add all other data sets to the ``other'' bucket.  Chart calculates the value of the ``other'' data set using the exact same math as the rendered data set, often leading to the ``other'' data set dominating the output of a chart.
+
 The results can be rendered in a variety of ways. By default, the UI will show a line chart (Figure \ref{fig:chart-line}, but the gear icon on the right side allows you to select a variety of chart types, including pie charts (Figure \ref{fig:chart-pie}.
 
 \begin{figure}
@@ -1118,6 +1120,8 @@ The results can be rendered in a variety of ways. By default, the UI will show a
 	\caption{Pie chart}
 	\label{fig:chart-pie}
 \end{figure}
+
+Notice that the ``other'' group represents the largest slice in the pie chart, indicating that the vast majority of usernames are not in the primary data sets.
 
 \clearpage
 
