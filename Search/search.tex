@@ -1105,7 +1105,7 @@ tag=syslog grep sshd
 | chart count by username limit 10
 \end{Verbatim}
 
-The ``other'' data group is a combined calculation of all remaining data series that will not fit in the specified set of data series.  In the above examples we have instructed chart to only draw 10 data series using the \code{limit 10} argument, this means that the chart module will first survey the data as it comes in to pick the best 9 data series to include and then add all other data series to the ``other'' bucket.  Chart calculates the value of the ``other'' data series using the exact same math as the rendered data series, often leading to the ``other'' data series dominating the output of a chart.
+The ``other'' data group is a combined calculation of all remaining data sets that will not fit within the chart limit.  In the above example, we have instructed chart to only draw 10 groups using the \code{limit 10} argument. This means that the chart module will first survey the data as it comes in to pick the 9 best data sets to include and then will add all other data sets to the ``other'' bucket.  Chart calculates the value of the ``other'' data group using the exact same math as the rendered data sets, often leading to the ``other'' group dominating the output of a chart.
 
 The results can be rendered in a variety of ways. By default, the UI will show a line chart (Figure \ref{fig:chart-line}, but the gear icon on the right side allows you to select a variety of chart types, including pie charts (Figure \ref{fig:chart-pie}.
 
