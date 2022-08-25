@@ -269,55 +269,42 @@ thing. When an enumerated value is extracted it is attached to an
 entry for the remainder of the pipeline. Entries can have many enumerated values attached.
 
 The best way to demonstrate field extraction and enumerated values is
-to perform a few queries and look at the results. Let's look at some
-Apache access log data and perform some queries that use enumerated
-values. First let's see what a standard Apache combined access
-log\footnote{http://httpd.apache.org/docs/2.2/logs.html\#combined} looks like;
-note that the entry is a single line of text but has been broken into
-several lines for printing here:
+to perform a few queries and look at the results. Let's look at the same
+syslog data we used previously. Here's an example:
 
 \begin{Verbatim}[breaklines=true]
-58.71.219.5 - Bayer3954 368 [2019-03-21T11:10:21-06:00] 
-"GET /vortals/target/frontend?data=7b22757365726e616d65223
-a226a6f65222c2270617373776f7264223a226368616e67656d65227d"
-200 58212 "http://www.humanmethodologies.com/aggregate"
-"Mozilla/5.0 Chrome/38.0.89"
+Mar 20 23:59:48 porter sshd[35522]: Failed password for root from 218.92.0.151 port 26814 ssh2
 \end{Verbatim}
 
-The log entry is pretty complex and contains several pieces of data
-that might be useful to analyze, but first we need to get them out of
-that log entry. Let's start by issuing a query that uses the regex
-module to extract the requesters IP and username:
+A syslog entry consists of a date, the hostname of the system that sent the message, the application that generated the message, the process ID of that particular application, and the message itself. Sometimes a message may contain additional information, but these basic fields should always exist.
+
+We can use Gravwell's \code{syslog} module to extract some of these fields as enumerated values and display them in a table. Figure \ref{fig:extract-syslog} shows the results.
 
 \begin{Verbatim}[breaklines=true]
-tag=apache regex "^(?P<ip>\S+)\s\S+\s(?P<user>\S+)\s" | table
+tag=syslog syslog Appname Message | table
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/extract-ip.png}
-	\caption{Extracted IP and username}
-	\label{fig:extract-ip}
+	\includegraphics[width=0.8\linewidth]{images/extract-syslog.png}
+	\caption{Fields extracted from syslog entries.}
+	\label{fig:extract-syslog}
 \end{figure}
 
-Figure \ref{fig:extract-ip} shows the results.
 Note that if you specify the table renderer and don't give it column
 names, it will automatically use every enumerated value created in the
-pipeline. Our regular expression extracted two features from the log
-entry named ``ip'' and ``user'' and attached them to the entry. The
+pipeline. The syslog module extracted features from the log
+entry named ``Appname'' and ``Message'' and attached them to the entry. The
 table renderer then created columns using the enumerated value names
 and rendered a row for each entry, populating the columns with the
-enumerated value names.
+enumerated value contents.
 
 We can expand on these extractions by also extracting the method and
-URL. Rather than trying to modify our regular expression to extract
-everything all at once, let's chain another regular expression that only
-extracts those values. This demonstrates that successive modules can
+URL. Rather than modifying the original \code{syslog} command, we can
+chain in another one to extract the additional values. This demonstrates that successive modules can
 extract additional features and attach them to entries.
 
 \begin{Verbatim}[breaklines=true]
-tag=apache regex "^(?P<ip>\S+)\s\S+\s(?P<user>\S+)\s" |
-regex "\]\s\"(?P<method>\S+)\s(?P<url>\S+)\"\s"
-| table
+tag=syslog syslog Appname Message | syslog ProcID Message | table
 \end{Verbatim}
 
 \begin{figure}
@@ -326,19 +313,16 @@ regex "\]\s\"(?P<method>\S+)\s(?P<url>\S+)\"\s"
 	\label{fig:extract-chaining}
 \end{figure}
 
-Now that we have the IP, username, method, and URL, let's extract a
-feature from a feature. We will chain yet another module to extract
-just the data parameter from the already-extracted URL by adding another
-regular expression statement that only operates on the ``url''
-enumerated value. This time we'll specify the columns we actually care
-about as arguments to the table renderer. Figure \ref{fig:extract-ev} shows
+Now that we have the Appname, Hostname, ProcID, and Message, let's extract a
+feature from a feature. This data contains lots of messages about failed login attempts in the Message fields; we can use the \code{regex} module to extract the username and IP address from these failed login attempts with a regular expression. We specify the \code{-e} flag to tell \code{regex} that it should look \emph{only} at the contents of the Message enumerated value, rather than the entire raw entry.
+
+We'll simplify the query a little by condensing the two \code{syslog} invocations into one, and we'll also tell the table module to only display the columns we're interested in. Figure \ref{fig:extract-ev} shows
 the results of the query.
 
 \begin{Verbatim}[breaklines=true]
-tag=apache regex "^(?P<ip>\S+)\s\S+\s(?P<user>\S+)\s" |
-regex "\]\s\"(?P<method>\S+)\s(?P<url>\S+)\"\s"|
-regex -e url "data=(?P<data>[\da-z]+)" |
-table ip user method data
+tag=syslog syslog Appname Message ProcID Hostname 
+| regex -e Message "Failed password for (?P<username>\S+) from (?P<ip>\S+) port"
+| table Hostname username ip
 \end{Verbatim}
 
 \begin{figure}
@@ -347,56 +331,25 @@ table ip user method data
 	\label{fig:extract-ev}
 \end{figure}
 
-\begin{samepage}
-We can see that the data is hex encoded, so let's pass it to the
-\code{hexlify}\footnote{https://docs.gravwell.io/\#!search/hexlify/hexlify.md} module
-and decode it.
-
-\begin{Verbatim}[breaklines=true]
-tag=apache regex "^(?P<ip>\S+)\s\S+\s(?P<user>\S+)\s" |
-regex "\]\s\"(?P<method>\S+)\s(?P<url>\S+)\"\s"|
-regex -e url "data=(?P<data>[\da-z]+)" |
-hexlify -d data as decoded |
-table ip user method decoded
-\end{Verbatim}
-\end{samepage}
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/hex-decode-url.png}
-	\caption{Hex-decoded URL}
-	\label{fig:hex-decode-url} 
-\end{figure}
-
-
 We were able to chain multiple pipeline modules to extract multiple
-fields and then operate on those extracted fields to make machine data
-consumable by a human. As a result we can see that the user
-``Bayer3954'' is performing a GET request and sending URL parameters
-that contain encoded JSON data. We can even pass that extracted and
-decoded URL data to the \code{json}\footnote{https://docs.gravwell.io/\#!search/json/json.md}
-module, extract the username and password fields, and add them to the table as
-seen in Figure \ref{fig:url-extract-json}
+fields and then operate on those extracted fields to make a nicely-formatted table
+showing failed login attempts. We can even invoke the \code{count} module to track how
+many attempts occurred for each user on each system, as seen in Figure \ref{fig:extract-count}.
+Note how we specify \code{by Hostname username}, telling the \code{count} module that it
+should keep a separate count for each unique combination of Hostname and username.
 
-\begin{Verbatim}[breaklines=true]
-tag=apache regex "^(?P<ip>\S+)\s\S+\s(?P<user>\S+)\s" |
-regex "\]\s\"(?P<method>\S+)\s(?P<url>\S+)\"\s"|
-regex -e url "data=(?P<data>[\da-z]+)" |
-hexlify -d data as decoded |
-json -e decoded username password |
-table ip user method username password
+\begin{Verbatim}
+tag=syslog syslog Appname Message ProcID Hostname 
+| regex -e Message "Failed password for (?P<username>\S+) from (?P<ip>\S+) port"
+| count by Hostname username
+| table Hostname username count
 \end{Verbatim}
 
 \begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/url-extract-json.png}
-	\caption{URL parameters extracted as JSON}
-	\label{fig:url-extract-json}
+	\includegraphics[width=0.8\linewidth]{images/extract-count.png}
+	\caption{Doing statistics with enumerated values.}
+	\label{fig:extract-count}
 \end{figure}
-
-Using our chained modules we were able to take a rather complex Apache
-log with encoded data and translate it into an easily-digestible table.
-If we were operating in a security context we might set up an alert due
-to the fact that the user ``Bayer3954'' is sending requests with someone
-else's username (``joe'').
 
 \clearpage
 \subsection{Hands-on Lab: Searching with Enumerated Values and Field Extraction}
@@ -406,47 +359,28 @@ instead of just filtering we will extract data and output statistics to
 zero in on some bad behavior. If you tore down the environment from
 previous lab, go back and stand it back up and reingest the auth data.
 
-We will be using some regular expressions to extract data from Linux
-auth logs. Because regular expressions can be tricky we will just
-provide a few examples to get you started.
-
-This regular expression extracts the hostname and application name which generated the entry into enumerated values named ``host'' and ``app'':
-
-\begin{Verbatim}[breaklines=true]
-\S+\s\d+\s\S+\s(?P<host>\S+)\s(?P<app>[^\[]+)\[\d+\]:\s
-\end{Verbatim}
-
-This regular expression extracts the message from the syslog entry into an enumerated value named ``msg'':
-
-\begin{Verbatim}[breaklines=true]
-\[\d+\]:\s(?P<msg>.+)
-\end{Verbatim}
-
-This expression extracts the username (``user'') and IP address (``ip'') from an SSH log entry. It expects to operate on the ``msg'' enumerated value, not the full entry.
-
-\begin{Verbatim}[breaklines=true]
-^(?P<action>\S+)\spassword\sfor\s(?P<user>\S+)\sfrom\s(?P<ip>[\d\.]+)\s
-\end{Verbatim}
+We will be using the syslog module to extract data from Linux
+auth logs as demonstrated in the preceding section. You'll use
+the \code{syslog}, \code{grep}, and \code{count} modules, along with
+the \code{table} renderer.
 
 \subsubsection{Lab Tasks}
 
 \begin{enumerate}
 \item
-  Extract the \code{app} and \code{host} from the entries and put them in a
+  Extract the \code{Appname} and \code{Hostname} fields from the entries and put them in a
   table.
 	\begin{enumerate}
 	\item
-	  Add another extraction to pull the \code{msg} portion of the logs and
+	  Add another extraction to pull the \code{Message} portion of the logs and
 	  add it to the table.
 	\end{enumerate}
 \item
-  Filter to only include sshd messages by matching on the \code{app} enumerated value.
-	\begin{enumerate}
-	\item
-	  Generate a table with the count of \code{app} events by each \code{host}. Hint: \code{count by host}
-	\end{enumerate}
+  Filter to only include sshd messages by matching on the \code{Appname} enumerated value. Hint: \code{grep} takes a \code{-e} flag to specify an enumerated value!
 \item
-  Extract the \code{ip} and \code{user} for all SSH login events.
+ Generate a table with the count of \code{Appname} events by each \code{Hostname}. Hint: \code{count by host}
+\item
+  Extract the \code{ip} and \code{username} for all SSH login events. Hint: refer back to the regex examples given in this section.
 \end{enumerate}
 
 \textbf{BONUS}: generate a table with success and failure counts for each IP.
@@ -457,7 +391,7 @@ To clean up after the experiment, simply run:
 docker kill $(docker ps -a -q)
 \end{Verbatim}
 
-
+\clearpage
 \section{Search Modules}
 \index{Search!modules}
 Gravwell supports a wide variety of search modules that are designed to
@@ -542,20 +476,18 @@ Here is an example of the data we're looking at:
 }
 \end{Verbatim}
 
-The data generated is random. To complete this lab, examine the entries and make note of values found for country and groups.
-For example, in our sample entry above, we may note the following:
+The data generated is random. Let's take a look at the country and groups fields in the example above:
+
 \begin{itemize}
 \item country
-\subitem "Brazil"
+\subitem ``Brazil''
 \item groups
-\subitem "dagger"
-\subitem "jester"
+\subitem ``dagger''
+\subitem ``jester''
 \end{itemize}
 
-In the searches below, make replacements using your pre-selected values.
-
 Let's say we were looking to perform some analytics and we wanted to see
-what group activity looked like from users in Brazil. 
+what the ``groups'' field looked like for users in Brazil. 
 
 Because groups is an array of values, we will extract 
 the array and pass the output name to the \code{-x} flag:
@@ -598,7 +530,7 @@ chart count by groups
 \end{Verbatim}
 
 The new query doesn't look much different and the output is identical,
-but the performance may be dramatically different. If we have indexed
+but the performance may be dramatically different. It's also easier to read. If we have indexed
 on the \code{country} field, the json module can tell the acceleration system
 about our filter. As a result, only entries that have a country value of
 ``Brazil'' are ever retrieved from the disk or enter into the
@@ -647,8 +579,8 @@ because the filter allows the json module to be more efficient. The
 \code{json} module has to walk the data and find each field it is asked to
 extract, but by specifying a filter directly in the json module it can
 stop execution if one of the extractions fails the filter. In the above
-query example, let's say it extracts the country field and gets ``Mexico'';
-with inline filtering the json module knows that this fails the
+query example, let's say it extracts the country field and gets ``Mexico''.
+With inline filtering, the json module knows that this fails the
 filter, so it stops processing the entry; the \code{group} extraction is
 never even performed.
 
@@ -656,7 +588,7 @@ Let's look at another query where inline
 filtering lets us perform a filter that is more complex than simple
 equality, where the processing module can leverage its knowledge about
 the data to do something more interesting. Netflow is a network monitoring data format that generates flows
-(records of network connections) from raw network traffic. It can passively watch a network and say that
+(records of network connections) from raw network traffic. It will passively watch a network and report on connections, saying that
 IP A sent X bytes to IP B using the port Z. So instead of capturing
 potentially trillions of bytes for network statistical monitoring, we can
 capture just a few. Many smart switches and routers will natively
@@ -696,9 +628,8 @@ sum Bytes by IP | chart sum by IP
 This query also uses the PRIVATE keyword, which tells netflow we are
 looking for any non-routable
 IP\footnote{https://en.wikipedia.org/wiki/Private\_network\#Private\_IPv4\_addresses} addresses.
-Also, even though we are using the Port field that can examine and use
-either the SrcPort or DstPort, because we are using an equality filter
-it will invoke the accelerator (if we are accelerating on the field).
+Also, even though the Port field might end up referring to either SrcPort or DstPort, because we are using an equality filter
+it can still invoke the accelerator (if we are accelerating on the field).
 If we were on a large network with many billions of flows per day, the
 accelerators would dramatically speed up that query, plus we get a cool
 chart to show us who is pushing a bunch of data around using SSH.
@@ -766,14 +697,16 @@ entries by clicking on the stats tab of the query results.
 	\end{enumerate}
 \item
   Create a new query that generates a list of all users in the group
-  ``dagger'' and from the country Canada.
+  ``myth'' and from the country Canada.
 \item
   Adapt the query to generate a count of unique users in the
-  group ``dagger'' for each country sorted by largest count first.
+  group ``myth'' for each country sorted by largest count first.
 \end{enumerate}
 
-If these queries do not yield results, review the data or your list
-of pre-selected values. Adapt the query to search for a different group or country.
+Note: If your queries do not yield results, review the data or your list
+of pre-selected values. Adapt the query to search for a different group or country;
+it is possible that the generated data may not include a particular combination
+of country and group.
 
 To clean up after the experiment, simply run:
 
@@ -1535,21 +1468,15 @@ networkstatic/nflow-generator -t ingesters -p 2055
 The netflow generator will run indefinitely, generating flow records,
 until killed.
 
-Next we will upload a resource containing the MaxMind GeoIP database.
-Go to
-\href{https://dev.maxmind.com/geoip/geoip2/geolite2}{https://dev.maxmind.com/geoip/geoip2/geolite2/} and
-download the ``GeoLite2 City'' database in MaxMind DB format. Unpack the file
-using tar; it should contain a file named \code{GeoLite2-City.mmdb}.
-
-Upload that file into a new resource named ``maxmind'', as shown in Figure \ref{fig:maxmind-upload}.
+Now, we will install a kit (Chapter \ref{ch:kits}) which contains the MaxMind GeoIP database. In the main menu, expand the ``Kits'' section, then click ``Kit Management''. This will open a list of currently-installed kits; if you see ``Network Enrichment'' in the list, you may skip on to the next step. If not, click ``Available Kits'' at the top of the page, then find the Network Enrichment kit and click the deploy icon, as seen in Figure \ref{fig:maxmind-upload}. This will launch a kit deployment wizard; click through and install the kit.
 
 \begin{figure}
-	\includegraphics[width=0.5\linewidth]{images/maxmind-upload.png}
-	\caption{Uploading maxmind database}
+	\includegraphics[width=0.8\linewidth]{images/maxmind-upload.png}
+	\caption{Installing the Network Enrichment kit.}
 	\label{fig:maxmind-upload}
 \end{figure}
 
-With the GeoIP database uploaded, run the following query:
+With the kit installed, run the following query:
 
 \begin{Verbatim}[breaklines=true]
 tag=netflow netflow Src | ip Src !~ PRIVATE
@@ -1635,32 +1562,37 @@ diagram:
 \textbar{} sort by sum desc \\
 \textbar{} table sum variance B}
 
-Data fusion queries that perform enrichment will often need the
-\code{eval} module and persistent maps in order to save enumerated values
-from one entry and attach them to another. Here is the same query but
-instead of generating a unified set of stats using the two sources, we
-are going to enrich the RED data with the BLUE data:
+Data fusion queries that perform enrichment can use the \code{fuse} module
+in order to save enumerated values
+from one entry and attach them to another. Here is a less abstract query which uses dhcp (blue) logs to enrich dns (red) logs with MAC addresses:
 
-\code{tag=\textcolor{red}{RED},\textcolor{blue}{BLUE tag=BLUE json X Y} \\
-\textbar{} \textcolor{red}{tag=RED regex ``(?P\textless{}B\textgreater{}\textbackslash{}S+)\textbackslash{}s(?P\textless{}X\textgreater{}\textbackslash{}S+)\textbackslash{}s''} \\
-\textbar{} \textcolor{orange}{eval if(TAG==BLUE)\{ \\
-setPersistentMap(``X'', X, Y); \\
-~~~~return false \\
-\} else \{ \\
-~~~~setEnum(``Y'', getPersistentMap(``X'', X)) \\
-\}} \\
-\textbar{} table B X Y}
+\code{tag=\textcolor{red}{dns},\textcolor{blue}{dhcp tag=dhcp json mac ip} \\
+\textbar{} \textcolor{red}{tag=dns csv [0] as ip [1] as hostname} \\
+\textbar{} \textcolor{orange}{fuse ip mac} \\
+\textbar{} require -s hostname ip mac \\
+\textbar{} table hostname ip mac}
 
 This query looks daunting, but it is not terribly complicated. We have
-the RED and BLUE data streams coming in, each of which is processed by a
-different search module to extract data. Then the eval module will
-either save a key/value pair or lookup a key/value pair depending on the
-tag. For this example, if the entry has a BLUE tag we are saving the Y
-value with a key of X, then we drop the entry. If the tag is not
-BLUE (translation: the tag is RED) then we attempt to look up the X key in the map and assign
-the result into the enumerated value ``Y''. The output is a single data stream
-that essentially unifies the RED and BLUE data sets using a common key
-B.
+the \code{dhcp} and \code{dns} data streams coming in; in this case, we assume the DHCP logs are in a JSON format and the DNS records are CSV and use the appropriate modules to extract the enumerated values `mac' and `ip' from the DHCP logs, and `ip' and `hostname' from the DNS logs.
+
+We then invoke the \code{fuse} module. When it receives a dhcp entry, it sees that the `mac' enumerated value is set, so it stores the MAC address in a lookup table using the `ip' as a key. When it sees a \emph{dns} entry, it observes that there is no `mac' enumerated value, so it checks the table to see if there is anything stored under the given `ip'; if so, it sets the `mac' enumerated value on the entry.
+
+Consider these two example entries:
+
+\begin{itemize}
+\item Entry 1: \code{{"mac": "00:11:22:33:44:55", "ip": "192.168.0.1"}}
+	\subitem TAG = ``dhcp''
+	\subitem mac = ``00:11:22:33:44:55''
+	\subitem ip = ``192.168.0.1''
+\item Entry 2: \code{192.168.0.1,gravwell.example.org}
+	\subitem TAG = ``dns''
+	\subitem ip = ``192.168.0.1''
+	\subitem hostname = ``gravwell.example.org''
+\end{itemize}
+
+When the fuse module sees Entry 1, it will store a mapping of \code{192.168.0.1} → \code{00:11:22:33:44:55}. When it then sees Entry 2, it will observer that there is no `mac' enumerated value set; it will therefore check its lookup table for anything stored with the key \code{192.168.0.1}. It finds the mapping stored from Entry 1 and thus creates an enumerated value on Entry 2, `mac' = ``00:11:22:33:44:55''.
+
+The \code{require} module simply serves to filter out any entries which were not able to be enriched, dropping any entry which does not have hostname, ip, and mac enumerated values on it.
 
 \clearpage
 \subsection{Hands-on Lab: Data Fusion}
@@ -1674,7 +1606,7 @@ query. Let's start by ingesting our dataset and building extractions
 that pull the appropriate data from each tag. We will be using the
 tags ``dhcp'' and ``switch''.
 
-Note that this lab is one of the most challenging in this training document. It makes use of the powerful but complex regex (\href{https://docs.gravwell.io/\#!search/regex/regex.md}{https://docs.gravwell.io/\#!search/regex/regex.md}) and eval (\href{https://docs.gravwell.io/\#!search/eval/eval.md}{https://docs.gravwell.io/\#!search/eval/eval.md}) modules. We recommend carefully reading the examples shown in the lab instructions and those in the preceding section; these should demonstrate any necessary invocations of the modules. We also recommend using \href{https://regex101.com/}{https://regex101.com/} to help build and test regular expressions if needed.
+Note that this lab is one of the most challenging in this training document. It makes use of the powerful but complex regex\footnote{\href{https://docs.gravwell.io/\#!search/regex/regex.md}{https://docs.gravwell.io/\#!search/regex/regex.md}} and fuse\footnote{\href{https://docs.gravwell.io/\#!search/fuse/fuse.md}{https://docs.gravwell.io/\#!search/fuse/fuse.md}} modules. We recommend carefully reading the examples shown in the lab instructions and those in the preceding section; these should demonstrate any necessary invocations of the modules. We also recommend using \href{https://regex101.com/}{https://regex101.com/} to help build and test regular expressions if needed.
 
 First, we'll start the Gravwell container:
 
@@ -1766,33 +1698,19 @@ tag=switch,dhcp tag=switch grep "new MAC address"
 | tag=dhcp regex "\s(?P<ip>[\d\.]+) to (?P<mac>[\da-f:]+)(\s\((?P<host>\S+)\))?"
 | tag=switch regex "(?P<mac>[\da-f:]+),\s\S+\sinterface:port\s(?P<port>\d+)"
 | sort by time asc
-| eval if(TAG=="switch"){ setPersistentMap("ports", mac, port)
-} else { setEnum("port", getPersistentMap("ports", mac)) }
-| eval TAG=="dhcp" 
-| require port 
+| fuse mac port
+| require host 
 | unique mac host port 
 | table mac host port
 \end{Verbatim}
 
-The eval logic is a boolean if/else statement that sets the port value
-using the MAC as key if the tag is ``switch'', and looks up the port using the
-MAC key if not. Another eval statement drops all entries that are not
-tagged ``dhcp''. We then unique the list and generate a table. Here is the eval
-logic formatted a little better:
-
-\begin{Verbatim}[breaklines=true]
-if(TAG=="switch") {
-    setPersistentMap("ports", mac, port)
-} else {
-    setEnum("port", getPersistentMap("ports", mac))
-}
-\end{Verbatim}
+The \code{fuse} module in this case will store the port values from the switch logs and \emph{set} them on dhcp logs with matching MAC addresses. The \code{require} module drops all entries which lack the `host' enumerated value, which means all switch logs will be dropped. We then find all unique combinations of mac, host, and port, then generate a table. 
 
 Make note of the additional \code{sort by time asc} search module.  Gravwell
 loosely orders data by time when executing queries, but correlations like
 DHCP and switch actions are operating on data where microseconds matter,
 so it is important to strictly order the data by time in the pipeline
-so that the switch logs occur before the DHCP logs so that a mac address
+such that the switch logs properly occur \emph{before} the DHCP logs. This way a MAC address
 from the DHCP log can be looked up against a MAC address from the switch log.
 
 \begin{figure}
@@ -1809,9 +1727,7 @@ The resulting table (Figure \ref{fig:mac-host-table}) is pretty useful for keepi
 \item
   Try adapting the query to also extract the vlan id (vid) from the
   switch logs and add it to the table.
-\item
-  Adapt the query to set the hostname to ``UNKNOWN'' if the DHCP log
-  doesn't have a hostname
+	\subitem Hint: Look at the documentation for the fuse module to find out how to fuse multiple things!
 \item
   Generate an FDG with host to vid
 \item
@@ -2800,7 +2716,7 @@ docker kill $(docker ps -a -q)
 \end{Verbatim}
 
 
-
+\clearpage
 \section{Dashboards}
 \label{sec:dashboards}
 \index{Dashboards}
