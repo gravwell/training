@@ -1,7 +1,7 @@
 #!/bin/bash
 LOGFILE=/tmp/build.log
 OUTDIR=../dockerimages/
-VER=${VERSION:-5.0.5}
+VER=${VERSION:-5.0.6}
 
 if [ ! -d "$GOPATH" ]; then
 	echo "Must set GOPATH"
