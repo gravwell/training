@@ -224,6 +224,46 @@ Three label prefixes are used to manage Gravwell-internal information about obje
 Users should not create labels beginning with these strings, e.g. \code{kit/foo} or \code{kit/dependency:bar}. These labels are managed internally by Gravwell.
 
 \clearpage
+\section{Search Interfaces}
+\label{sec:search-interfaces}
+\index{Search}
+There are two different user interfaces for running searches in Gravwell: the classic lightweight search interface, and the multi-tabbed Query Studio. Which should you use? Either is acceptable, both take exactly the same Gravwell queries, but most users will find the Query Studio most comfortable.
+
+Throughout this text, screenshots may use either interface interchangeably, because they are \emph{designed} to be used interchangeably. Every feature available in the classic interface is available in the Query Studio. The Query Studio provides a few extra conveniences (including more advanced Data Explorer functionality (Section \ref{sec:data-explorer}), which is why we recommend it to most users.
+
+The classic search interface is accessed via the ``New Query'' option in the main menu. It presents a very sparse and straightforward way to enter a Gravwell query, along with a few options such as timeframe selection (Figure \ref{fig:original-search}).
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/original-search.png}
+	\caption{The classic search interface}
+	\label{fig:original-search}
+\end{figure}
+
+Clicking ``Search Now'' launches the search, taking the user to the classic results page as seen in Figure \ref{fig:original-results}. From here, the query can be modified and iterated on, re-running the search again and again as you explore data.
+
+\begin{figure}
+	\includegraphics[width=0.9\linewidth]{images/original-results.png}
+	\caption{The classic search results page}
+	\label{fig:original-results}
+\end{figure}
+
+The Query Studio is a newer interface, designed to provide a convenient multi-tabbed environment in which a user can work with multiple queries at the same time. Figure \ref{fig:query-studio} shows what the Query Studio looks like when first opened. Note how it presents a list of queries from the query library, templates, and selections from recent query history; clicking any of these will launch the selected query. Clicking ``Start a New Query'' begins with a blank query instead.
+
+\begin{figure}
+	\includegraphics[width=0.9\linewidth]{images/query-studio.png}
+	\caption{The Query Studio}
+	\label{fig:query-studio}
+\end{figure}
+
+Figure \ref{fig:query-studio-results} shows the Query Studio with two tabs open. The current tab displays the results of a chart query. Note the ``Pie Chart'' text near the upper right; this is a drop-down menu which allows the user to quickly change between chart types when running a query with the chart renderer. This and other conveniences make the Query Studio a more comfortable environment for most users.
+
+\begin{figure}
+	\includegraphics[width=0.9\linewidth]{images/query-studio-results.png}
+	\caption{Query Studio results display}
+	\label{fig:query-studio-results}
+\end{figure}
+
+\clearpage
 \section{Playbooks}
 \index{Playbooks}
 Playbooks are hypertext documents within Gravwell which help guide users through common tasks, describe functionality, and record information about data in the system. Most Gravwell kits (see Chapter \ref{ch:kits}) include a playbook or two to help users get oriented in the kit, but regular users can also \emph{create} playbooks for themselves, documenting their data investigations with a mix of text, images, and \emph{executable queries}.
