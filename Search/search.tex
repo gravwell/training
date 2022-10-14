@@ -69,6 +69,7 @@ presented to a human, script, or outside API.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+\clearpage
 \section{Query Entries and Tags}
 \index{Search!entries}\index{Entries}\index{Tags}
 The first part of any query is the \emph{tag set}; all queries operate on at
@@ -109,11 +110,9 @@ process this binary data.
 	\caption{Table showing tags and raw data}
 	\label{fig:tag-data-table}
 \end{figure}
+
+
 \clearpage
-
-
-
-
 \section{Chaining Multiple Modules}
 
 Gravwell search modules are each designed to accomplish a specific
@@ -251,6 +250,7 @@ Log into your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080},
 Do not \code{rm} the test container, as we are
 going to use it again for the next lab.
 
+\clearpage
 \section{Entries, Enumerated Values, and Field Extraction}
 \index{Search!enumerated values}\index{Enumerated Values}
 One of the most common operations any Gravwell user will perform is
@@ -390,189 +390,6 @@ To clean up after the experiment, simply run:
 \begin{Verbatim}[breaklines=true]
 docker kill $(docker ps -a -q)
 \end{Verbatim}
-
-\clearpage
-\section{Search Modules}
-\index{Search!modules}
-Gravwell supports a wide variety of search modules that are designed to
-perform various functions. Many of the search modules are used to
-perform feature extraction such as \code{json}, \code{syslog}, \code{cef},
-\code{csv}, \code{fields}, \code{netflow}, etc. Feature \textbf{extraction modules}
-transform raw data into structured data so that features can be
-extracted; they are also designed to be specification tolerant. This
-means that the modules will often operate on data that doesn't quite fit
-the spec. The \code{cef} and \code{syslog} modules are great examples, as there
-are specs for syslog (RFC5424) and CEF but almost no one follows them
-completely, so the extraction modules have to be tolerant to what is
-actually out in the wild.
-
-Gravwell also has many \textbf{analytical modules}. These modules perform
-statistical analysis. Examples of these are \code{count}, \code{sum},
-\code{mean}, \code{stddev}, \code{variance}, and \code{stats}. The analytical
-modules are great for performing analysis to identify
-trends, deviences and abnormalities in very large datasets. Many
-problems have been identified simply by counting log entries over time.
-Other search modules allow for plugging in logic which can allow for
-very complicated processing. The \code{eval} module allows for arbitrarily
-complex boolean logic, and the \code{anko} module lets you plug a
-Turing-complete script into the pipeline. If there isn't a module that
-accomplishes exactly what you want to do, Gravwell makes it possible to
-drop in your own custom logic via these modules.
-
-Search modules can also perform \textbf{feature enrichment}. Using the
-\code{lookup} module we can add external context to data as it goes by
-(such as assigning a hostname to an IP). The \code{langfind} module can
-use statistical analysis to infer the language of text. Using Gravwell
-you might be able to classify users by spoken language using chat logs,
-messages, or emails. Gravwell also has modules for complex machine
-learning tasks; we used Bayesian inference to generate datasets which
-classified social media posts as positive or negative (turns out people
-are pretty angry on the Internet). The Gravwell pipeline is designed to
-be pluggable and the available search modules are always expanding and
-improving. If you can't find what you want and aren't ready to roll
-your own using anko, Gravwell may be able to implement the module for you.
-
-\subsection{Statistics Modules}
-
-The statistics modules in Gravwell deserve special mention. They are used in perhaps a majority of queries: one of the most common questions asked in Gravwell is ``how many times did X occur?''. The following statistical operations are available:
-
-\begin{itemize}
-\item    count: count entries
-\item    sum: sum values and return the total
-\item    total: sum values over a period of time and keep a running total.
-\item    mean: calculate the average
-\item    stddev: calculate the standard deviation
-\item    variance: calculate the variance
-\item    min: return the minimum value seen
-\item    max: return the maximum value seen
-\item    unique\_count: return the number of unique instances of the source were seen.
-\end{itemize}
-
-The simplest possible invocation of a stats operation is the following query, which counts the number of entries in the \code{gravwell} tag:
-
-\begin{verbatim}
-tag=gravwell stats count
-\end{verbatim}
-
-You can do two operations at the same time; in the following example, we calculate each entry's length, then find the mean entry length and the total number of entries and display them in a table. Figure \ref{fig:stats-mean-count} shows the results of running this query, indicating that out of 12,057 entries, the average entry length was 209.73 bytes.
-
-\begin{verbatim}
-tag=gravwell length | stats mean(length) count | table
-\end{verbatim}
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/stats-mean-count.png}
-	\caption{Multiple stats operations at once.}
-	\label{fig:stats-mean-count}
-\end{figure}
-
-Note the syntax \code{mean(length)}. This tells the stats code to calculate the mean of the \code{length} enumerated value.
-
-Stats operations can be \emph{keyed}; for example, if you wish to calculate the count of log entries \emph{from each Gravwell component}, the component names (``webserver'', ``indexer'', ``searchagent'' etc.) are the \emph{keys}. Keys are specified using the \code{by} keyword, as seen in the query below, which calculates the count of log entries and the mean Message length, per Gravwell component. Figure \ref{fig:stats-keyed} shows the results for this query.
-
-\begin{verbatim}
-tag=gravwell syslog Appname Message | length Message 
-| stats count by Appname mean(length) by Appname | table Appname count
-\end{verbatim}
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/stats-keyed.png}
-	\caption{Keyed stats operation.}
-	\label{fig:stats-keyed}
-\end{figure}
-
-\subsubsection{Bucketing and Condensing}
-
-When you've run a search using a statistics operation, you will frequently be able to zoom in on the results of a portion of the results (see Section \ref{sec:temporal} for a more detailed explanation), and the results will automatically update. For instance, consider the following query:
-
-\begin{verbatim}
-tag=gravwell stats count | table
-\end{verbatim}
-
-If we run the query over the last hour, we'll see results as seen in Figure \ref{fig:bucket1}. We can then use the mouse to select a sub-portion of the timeframe graph at the top of the results, as seen in Figure \ref{fig:bucket2}; note how the count updates to reflect the count in the portion of time we selected, \emph{without re-running the query}.
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/bucket1.png}
-	\caption{Un-zoomed query.}
-	\label{fig:bucket1}
-\end{figure}
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/bucket2.png}
-	\caption{Zoomed query.}
-	\label{fig:bucket2}
-\end{figure}
-
-This is possible because the stats code uses bucketing and condensing operations. Basically, when the query runs, it generates a count \emph{for each second}--we say it has a 1 second bucket size. However, because we want to display the full hour's count in our table, the \emph{renderer} goes through and sums up all the count buckets to generate a final value. If you select a subset of the results, it is easy to compute the correct count by summing up only the buckets which fall within the selected timeframe. This same strategy is used for all the stats operations (we store additional data behind the scenes to accomplish this, e.g. in the case of \code{mean}).
-
-If a search is executed over a very long period of time, the default bucket size may be adjusted. Consider that storing counts for each individual second on a query spanning 10 years would require hundreds of megabytes of storage!
-
-It is also possible to manually specify a bucket size using the \code{over} keyword. Figure \ref{fig:stats-over} shows an example of a chart showing \emph{hourly} connection counts generated by simply counting the number of Zeek conn logs.
-
-\begin{verbatim}
-tag=zeekconn stats count over 1h | chart count
-\end{verbatim}
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/stats-over.png}
-	\caption{Using the over keyword.}
-	\label{fig:stats-over}
-\end{figure}
-
-
-\subsubsection{Sum vs. Total}
-
-The sum and total operators behave exactly the same in every context except chart. When using the chart renderer the total module will not ``reset'' values across time buckets.
-
-The behavior difference is best demonstrated using the following queries:
-
-\begin{verbatim}
-tag=zeekconn ax duration
-| stats sum(duration) total(duration)
-| table sum total
-\end{verbatim}
-
-\begin{verbatim}
-tag=zeekconn ax duration
-| stats sum(duration) total(duration)
-| chart sum total
-\end{verbatim}
-
-When the sum and total values are viewed in the table renderer (Figure \ref{fig:stats-total-table}), the values are the same: the summed-up/totaled-up duration of connections from Zeek connection logs. 
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/stats-total-table.png}
-	\caption{Sum and total operations in a table.}
-	\label{fig:stats-total-table}
-\end{figure}
-
-However, when viewed as a chart (Figure \ref{fig:stats-total-chart}), we can see the difference. Each line is composed of dots representing a fraction of the total time frame. On the sum line, each dot represents the sum for that particular fraction of time. On the total line, each dot represents the total duration of that slice of time \emph{and all preceding slices}. The underlying operations are the same, but total does not ``reset'' the bucket each time it transitions to a new time span, where sum does.
-
-\begin{figure}
-	\includegraphics[width=0.8\linewidth]{images/stats-total-chart.png}
-	\caption{Sum and total operations in a chart.}
-	\label{fig:stats-total-chart}
-\end{figure}
-
-\subsubsection{Statistics Shorthand Syntax}
-
-The sum, mean, max, min, count, variance, and stddev statistics operations can be invoked in ``shorthand'' syntax:
-
-\begin{verbatim}
-tag=* count
-\end{verbatim}
-
-\begin{verbatim}
-tag=gravwell length | mean length
-\end{verbatim]
-
-\begin{verbatim}
-tag=gravwell syslog Appname | length | mean length by Appname | table Appname mean
-\end{verbatim}
-
-Note that \code{stats mean(length)} becomes \code{mean length}. The shorthand syntax varies slightly from the normal syntax, because ``shorthand'' syntax is a compatibility mode remaining from old versions of Gravwell.
-
-It is not possible to invoke multiple stats operations simultaneously using the shorthand syntax. In general, we recommend using the \code{stats} syntax, as it is less ambiguous and more flexible.
 
 \clearpage
 \section{Inline Filtering}
@@ -937,6 +754,255 @@ Selecting the menu option will automatically update the query with a filter on t
 	\label{fig:filtered-query}
 \end{figure}
 
+\clearpage
+\section{Search Modules}
+\index{Search!modules}
+Gravwell supports a wide variety of search modules that are designed to
+perform various functions. Many of the search modules are used to
+perform feature extraction such as \code{json}, \code{syslog}, \code{cef},
+\code{csv}, \code{fields}, \code{netflow}, etc. Feature \textbf{extraction modules}
+transform raw data into structured data so that features can be
+extracted; they are also designed to be specification tolerant. This
+means that the modules will often operate on data that doesn't quite fit
+the spec. The \code{cef} and \code{syslog} modules are great examples, as there
+are specs for syslog (RFC5424) and CEF but almost no one follows them
+completely, so the extraction modules have to be tolerant to what is
+actually out in the wild.
+
+Gravwell also has many \textbf{analytical modules}. These modules perform
+statistical analysis. Examples of these are \code{count}, \code{sum},
+\code{mean}, \code{stddev}, \code{variance}, and \code{stats}. The analytical
+modules are great for performing analysis to identify
+trends, deviences and abnormalities in very large datasets. Many
+problems have been identified simply by counting log entries over time.
+Other search modules allow for plugging in logic which can allow for
+very complicated processing. The \code{eval} module allows for arbitrarily
+complex boolean logic, and the \code{anko} module lets you plug a
+Turing-complete script into the pipeline. If there isn't a module that
+accomplishes exactly what you want to do, Gravwell makes it possible to
+drop in your own custom logic via these modules.
+
+Search modules can also perform \textbf{feature enrichment}. Using the
+\code{lookup} module we can add external context to data as it goes by
+(such as assigning a hostname to an IP). The \code{langfind} module can
+use statistical analysis to infer the language of text. Using Gravwell
+you might be able to classify users by spoken language using chat logs,
+messages, or emails. Gravwell also has modules for complex machine
+learning tasks; we used Bayesian inference to generate datasets which
+classified social media posts as positive or negative (turns out people
+are pretty angry on the Internet). The Gravwell pipeline is designed to
+be pluggable and the available search modules are always expanding and
+improving. If you can't find what you want and aren't ready to roll
+your own using anko, Gravwell may be able to implement the module for you.
+
+\subsection{Extraction Modules}
+
+Extraction modules apply structure to raw entries to extract features. For instance, the \code{syslog} module will look at an entry and attempt to parse it as a Syslog message. If successful, it can extract syslog features such as the hostname, application name, priority, message, and so on. The \code{netflow} module can look at binary data, parse it as Netflow records, and give you back IP addresses, port numbers, etc.
+
+One important thing to note is that you can attempt to apply any extraction module to \emph{any} data. You can use the \code{csv} module on Syslog messages, and while that does not \emph{usually} produce much of value, it can for instance be a convenient way to parse Palo Alto logs that are wrapped in Syslog: the first ``column'' ends up including the entire Syslog header and the first field of the Palo Alto logs, which is \emph{always} marked as `reserved for future use'. Figure \ref{fig:pan-csv} shows how the CSV module can extract fields from a Palo Alto syslog entry.
+
+\begin{figure}
+	\includegraphics[width=0.9\linewidth]{images/pan-csv.png}
+	\caption{Parsing Syslog messages with the \code{csv} module.}
+	\label{fig:pan-csv}
+\end{figure}
+
+\subsubsection{Extraction Names and Paths}
+
+When an extraction module extracts a feature, it stores the contents of that feature in an enumerated value. If you say \code{tag=syslog syslog Appname Hostname}, the syslog module will extract the application name and hostname field from each entry and attach them as enumerated values named Appname and Hostname, respectively.
+
+Some modules, like \code{netflow}, have a pre-defined set of which fields can be extracted: no Netflow record will ever contain any \emph{other} fields. Thus, \code{netflow Src Dst} will work on \emph{all} Netflow data, and \code{netflow foo} will \emph{never} work. These pre-defined fields are documented in the Gravwell documentation wiki, and will usually be ``hinted'' when you are typing a query into the user interface.
+
+Other modules, like \code{json}, deal with self-describing data and can therefore extract arbitrary fields. If an entry contains the following JSON:
+
+\begin{verbatim}
+{ "foo": { "bar": 3 } }
+\end{verbatim}
+
+Then the invocation \code{json foo.bar} will extract an enumerated value named \code{bar} containing the number 3.
+
+Other modules, like \code{csv}, can extract arbitrary fields, but the data is \emph{not} self-describing. Consider the following CSV entry:
+
+\begin{verbatim}
+webserver,157,shutdown
+\end{verbatim}
+
+We can extract the individual fields with \code{csv [0] [1] [2]}, resulting in the enumerated values shown in Table \ref{table:csv-evs}.
+
+\begin{table}[H]
+\begin{tabular}{ll}
+\textbf{E.V. Name} & \textbf{Value} \\
+\hline
+\code{0} &	webserver \\
+\code{1} &	157  \\
+\code{2} &	shutdown  \\
+\end{tabular}
+\caption{Enumerated values from \code{csv} module.}
+\label{table:csv-evs}
+\end{table}
+
+Gravwell doesn't know what those columns represent. However, the user can specify names for the columns using the \emph{as} keyword, e.g. \code{csv [0] as component [1] as pid [2] as status}. Table \ref{table:csv-evs-named} shows the result.
+
+\begin{table}[H]
+\begin{tabular}{ll}
+\textbf{E.V. Name} & \textbf{Value} \\
+\hline
+\code{component} &	webserver \\
+\code{pid} &	157  \\
+\code{status} &	shutdown  \\
+\end{tabular}
+\caption{Enumerated values from \code{csv} module.}
+\label{table:csv-evs-named}
+\end{table}
+
+Because it is useful to select your own names for fields, it is typically allowed in \emph{all} extraction modules:
+
+\begin{verbatim}
+	json foo.bar.baz as MyValue
+	netflow Protocol Bytes as traffic
+\end{verbatim}
+
+\subsection{Statistics Modules}
+
+The statistics modules in Gravwell deserve special mention. They are used in perhaps a majority of queries: one of the most common questions asked in Gravwell is ``how many times did X occur?''. The following statistical operations are available:
+
+\begin{itemize}
+\item    count: count entries
+\item    sum: sum values and return the total
+\item    total: sum values over a period of time and keep a running total.
+\item    mean: calculate the average
+\item    stddev: calculate the standard deviation
+\item    variance: calculate the variance
+\item    min: return the minimum value seen
+\item    max: return the maximum value seen
+\item    unique\_count: return the number of unique instances of the source were seen.
+\end{itemize}
+
+The simplest possible invocation of a stats operation is the following query, which counts the number of entries in the \code{gravwell} tag:
+
+\begin{verbatim}
+tag=gravwell stats count
+\end{verbatim}
+
+You can do two operations at the same time; in the following example, we calculate each entry's length, then find the mean entry length and the total number of entries and display them in a table. Figure \ref{fig:stats-mean-count} shows the results of running this query, indicating that out of 12,057 entries, the average entry length was 209.73 bytes.
+
+\begin{verbatim}
+tag=gravwell length | stats mean(length) count | table
+\end{verbatim}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/stats-mean-count.png}
+	\caption{Multiple stats operations at once.}
+	\label{fig:stats-mean-count}
+\end{figure}
+
+Note the syntax \code{mean(length)}. This tells the stats code to calculate the mean of the \code{length} enumerated value.
+
+Stats operations can be \emph{keyed}; for example, if you wish to calculate the count of log entries \emph{from each Gravwell component}, the component names (``webserver'', ``indexer'', ``searchagent'' etc.) are the \emph{keys}. Keys are specified using the \code{by} keyword, as seen in the query below, which calculates the count of log entries and the mean Message length, per Gravwell component. Figure \ref{fig:stats-keyed} shows the results for this query.
+
+\begin{verbatim}
+tag=gravwell syslog Appname Message | length Message 
+| stats count by Appname mean(length) by Appname | table Appname count
+\end{verbatim}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/stats-keyed.png}
+	\caption{Keyed stats operation.}
+	\label{fig:stats-keyed}
+\end{figure}
+
+\subsubsection{Bucketing and Condensing}
+
+When you've run a search using a statistics operation, you will frequently be able to zoom in on the results of a portion of the results (see Section \ref{sec:temporal} for a more detailed explanation), and the results will automatically update. For instance, consider the following query:
+
+\begin{verbatim}
+tag=gravwell stats count | table
+\end{verbatim}
+
+If we run the query over the last hour, we'll see results as seen in Figure \ref{fig:bucket1}. We can then use the mouse to select a sub-portion of the timeframe graph at the top of the results, as seen in Figure \ref{fig:bucket2}; note how the count updates to reflect the count in the portion of time we selected, \emph{without re-running the query}.
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/bucket1.png}
+	\caption{Un-zoomed query.}
+	\label{fig:bucket1}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/bucket2.png}
+	\caption{Zoomed query.}
+	\label{fig:bucket2}
+\end{figure}
+
+This is possible because the stats code uses bucketing and condensing operations. Basically, when the query runs, it generates a count \emph{for each second}--we say it has a 1 second bucket size. However, because we want to display the full hour's count in our table, the \emph{renderer} goes through and sums up all the count buckets to generate a final value. If you select a subset of the results, it is easy to compute the correct count by summing up only the buckets which fall within the selected timeframe. This same strategy is used for all the stats operations (we store additional data behind the scenes to accomplish this, e.g. in the case of \code{mean}).
+
+If a search is executed over a very long period of time, the default bucket size may be adjusted. Consider that storing counts for each individual second on a query spanning 10 years would require hundreds of megabytes of storage!
+
+It is also possible to manually specify a bucket size using the \code{over} keyword. Figure \ref{fig:stats-over} shows an example of a chart showing \emph{hourly} connection counts generated by simply counting the number of Zeek conn logs.
+
+\begin{verbatim}
+tag=zeekconn stats count over 1h | chart count
+\end{verbatim}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/stats-over.png}
+	\caption{Using the over keyword.}
+	\label{fig:stats-over}
+\end{figure}
+
+
+\subsubsection{Sum vs. Total}
+
+The sum and total operators behave exactly the same in every context except chart. When using the chart renderer the total module will not ``reset'' values across time buckets.
+
+The behavior difference is best demonstrated using the following queries:
+
+\begin{verbatim}
+tag=zeekconn ax duration
+| stats sum(duration) total(duration)
+| table sum total
+\end{verbatim}
+
+\begin{verbatim}
+tag=zeekconn ax duration
+| stats sum(duration) total(duration)
+| chart sum total
+\end{verbatim}
+
+When the sum and total values are viewed in the table renderer (Figure \ref{fig:stats-total-table}), the values are the same: the summed-up/totaled-up duration of connections from Zeek connection logs. 
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/stats-total-table.png}
+	\caption{Sum and total operations in a table.}
+	\label{fig:stats-total-table}
+\end{figure}
+
+However, when viewed as a chart (Figure \ref{fig:stats-total-chart}), we can see the difference. Each line is composed of dots representing a fraction of the total time frame. On the sum line, each dot represents the sum for that particular fraction of time. On the total line, each dot represents the total duration of that slice of time \emph{and all preceding slices}. The underlying operations are the same, but total does not ``reset'' the bucket each time it transitions to a new time span, where sum does.
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/stats-total-chart.png}
+	\caption{Sum and total operations in a chart.}
+	\label{fig:stats-total-chart}
+\end{figure}
+
+\subsubsection{Statistics Shorthand Syntax}
+
+The sum, mean, max, min, count, variance, and stddev statistics operations can be invoked in ``shorthand'' syntax:
+
+\begin{verbatim}
+tag=* count
+\end{verbatim}
+
+\begin{verbatim}
+tag=gravwell length | mean length
+\end{verbatim]
+
+\begin{verbatim}
+tag=gravwell syslog Appname | length | mean length by Appname | table Appname mean
+\end{verbatim}
+
+Note that \code{stats mean(length)} becomes \code{mean length}. The shorthand syntax varies slightly from the normal syntax, because ``shorthand'' syntax is a compatibility mode remaining from old versions of Gravwell.
+
+It is not possible to invoke multiple stats operations simultaneously using the shorthand syntax. In general, we recommend using the \code{stats} syntax, as it is less ambiguous and more flexible.
 
 \clearpage
 \section{Render Modules}
@@ -1530,7 +1596,6 @@ neighbors, as in Figure \ref{fig:fdg-context}.
 \end{figure}
 
 \clearpage
-
 \section{Resources}
 \label{sec:resources}
 \index{Resources}
@@ -1741,7 +1806,6 @@ docker kill $(docker ps -a -q)
 
 
 \clearpage
-
 \section{Data Fusion}
 \index{Data fusion}\index{Search!data fusion}
 The Gravwell query pipeline supports what we call module interleaving,
@@ -1991,6 +2055,7 @@ To clean up after the experiment, simply run:
 docker kill $(docker ps -a -q)
 \end{Verbatim}
 
+\clearpage
 \section{Query Optimization}
 \label{sec:query-optimization}
 \index{Search!optimization}
@@ -2220,9 +2285,7 @@ docker kill $(docker ps -a -q)
 \end{Verbatim}
 
 
-
-
-
+\clearpage
 \section{Auto-extractors}
 \index{Search!extractors}\index{Auto-extractors|see {Extractors}}\index{Extractors}
 Gravwell enables per-tag extraction definitions that can ease the
@@ -2793,7 +2856,7 @@ docker kill $(docker ps -a -q)
 \end{Verbatim}
 
 
-
+\clearpage
 \section{Backgrounded and Saved Searches}
 \index{Search!background searches}\index{Search!saved searches}
 Backgrounding a search allows a user to do other things while a search
@@ -3122,6 +3185,7 @@ To clean up after the experiment, run:
 docker kill $(docker ps -a -q)
 \end{Verbatim}
 
+\clearpage
 \section{Templates}
 \index{Search!templates}\index{Dashboards!templates}
 Templates are stored Gravwell queries which require one or more variables to run. This lets you build advanced queries which can investigate a particular IP address. They are particularly effective when inserted into a dashboard (section \ref{sec:dashboards}), or when coupled with an actionable (\ref{sec:actionables}).
@@ -3150,6 +3214,7 @@ Templates can be included in dashboards by selecting ``Templates'' in the ``Add 
 	\label{fig:dashboard-template}
 \end{figure}
 
+\clearpage
 \section{Actionables}
 \label{sec:actionables}
 \index{Actionables}\index{Dashboards!actionables}
@@ -3216,7 +3281,6 @@ A trigger is a JavaScript regular expression that determines if an actionable sh
 \end{figure}
 
 \clearpage
-
 \section{Compound Queries}
 \label{sec:compoundqueries}
 \index{Compound queries}\index{Search!compound queries}
