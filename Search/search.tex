@@ -1045,7 +1045,7 @@ tag=pcap packet ipv4.SrcIP ipv4.DstIP
 | geoip DstIP.City as dest SrcIP.City as src | fdg -b src dst
 \end{verbatim}
 
-By default, the geoip module looks for a resource named "maxmind" containing the GeoIP database. In order to extract ASN information, use the \code{-r} option:
+By default, the geoip module looks for a resource named ``maxmind'' containing the GeoIP database. In order to extract ASN information, use the \code{-r} option:
 
 \begin{verbatim}
 tag=pcap packet ipv4.SrcIP !~ PRIVATE | geoip -r asn SrcIP.ASNOrg | table
@@ -1066,7 +1066,7 @@ MF,4,a mail forwarder (OBSOLETE - use MX),[RFC1035],,
 CNAME,5,the canonical name for an alias,[RFC1035],,
 \end{verbatim}
 
-CoreDNS response logs contain a numeric "Rrtype" field indicating the record type of the response:
+CoreDNS response logs contain a numeric ``Rrtype'' field indicating the record type of the response:
 
 \begin{verbatim}
 {"TS":"2022-12-06T10:27:33.214442008-08:00","Proto":"udp","Local":"[::]:53",
