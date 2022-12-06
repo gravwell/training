@@ -1005,6 +1005,129 @@ Note that \code{stats mean(length)} becomes \code{mean length}. The shorthand sy
 It is not possible to invoke multiple stats operations simultaneously using the shorthand syntax. In general, we recommend using the \code{stats} syntax, as it is less ambiguous and more flexible.
 
 \clearpage
+\subsection{Enrichment Modules}
+
+Some modules are designed to take existing data on an entry and \emph{enrich} it with external data sources. For example, the \code{geoip} module can look an IP address (perhaps extracted via the \code{netflow} module) and enrich the entry with a corresponding location for that IP. A short selection of useful enrichment modules includes:
+
+\begin{itemize}
+\item filetype: detect the MIME file types of data.
+\item geoip: look up geographical information for IP addresses.
+\item langfind: identify the language used in a sample of text.
+\item lookup: extract arbitrary items from a lookup table based on values in the entry.
+\item maclookup: look up manufacturer information for MAC addresses.
+\end{itemize}
+
+Two of these modules are particularly useful and deserve additional introduction below.
+
+\subsubsection{\emph{\code{geoip}}}
+
+The geoip module\footnote{\href{https://docs.gravwell.io/\#!search/geoip/geoip.md}{https://docs.gravwell.io/\#!search/geoip/geoip.md}} uses MaxMind GeoIP databases to extract location information about IP addresses. It can extract approximate latitude/longitude as well as city, country, and continent names. It can also extract ASN numbers and the ASN organization associated with the IP.
+
+The MaxMind GeoIP database is distributed in the Network Enrichment kit, which contains many useful resources for dealing with network traffic logs. It is a dependency of many other kits, so it may already be installed on your system.
+
+The geoip module's syntax is a bit unusual; it most closely resembles the packet extraction module. The following query uses the packet module to extract the destination IP addresses from packet. It then uses the geoip module to perform two tasks: first, to keep only those entries where the destination IP is in the US, and second, to extract a city name for the destination IP. This results in the addition of two enumerated values, \code{Country} and \code{City}. Next, it counts how many times each city appears and builds a table. Figure \ref{fig:geoip1} shows the results.
+
+\begin{verbatim}
+tag=pcap packet ipv4.DstIP | geoip -s DstIP.Country == US DstIP.City 
+| count by City | table City count
+\end{verbatim}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/geoip1.png}
+	\caption{Enriching and filtering with the geoip module.}
+	\label{fig:geoip1}
+\end{figure}
+
+Note how to extract the City field for DstIP, we specify \code{DstIP.City}. This implies the creation of an output enumerated value named \code{City}, but this can be modified using the \code{as} option:
+
+\begin{verbatim}
+tag=pcap packet ipv4.SrcIP ipv4.DstIP 
+| geoip DstIP.City as dest SrcIP.City as src | fdg -b src dst
+\end{verbatim}
+
+By default, the geoip module looks for a resource named "maxmind" containing the GeoIP database. In order to extract ASN information, use the \code{-r} option:
+
+\begin{verbatim}
+tag=pcap packet ipv4.SrcIP !~ PRIVATE | geoip -r asn SrcIP.ASNOrg | table
+\end{verbatim}
+
+\subsubsection{\emph{\code{lookup}}}
+
+The lookup module\footnote{\href{https://docs.gravwell.io/\#!search/lookup/lookup.md}{https://docs.gravwell.io/\#!search/lookup/lookup.md}} is used to enrich entries from a lookup table. The lookup table might be stored in a resource (Section \ref{sec:resources}) or it might be the result of a compound query (Section \ref{sec:compoundqueries}). The contents of one or more enumerated values are compared against values in one or more lookup table columns until a match is found, then the values from one or more columns in that row are extracted into new enumerated values on the entry.
+
+Below is a portion of the \code{dns\_types} lookup table distributed in the Network Enrichment kit; it maps DNS record type numeric codes to names and descriptions, e.g. type 1 is an A record:
+
+\begin{verbatim}
+TYPE,Value,Meaning,Reference,Template,Registration Date
+A,1,a host address,[RFC1035],,
+NS,2,an authoritative name server,[RFC1035],,
+MD,3,a mail destination (OBSOLETE - use MX),[RFC1035],,
+MF,4,a mail forwarder (OBSOLETE - use MX),[RFC1035],,
+CNAME,5,the canonical name for an alias,[RFC1035],,
+\end{verbatim}
+
+CoreDNS response logs contain a numeric "Rrtype" field indicating the record type of the response:
+
+\begin{verbatim}
+{"TS":"2022-12-06T10:27:33.214442008-08:00","Proto":"udp","Local":"[::]:53",
+"Remote":"18.8.17.9:46910","Question":{"Hdr":{"Name":"porter.gravwell.io.",
+"Rrtype":1,"Class":1,"Ttl":65,"Rdlength":4},"A":"208.71.141.34"}}
+\end{verbatim}
+
+We can convert that into a more user-friendly name with the lookup module:
+
+\begin{verbatim}
+tag=dns json -s Question.Hdr.Rrtype | stats count by Rrtype 
+| lookup -r dns_types Rrtype Value TYPE 
+| table Rrtype TYPE count
+\end{verbatim}
+
+In the query above, we extract the Rrtype field, then count how many times each type appeared. We then invoke the lookup module with the following arguments:
+
+\begin{itemize}
+\item \code{-r dns\_types} tells the module to use the \code{dns\_types} resource.
+\item \code{Rrtype} is the name of the enumerated value to look at.
+\item \code{Value} is the name of the column in the resource to compare against Rrtype.
+\item \code{TYPE} is the name of the column in the resource to \emph{extract} when a match is found.
+\end{itemize}
+
+Figure \ref{fig:lookup1} shows the results of the query. Note the rows with Rrtype 64 and 65; those values are not in the resource, because they represent draft record types which have not yet been officially adopted. If we added the \code{-s} flag to the lookup module's arguments, those rows would be dropped because the lookup failed.
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/lookup1.png}
+	\caption{Using the lookup module with DNS data.}
+	\label{fig:lookup1}
+\end{figure}
+
+
+It is also possible to compare against multiple columns in the lookup table, and to extract multiple columns when a match is found. The following lookup table is a portion of the \code{network\_services} resource distributed in the Network Enrichment kit. It maps IP protocol numbers and protocol ports to service names; e.g. port 22 on IP protocol 6 (TCP) is SSH.
+
+\begin{verbatim}
+proto_number,proto_name,service_port,service_name,service_desc
+6,tcp,22,ssh,The Secure Shell (SSH) Protocol
+17,udp,22,ssh,The Secure Shell (SSH) Protocol
+132,sctp,22,ssh,SSH
+6,tcp,23,telnet,Telnet
+17,udp,23,telnet,Telnet
+6,tcp,25,smtp,Simple Mail Transfer
+17,udp,25,smtp,Simple Mail Transfer
+\end{verbatim}
+
+The following query looks up service names for individual TCP packets. Note the use of square brackets; \code{[Protocol DstPort]} indicates that both the Protocol and DstPort enumerated values should be checked, and \code{[proto\_number service\_port]} specify the columns to compare against. Order matters: the Protocol enumerated value will be compared against the proto\_number column, and DstPort will be compared to service\_port. The names in parentheses are the values to extract: \code{(service\_name service\_desc)}.
+
+\begin{verbatim}
+tag=pcap packet ipv4.Protocol tcp.DstPort<1024 | stats count by Protocol DstPort 
+| lookup -r network_services [Protocol DstPort] [proto_number service_port] (service_name service_desc)
+| table
+\end{verbatim}
+
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{images/lookup2.png}
+	\caption{Matching multiple columns with the lookup module.}
+	\label{fig:lookup2}
+\end{figure}
+
+\clearpage
 \section{Render Modules}
 \index{Search!renderers}
 Gravwell provides a selection of render modules to help users display
