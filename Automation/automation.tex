@@ -1095,7 +1095,7 @@ Secrets may be shared with other users. For instance, an administrator may decid
 
 \subsection{Security Considerations}
 
-Although Gravwell does its best to protect the contents of secrets, there are several fundamental issues which must be faced by *any* system which uses stored secrets in automations. In brief, anyone who has root access to the Gravwell webserver systems can probably extract your secrets with a little work. Further details are given below.
+Although Gravwell does its best to protect the contents of secrets, there are several fundamental issues which must be faced by \emph{any} system which uses stored secrets in automations. In brief, anyone who has root access to the Gravwell webserver systems can probably extract your secrets with a little work. Further details are given below.
 
 Before creating a secret, think through what could happen if the secret were leaked and how you would respond. Adding a secret containing a Mattermost webhook URL to your internal corporate Gravwell system is low-risk; creating a secret containing your SSH private key on a publicly-accessible Gravwell system is higher-risk.
 
