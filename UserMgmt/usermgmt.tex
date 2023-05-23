@@ -133,3 +133,63 @@ Log into the web GUI (\href{http://localhost:8080}{http://localhost:8080}) and t
 To clean up after the experiment, run:
 
 \code{docker kill \$(docker ps -a -q)}
+
+\clearpage
+\section{Access Control}
+
+Capability Based Access Control (CBAC) is a feature access system that enables users and groups to be configured with fine-grained access to various Gravwell features. For example, using CBAC, a user can be configured to have access to search, but not resources or kits. Additionally, CBAC can be used to define which tags are available to users and groups.
+
+CBAC is based around a deny-all default policy. Capabilities and tag access must be granted to each user (or group a user belongs to) in order to access those features. Admin users are not restricted by CBAC and always have full system access.
+
+\subsection{Enabling CBAC}
+
+CBAC is enabled by adding the following clause to the global section of the webserver's \code{gravwell.conf} and restarting the webserver:
+
+\begin{verbatim}
+Enable-CBAC=true
+\end{verbatim}
+
+Because CBAC has a deny-all default policy, if this is the first time enabling CBAC, \emph{all} non-admin users will begin with no capabilities or tag access. 
+
+\subsection{Granting Capabilities to Users and Groups}
+
+Admin users can grant capability and tag access to both users and groups via the Users and Groups pages in the Administrator section of the main menu, as shown in Figure \ref{fig:capability-editor}.
+
+\begin{figure}
+	\includegraphics[width=0.5\linewidth]{images/cbac_user.png}
+	\caption{Editing a user's access permissions.}
+	\label{fig:capability-editor}
+\end{figure}
+
+When creating or editing a user or group, select the ``Capabilities'' tab and select the capabilities you wish to add. Users that are part of a group will also inherit capabilities from that group.
+
+Tag access is configured by selecting the Tags tab, and selecting the tags the user or group has access to.
+
+Users that don't have access to a particular feature will see a menu system with those features disabled. For example, a user that does not have access to dashboard or data ingest will see a menu system like Figure \ref{fig:capability-menu}
+
+\begin{figure}
+	\includegraphics[width=0.5\linewidth]{images/cbac_menu.png}
+	\caption{A CBAC-restricted main menu}
+	\label{fig:capability-menu}
+\end{figure}
+
+\subsection{Granting Capabilities in Practice}
+
+In practice, it is less common to grant capabilities to individual users; instead, administrators create groups with specific roles and assign users to those groups. For example, creating a group named ``IT Users'' that has access to IT-related tags (syslog, router logs, firewall logs, etc.), and a group named ``Incident Response Users'' that has access to IDS and other security related data, allows the admin to grant access to users based on their role. Users that need access to both IT and Incident response data in this example can simply be added to both groups.
+
+\subsection{Determining a CBAC Grant}
+
+A user is granted access based on the combination of capabilities and tags that are granted directly to the user and also those granted to any groups the user belongs to.
+
+For example, user ``Bob'' has access to Search and Resources (but nothing else), and the \code{gravwell} tag. Bob is also a member of a group that grants access to Dashboards and the \code{default} tag. As a result, ``Bob'' has access to Search, Resources, and Dashboards, and both the \code{gravwell} and \code{default} tags.
+
+\subsection{CBAC Restrictions in Search}
+
+CBAC capabilities also apply to search. A user that does not have access to resources will still be able to invoke the \code{lookup} module (and other resource-based modules), but that module will list no resources as being available. Similarly, macros, auto extractors, and related features in the \code{anko} and legacy \code{eval} modules will be restricted based on the user's CBAC grants.
+
+\subsection{Caveats}
+
+Some capabilities require both read and write grants in order to function correctly, such as Resources and Playbooks.
+
+The GUI automatically selects read access for a given feature if any of the write capabilities for that feature are selected. If write-only access is needed, you must use the Gravwell command line tool to configure the capability.
+
