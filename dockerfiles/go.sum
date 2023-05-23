@@ -161,6 +161,8 @@ github.com/nerdalert/nflow-generator v0.0.0-20220316032942-a4a241113494 h1:1JeqA
 github.com/nerdalert/nflow-generator v0.0.0-20220316032942-a4a241113494/go.mod h1:tM1+RLMmXuQr2iKkymdjVQob/N9ZdkudXQB8Iqp+HUc=
 github.com/nerdalert/nflow-generator v0.0.0-20220501044009-5cc1c43806c2 h1:uK4NvRV/WmXyh4rfutvtq/+FibFAJfeDz8QY4eAfdL8=
 github.com/nerdalert/nflow-generator v0.0.0-20220501044009-5cc1c43806c2/go.mod h1:tM1+RLMmXuQr2iKkymdjVQob/N9ZdkudXQB8Iqp+HUc=
+github.com/nerdalert/nflow-generator v0.0.0-20230222172017-b7cd1199871c h1:NyF9Sw88JHyCK+THgVuEpUk/YjktgArmc0ajQDjXVQk=
+github.com/nerdalert/nflow-generator v0.0.0-20230222172017-b7cd1199871c/go.mod h1:tM1+RLMmXuQr2iKkymdjVQob/N9ZdkudXQB8Iqp+HUc=
 github.com/open-networks/go-msgraph v0.0.0-20200217121338-a7bf31e9c1f2/go.mod h1:qrAWeYL/1D4WyM9vJnTmgKMtspVODwsvgBDXgVs64Gg=
 github.com/pierrec/lz4 v2.2.6+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pierrec/lz4 v2.3.0+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
@@ -308,6 +310,8 @@ golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 h1:Sx/u41w+OwrInGdEckYmEuU5g
 golang.org/x/sys v0.0.0-20220818161305-2296e01440c6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec h1:BkDtF2Ih9xZ7le9ndzTA7KJow28VbQW3odyk/8drmuI=
 golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.7.0 h1:3jlCCIQZPdOYu1h8BkNvLz8Kgwtae2cagcG/VamtZRU=
+golang.org/x/sys v0.7.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
