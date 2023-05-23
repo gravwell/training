@@ -12,7 +12,7 @@ To build just the PDF:
 
 To build the whole tarball with docker images and all:
 
-	VERSION=5.2.2 LICENSE=/path/to/gravwell-license make dist
+	VERSION=5.3.0 LICENSE=/path/to/gravwell-license make dist
 
 
 NOTE: You will need a training license in order to build the complete set of containers.
