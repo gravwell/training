@@ -960,7 +960,7 @@ pros and cons of this methodology.
 A Gravwell well without any acceleration configuration will employ only
 temporal indexing, which means that every entry is grouped according to a
 timestamp that is indexed using a temporal index. The temporal index
-allows for specifying subsections of time without combing through data
+allows searches over subsets of time without combing through data
 that isn't in the time region specified by the query. Wells can also be
 configured to enable a secondary index which takes into account data
 contents. The secondary indexes use feature extraction modules which
@@ -1384,8 +1384,6 @@ machine.
 As data is ingested into a Gravwell indexer it is grouped in storage
 units called blocks. The more efficiently that like data can be
 colocated into blocks, the more efficient we can store and query data.
-Gravwell indexers allow for fine tuning maximum block sizes and the
-facilities used to generate those blocks.
 
 \begin{figure}
 	\includegraphics{images/prebuffer.png}

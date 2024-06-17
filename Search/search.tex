@@ -402,7 +402,7 @@ module and filtering in another, the most important which may be
 acceleration. Search modules that support inline filtering know how to
 communicate the filters to an indexer's acceleration engine, which can
 enable dramatic speedups. Even when not filtering in a manner that can
-invoke the acceleration engine, inline filtering allows for fast type-native operations.
+invoke the acceleration engine, inline filtering still enables fast type-native operations.
 
 Let's start by examining some modules that support inline filtering and
 examine a query that would not invoke the accelerators and then adapt it
@@ -775,7 +775,7 @@ statistical analysis. Examples of these are \code{count}, \code{sum},
 modules are great for performing analysis to identify
 trends, deviences and abnormalities in very large datasets. Many
 problems have been identified simply by counting log entries over time.
-Other search modules allow for plugging in logic which can allow for
+Other search modules can execute arbitrary user-specified logic for
 very complicated processing. The \code{eval} module allows for arbitrarily
 complex boolean logic, and the \code{anko} module lets you plug a
 Turing-complete script into the pipeline. If there isn't a module that
@@ -1436,8 +1436,8 @@ renderer will automatically limit the plotted lines or bar groups to 24
 values. If you would like to see more lines or fewer lines, you can add the \code{limit \textless{}n\textgreater{}}
 argument, which tells the charting library
 to not introduce the ``other'' grouping until it reaches the given limit
-of n values. The limit maximum specifies the total number of data sets for a category; if the limit is 4 there may be 3 keyed sets and 1 other group. The user interface for charting allows for a rapid
-transition between line, area, bar, pie, and donut charts.
+of n values. The limit maximum specifies the total number of data sets for a category; if the limit is 4 there may be 3 keyed sets and 1 other group. The user interface for charting allows rapid
+transitions between line, area, bar, pie, and donut charts.
 
 The following query generates a chart showing the most common invalid usernames seen on incoming SSH connections--indicators of brute-forcing:
 
