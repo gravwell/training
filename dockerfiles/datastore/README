@@ -1,5 +1,0 @@
-Expects gravwell_datastore_installer_3.0.3.sh in /tmp, or you can provide a path as an argument to run.sh:
-
-bash run.sh
-
-bash run.sh /path/to/datastore_installer.sh

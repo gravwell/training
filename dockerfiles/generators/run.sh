@@ -1,12 +1,8 @@
 #!/bin/bash
 set -e
 
-GO111MODULE=on CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/manager
-GO111MODULE=on CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/generators/fieldsGenerator
-GO111MODULE=on CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/generators/csvGenerator
-GO111MODULE=on CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/generators/binaryGenerator
-GO111MODULE=on CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/generators/regexGenerator
-GO111MODULE=on CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/generators/jsonGenerator
+CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/manager@dev
+CGO_ENABLED=0 go install --ldflags "-w -s" github.com/gravwell/gravwell/v3/generators/gravwellGenerator@dev
 
 cp $GOPATH/bin/manager .
 cp $GOPATH/bin/fieldsGenerator .

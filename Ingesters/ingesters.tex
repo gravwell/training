@@ -2037,61 +2037,6 @@ group. When Gravwell is then started correctly by systemd, the Gravwell
 processes (running as the \code{gravwell} user) won't have access to the
 files and folders they need.
 
-\subsection{Hands-on Lab: Permissions and Port Binding}
-
-Docker typically just executes everything as root, so we will be using
-a new container that actually uses a proper user and group to execute
-Gravwell components. Start by cleaning up the environment:
-
-\code{docker kill \$(docker ps -q)}
-
-Ensure the \code{gravwell:brokenperms} container is loaded (if you don't have the \code{gravwell:brokenperms} image, see Section \ref{sec:load-lab-images} for instructions on how to load it), then start it:
-
-\begin{Verbatim}[breaklines=true]
-docker run -d --net gravnet -p 8080:80 --rm \
---name test gravwell:brokenperms
-\end{Verbatim}
-
-Check the GUI (\href{http://localhost:8080}{http://localhost:8080}), are we able to access Gravwell? Is the container up?
-
-Let's grab a shell within the container as the root user and start
-poking around:
-
-\begin{Verbatim}[breaklines=true]
-docker exec -it --user root test /bin/bash
-\end{Verbatim}
-
-The goal is to fix the installation and get the Gravwell components to
-start correctly. Start by answering a few questions:
-
-\begin{enumerate}
-\item
-  Which services are not starting?
-\item
-  Where are the pertinent log files?
-\item
-  What other locations contain Gravwell logs?
-\item
-  What are the permissions inside \code{/opt/gravwell/}?
-	\begin{enumerate}
-	\item
-	  What should they be?
-	\end{enumerate}
-\item
-  What are the capabilities assigned to each Gravwell service binary?
-	\begin{enumerate}
-	\item
-	  What should they be?
-	\end{enumerate}
-\end{enumerate}
-
-To clean up after the experiment, simply run:
-
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
-
 
 \section{Gravwell and Systemd}
 \index{SystemD}

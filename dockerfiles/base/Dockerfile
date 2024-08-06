@@ -7,7 +7,6 @@ RUN /bin/rm -f /opt/gravwell/bin/gravwell_simple_relay
 RUN /bin/rm -f /opt/gravwell/bin/gencert
 RUN /bin/rm -f /opt/gravwell/bin/gravwell_crash_report
 
-COPY reimport /opt/gravwell/bin/
 COPY $MANAGE_CONF /opt/gravwell/etc/
 COPY $CONF /opt/gravwell/etc/
 ENV GRAVWELL_INGEST_AUTH=IngestSecrets
