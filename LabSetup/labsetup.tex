@@ -173,10 +173,12 @@ docker rm test
 \section{Loading the Lab Images}
 \label{sec:load-lab-images}
 
-Several different Docker container images are used for the lab sections
-of this training. They are available in the \code{dockerimages/} subdirectory on
-the course materials bundle and can be installed with the following
-command:
+Several different Docker container images are used for the lab
+sections of this training. They are all built from publicly-available
+Docker images, but have been slightly customized and packaged here to
+speed up the training exercises. They are available in the
+\code{dockerimages/} subdirectory on the course materials bundle and
+can be installed with the following command:
 
 \code{docker load -i imagename.tar.gz}
 
@@ -184,14 +186,27 @@ Fetch and load the following images from the dockerimagesimages folder:
 
 \begin{itemize}
 	\item base.tar.gz
-	\item brokenperms.tar.gz
 	\item datastore.tar.gz
+        \item federator.tar.gz
+        \item filefollow.tar.gz
 	\item indexer.tar.gz
 	\item ingesters.tar.gz
+        \item netflow.tar.gz
+        \item nflow.tar.gz
 	\item offlinereplication.tar.gz
 	\item pcap.tar.gz
+        \item simplerelay.tar.gz
 	\item webserver.tar.gz
 \end{itemize}
+
+You can do the entire batch at once like this:
+
+\begin{Verbatim}
+for i in *.tar.gz
+do
+    docker load -i $i
+done
+\end{Verbatim}
 
 Once loaded, they should all be in the listing when you run \code{docker
 image ls}.

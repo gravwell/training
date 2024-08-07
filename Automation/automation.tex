@@ -957,7 +957,7 @@ Next, start the ingester container running the Netflow ingester:
 
 \begin{Verbatim}[breaklines=true]
 docker run --rm -d --net gravnet --name ingesters \
--e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 gravwell:ingesters \
+-e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 gravwell:netflow \
 /opt/gravwell/bin/gravwell_netflow_capture
 \end{Verbatim}
 

@@ -1236,11 +1236,11 @@ docker cp config/gravwell.conf test:/opt/gravwell/etc/gravwell.conf
 docker start test
 \end{Verbatim}
 
-Now we'll use the generators image to generate some JSON data; if you don't have the \code{gravwell:generators} image, see Section \ref{sec:load-lab-images} for instructions on how to load it.
+Now we'll use the ingesters image to generate some JSON data; if you don't have the \code{gravwell:ingesters} image, see Section \ref{sec:load-lab-images} for instructions on how to load it.
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns test:4023 -entry-count 500000
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -type json -clear-conns test:4023 -entry-count 500000
 \end{Verbatim}
 
 Open your Gravwell GUI and check that there is a new well named
@@ -1314,13 +1314,13 @@ Re-ingest more JSON data using the tags ``json2'' and
 ``json3'':}
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns test -entry-count 500000 -tag-name json2
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -type json -clear-conns test -entry-count 500000 -tag-name json2
 \end{Verbatim}
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns test -entry-count 500000 -tag-name json3
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -type json -clear-conns test -entry-count 500000 -tag-name json3
 \end{Verbatim}
 
 Go re-run the same query as before over a week, first using the tag

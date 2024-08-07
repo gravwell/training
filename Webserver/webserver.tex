@@ -102,8 +102,8 @@ Finally, we restart the webserver container:
 docker restart webserver
 \end{Verbatim}
 
-Now, browsing to the ``Wells and Indexers'' page in the GUI should show
-two indexers, as in Figure \ref{fig:twoindexers}
+Now, browsing to the ``Storage, Indexers \& Wells'' page in the GUI should show
+two indexers in the ``Indexer Stats'' section, as in Figure \ref{fig:twoindexers}.
 
 \begin{figure}
 	\includegraphics{images/twoindexers.png}
@@ -216,7 +216,7 @@ and add the following in the \code{[Global]} section:
     Remote-Indexers=net:indexer0:9404
     Datastore=datastore
     External-Addr=webserver0
-    Datastore-Insecure-Skip-TLS-Verify=true
+    Datastore-Insecure-Disable-TLS=true
 \end{Verbatim}
 
 Copy the config file back (\code{docker cp /tmp/gravwell.conf webserver0:/opt/gravwell/etc/gravwell.conf})
@@ -236,7 +236,7 @@ and add the following in the \code{[Global]} section:
     Remote-Indexers=net:indexer0:9404
     Datastore=datastore
     External-Addr=webserver1
-    Datastore-Insecure-Skip-TLS-Verify=true
+    Datastore-Insecure-Disable-TLS=true
 \end{Verbatim}
 
 Copy the config file back (\code{docker cp /tmp/gravwell.conf webserver1:/opt/gravwell/etc/gravwell.conf})
