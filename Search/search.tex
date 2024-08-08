@@ -616,11 +616,11 @@ docker cp config/gravwell.conf test:/opt/gravwell/etc/gravwell.conf
 docker restart test
 \end{Verbatim}
 
-Now we'll use the generators image to generate some JSON data; if you don't have the \code{gravwell:generators} image, see Section \ref{sec:load-lab-images} for instructions on how to load it.
+Now we'll use the ingesters image to generate some JSON data; if you don't have the \code{gravwell:ingesters} image, see Section \ref{sec:load-lab-images} for instructions on how to load it.
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns test:4023 -entry-count 500000
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -clear-conns test:4023 -entry-count 500000 -type json
 \end{Verbatim}
 
 Open your Gravwell GUI (\href{http://localhost:8080}{http://localhost:8080}) and check
@@ -1178,12 +1178,12 @@ a Gravwell container:
 docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
-Next, start the ingester container running the netflow ingester:
+Next, start the \code{gravwell:netflow} container running the netflow ingester:
 
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name ingesters -it \
 -e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 \
-gravwell:ingesters /opt/gravwell/bin/gravwell_netflow_capture
+gravwell:netflow /opt/gravwell/bin/gravwell_netflow_capture
 \end{Verbatim}
 
 The netflow ingester is pre-configured to listen on port 2055 for
@@ -1871,12 +1871,12 @@ First, launch a Gravwell webserver+indexer container:
 docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
-Next, start the ingester container running the netflow ingester:
+Next, start the \code{gravwell:netflow} container running the netflow ingester:
 
 \begin{Verbatim}[breaklines=true]
 docker run --rm -d --net gravnet --name ingesters \
 -e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 \
-gravwell:ingesters /opt/gravwell/bin/gravwell_netflow_capture
+gravwell:netflow /opt/gravwell/bin/gravwell_netflow_capture
 \end{Verbatim}
 
 The netflow ingester is pre-configured to listen on port 2055 for
@@ -2279,14 +2279,15 @@ as noticeable on such a small scale. For any Gravwell deployment with
 significant data or node count, however, the knowledge in this section
 is invaluable.
 
-We need to fire up the base Gravwell container and then the ingesters
+We need to fire up the base Gravwell container and then use the ingesters
 container to generate some sample JSON entries:
 
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 
-docker run --net gravnet --rm -it --name jsoningesters gravwell:ingesters\
- /opt/gravwell/bin/jsonGenerator -clear-conns gravwell:4023 -entry-count 100000
+docker run --net gravnet --rm -it --name jsoningesters gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -clear-conns gravwell:4023 \
+-entry-count 100000 -type json
 \end{Verbatim}
 
 Let's begin by examining the data:
@@ -2913,7 +2914,7 @@ tool. This will ingest 100 CSV-formatted entries under the tag ``csv'':
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name ingesters -it -e \
 GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 gravwell:ingesters \
-/opt/gravwell/bin/csvGenerator -clear-conns gravwell:4023 -tag-name csv
+/opt/gravwell/bin/gravwellGenerator -clear-conns gravwell:4023 -type csv
 \end{Verbatim}
 
 A quick search on the csv tag should show the raw entries, as in Figure \ref{fig:lab-csv-raw}.
@@ -3094,7 +3095,7 @@ indexer using the JSON generator:
 
 \begin{Verbatim}[breaklines=true]
 docker run --net gravnet --rm -i --name ingesters gravwell:ingesters \
-/opt/gravwell/bin/jsonGenerator -clear-conns gravwell:4023
+/opt/gravwell/bin/gravwellGenerator -clear-conns gravwell:4023 -type json 
 \end{Verbatim}
 
 Now, log in as the administrator (\href{http://localhost:8080}{http://localhost:8080}), open the Users page, and add two new
@@ -3223,7 +3224,7 @@ generator.
 docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 
 docker run --rm --net gravnet --name ingesters -it -e \
-GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 gravwell:ingesters \
+GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 gravwell:netflow \
 /opt/gravwell/bin/gravwell_netflow_capture
 
 docker run -it --net gravnet --rm \

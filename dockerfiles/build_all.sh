@@ -1,7 +1,8 @@
 #!/bin/bash
+set -e
 LOGFILE=/tmp/build.log
 OUTDIR=../dockerimages/
-VER=${VERSION:-5.3.0}
+VER=${VERSION:-latest}
 
 if [ ! -d "$GOPATH" ]; then
 	echo "Must set GOPATH"
@@ -27,28 +28,10 @@ if [ ! -d "$OUTDIR" ]; then
 	mkdir -p $OUTDIR
 fi
 
-#check that our installers exist
-installers=("/tmp/gravwell_simple_relay_installer_$VER.sh" "/tmp/gravwell_file_follow_installer_$VER.sh" "/tmp/gravwell_netflow_capture_installer_$VER.sh" "/tmp/gravwell_network_capture_installer_$VER.sh" "/tmp/gravwell_federator_installer_$VER.sh" "/tmp/gravwell_datastore_installer_$VER.sh" "/tmp/gravwell_$VER.sh")
-
-for inst in "${installers[@]}"
-do
-	if [ ! -f "$inst" ]; then
-		#attempt to download it
-		fname=$(basename $inst)
-		echo curl --output "$inst" "https://update.gravwell.io/archive/$VER/installers/$fname"
-		curl --output "$inst" "https://update.gravwell.io/archive/$VER/installers/$fname"
-		if [ "$?" != "0" ]; then
-			echo "Failed to download $fname"
-			exit -1
-		fi
-	fi
-done
-
-
 echo >> $LOGFILE
 echo "Creating slim container"
 echo "Creating slim container as our base" >> $LOGFILE
-/bin/bash createslim.sh >> $LOGFILE
+. createslim.sh >> $LOGFILE
 
 if [ "$?" != "0" ]; then
 	echo "Failed to create slim container"
@@ -71,7 +54,7 @@ function build() {
 		echo "building $d"
 		echo >> $LOGFILE
 		echo "building $d" >> $LOGFILE
-		VER=$VER bash run.sh >> $LOGFILE
+		. run.sh >> $LOGFILE
 		if [ "$?" != "0" ]; then
 			echo "Failed to build $d"
 			exit -1
@@ -108,11 +91,13 @@ build "offlinereplication"
 moveTarget "/tmp/offlinereplication.tar.gz"
 build "datastore"
 moveTarget "/tmp/datastore.tar.gz"
-build "permissions"
-moveTarget "/tmp/perms.tar.gz"
-build "brokenperms"
-moveTarget "/tmp/brokenperms.tar.gz"
 build "pcap"
 moveTarget "/tmp/pcap.tar.gz"
-build "generators"
-moveTarget "/tmp/generators.tar.gz"
+build "netflow"
+moveTarget "/tmp/netflow.tar.gz"
+build "federator"
+moveTarget "/tmp/federator.tar.gz"
+build "filefollow"
+moveTarget "/tmp/filefollow.tar.gz"
+build "simplerelay"
+moveTarget "/tmp/simplerelay.tar.gz"

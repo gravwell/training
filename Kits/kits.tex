@@ -209,7 +209,7 @@ Next, start the ingester container running the netflow ingester:
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name ingesters -it \
 -e GRAVWELL_CLEARTEXT_TARGETS=kits:4023 \
-gravwell:ingesters /opt/gravwell/bin/gravwell_netflow_capture
+gravwell:netflow /opt/gravwell/bin/gravwell_netflow_capture
 \end{Verbatim}
 
 The netflow ingester is pre-configured to listen on port 2055 for

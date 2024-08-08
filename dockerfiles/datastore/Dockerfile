@@ -1,17 +1,9 @@
-FROM gravwell:base
+ARG version
+FROM gravwell/datastore:${version}
 MAINTAINER training@gravwell.io
 ARG MANAGE_CONF=manager.cfg
-RUN /bin/rm -rf /opt/gravwell/storage/*
-RUN /bin/rm -f /opt/gravwell/bin/gravwell_simple_relay
-RUN /bin/rm -f /opt/gravwell/bin/gencert
-RUN /bin/rm -f /opt/gravwell/bin/gravwell_crash_report
-RUN /bin/rm -f /opt/gravwell/bin/gravwell_indexer
-RUN /bin/rm -f /opt/gravwell/bin/gravwell_webserver
-RUN /bin/rm -f /opt/gravwell/bin/gravwell_searchagent
 
 COPY $MANAGE_CONF /opt/gravwell/etc/
-COPY datastore.sh /tmp
-RUN /bin/sh /tmp/datastore.sh --no-questions --no-crash-report --no-start
 ENV GRAVWELL_INGEST_AUTH=IngestSecrets
 ENV GRAVWELL_INGEST_SECRET=IngestSecrets
 ENV GRAVWELL_CONTROL_AUTH=ControlSecrets

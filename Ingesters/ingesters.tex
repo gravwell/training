@@ -609,12 +609,12 @@ webserver+indexer container:
 docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
-Open the web interface by pointing your browser at \href{http://localhost:8080/}{http://localhost:8080} and log in (``admin''/``changeme''). Then start the ingester container running the Simple Relay ingester:
+Open the web interface by pointing your browser at \href{http://localhost:8080/}{http://localhost:8080} and log in (``admin''/``changeme''). Then start the container running the Simple Relay ingester:
 
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name ingesters -it \
 -e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 \
-gravwell:ingesters /opt/gravwell/bin/gravwell_simple_relay
+gravwell:simplerelay /opt/gravwell/bin/gravwell_simple_relay
 \end{Verbatim}
 
 Note the use of the option \code{-e GRAVWELL\_CLEARTEXT\_TARGETS=gravwell:4023}.
@@ -939,7 +939,7 @@ configuration, so we use \code{docker create} rather than \code{docker start}:
 \begin{Verbatim}[breaklines=true]
 docker create --rm --net gravnet --name ingesters -it -e \
 GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 -v /var/log:/var/log \
-gravwell:ingesters /opt/gravwell/bin/gravwell_file_follow -v
+gravwell:filefollow /opt/gravwell/bin/gravwell_file_follow -v
 \end{Verbatim}
 
 Note the option \code{-v /var/log:/var/log}. This mounts the host's
@@ -1313,12 +1313,12 @@ First, launch a Gravwell webserver+indexer container:
 docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
-Next, start the ingester container running the netflow ingester:
+Next, start the container running the netflow ingester:
 
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name ingesters -it \
 -e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 \
-gravwell:ingesters /opt/gravwell/bin/gravwell_netflow_capture
+gravwell:netflow /opt/gravwell/bin/gravwell_netflow_capture
 \end{Verbatim}
 
 The netflow ingester is pre-configured to listen on port 2055 for
@@ -1581,7 +1581,7 @@ Start another container running the Federator:
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name federator -it \
 -e GRAVWELL_CLEARTEXT_TARGETS=gravwell:4023 \
-gravwell:ingesters /opt/gravwell/bin/gravwell_federator
+gravwell:federator /opt/gravwell/bin/gravwell_federator
 \end{Verbatim}
 
 The container we are using has two pre-configured listeners for the
@@ -1596,31 +1596,24 @@ Federator:
   ``testB'', and uses the Ingest Secret ``enclaveBSecrets''
 \end{itemize}
 
-With the Federator up and running, we use the generators container to attempt to send some JSON-formatted
+With the Federator up and running, we use the ingesters container to attempt to send some JSON-formatted
 entries to the Federator. We direct it to connect to the ``federator'' container on port 4001 and
 use the secret ``enclaveASecrets'', which is the correct configuration
 for the first IngestListener defined in the Federator config. However, note that we
 add the option \code{-tag-name json}. This is not one of the allowed tags!
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns federator:4001 \
--ingest-secret enclaveASecrets -tag-name json
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -clear-conns federator:4001 \
+-ingest-secret enclaveASecrets -type json -tag-name json
 \end{Verbatim}
 
-The command should fail, with an error message saying it
-failed to negotiate tags:
+The command should fail; this is expected, because we attempted to send entries tagged ``json'', which is not allowed! Let's run the generator again, this time specifying the allowed ``testA'' tag:
 
 \begin{Verbatim}[breaklines=true]
-2020/02/05 18:44:25 ERROR: Timed out waiting for active connection due to All connections failed Failed to negotiate tags
-\end{Verbatim}
-
-This is expected, because we attempted to send entries tagged ``json'', which is not allowed! Let's run the generator again, this time specifying the allowed ``testA'' tag:
-
-\begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns federator:4001 \
--ingest-secret enclaveASecrets -tag-name testA
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -clear-conns federator:4001 \
+-ingest-secret enclaveASecrets -type json -tag-name testA
 \end{Verbatim}
 
 We can verify that the entries made it in by running the query \code{tag=testA} in the Gravwell interface, as shown in Figure \ref{fig:federator-lab-1}.
@@ -1634,9 +1627,9 @@ We can verify that the entries made it in by running the query \code{tag=testA} 
 We can send entries to the other Federator listener by tweaking the generator command line, specifying port 4002, the secret ``enclaveBSecrets'', and tag ``testB'':
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns federator:4002 \
--ingest-secret enclaveBSecrets -tag-name testB
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -clear-conns federator:4002 \
+-ingest-secret enclaveBSecrets -type json -tag-name testB
 \end{Verbatim}
 
 To clean up after the experiment, simply run:
@@ -1712,7 +1705,7 @@ Then make the ingester container:
 \begin{Verbatim}[breaklines=true]
 docker run --rm --net gravnet --name ingesters -d \
 -e GRAVWELL_CLEARTEXT_TARGETS=gravwell \
-gravwell:ingesters /opt/gravwell/bin/gravwell_simple_relay
+gravwell:simplerelay /opt/gravwell/bin/gravwell_simple_relay
 \end{Verbatim}
 
 The ingesters container ships with a default Simple Relay configuration
@@ -2037,61 +2030,6 @@ group. When Gravwell is then started correctly by systemd, the Gravwell
 processes (running as the \code{gravwell} user) won't have access to the
 files and folders they need.
 
-\subsection{Hands-on Lab: Permissions and Port Binding}
-
-Docker typically just executes everything as root, so we will be using
-a new container that actually uses a proper user and group to execute
-Gravwell components. Start by cleaning up the environment:
-
-\code{docker kill \$(docker ps -q)}
-
-Ensure the \code{gravwell:brokenperms} container is loaded (if you don't have the \code{gravwell:brokenperms} image, see Section \ref{sec:load-lab-images} for instructions on how to load it), then start it:
-
-\begin{Verbatim}[breaklines=true]
-docker run -d --net gravnet -p 8080:80 --rm \
---name test gravwell:brokenperms
-\end{Verbatim}
-
-Check the GUI (\href{http://localhost:8080}{http://localhost:8080}), are we able to access Gravwell? Is the container up?
-
-Let's grab a shell within the container as the root user and start
-poking around:
-
-\begin{Verbatim}[breaklines=true]
-docker exec -it --user root test /bin/bash
-\end{Verbatim}
-
-The goal is to fix the installation and get the Gravwell components to
-start correctly. Start by answering a few questions:
-
-\begin{enumerate}
-\item
-  Which services are not starting?
-\item
-  Where are the pertinent log files?
-\item
-  What other locations contain Gravwell logs?
-\item
-  What are the permissions inside \code{/opt/gravwell/}?
-	\begin{enumerate}
-	\item
-	  What should they be?
-	\end{enumerate}
-\item
-  What are the capabilities assigned to each Gravwell service binary?
-	\begin{enumerate}
-	\item
-	  What should they be?
-	\end{enumerate}
-\end{enumerate}
-
-To clean up after the experiment, simply run:
-
-\begin{Verbatim}[breaklines=true]
-docker kill $(docker ps -a -q)
-\end{Verbatim}
-
-
 
 \section{Gravwell and Systemd}
 \index{SystemD}
@@ -2216,13 +2154,13 @@ When you create the container, override the default \code{Ingest-Auth},
 \code{Control-Auth}, and \code{Search-Agent-Auth} auth tokens with something
 unique. Once the container has been created using \code{docker create},
 log into the GUI and check that
-everything came up, then try ingesting some data using JSON generator; be sure to
+everything came up, then try ingesting some data using the generator; be sure to
 set the appropriate authentication secrets!
 
 \begin{Verbatim}[breaklines=true]
-docker run --net gravnet --rm -it gravwell:generators \
-/jsonGenerator -clear-conns test \
--ingest-secret MY_SECRET
+docker run --net gravnet --rm -it gravwell:ingesters \
+/opt/gravwell/bin/gravwellGenerator -clear-conns test \
+-type json -ingest-secret MY_SECRET
 \end{Verbatim}
 
 \subsubsection{Lab Questions}
