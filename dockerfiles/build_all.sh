@@ -31,7 +31,7 @@ fi
 echo >> $LOGFILE
 echo "Creating slim container"
 echo "Creating slim container as our base" >> $LOGFILE
-/bin/bash createslim.sh >> $LOGFILE
+. createslim.sh >> $LOGFILE
 
 if [ "$?" != "0" ]; then
 	echo "Failed to create slim container"
@@ -54,7 +54,7 @@ function build() {
 		echo "building $d"
 		echo >> $LOGFILE
 		echo "building $d" >> $LOGFILE
-		VER=$VER bash run.sh >> $LOGFILE
+		. run.sh >> $LOGFILE
 		if [ "$?" != "0" ]; then
 			echo "Failed to build $d"
 			exit -1
