@@ -1,14 +1,14 @@
-name: Release
+name: Upload PDF to Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types:
+      - published
 
 jobs:
   training-pdf-builder:
     runs-on: ubuntu-latest
-    name: Build the training PDF and Release
+    name: Build the training PDF and upload to Release
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -30,4 +30,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create ${{ github.ref_name }} gravwell_training_${{ github.ref_name }}.pdf --verify-tag --generate-notes
+          gh release upload ${{ github.ref_name }} gravwell_training_${{ github.ref_name }}.pdf  --clobber
