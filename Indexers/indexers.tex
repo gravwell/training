@@ -1015,7 +1015,7 @@ like:
     Tags=json
     Location=/opt/gravwell/storage/json/
     Accelerator-Name="json"
-    Accelerator-Args="user email country group ip"
+    Accelerator-Args="user email country group useragent ip"
 \end{Verbatim}
 
 The acceleration configuration does not specify an
@@ -1084,7 +1084,7 @@ Three fields are extracted, with a filter applied to the
 equality filter, specifying that the extracted \code {country} must be the
 exact value ``Monaco'' and the \code{useragent} filter simply says that the
 value ``Apple'' must occur somewhere within the \code{useragent} field.
-While both the \code{name} and \code{country} fields are specified in the
+While both the \code{useragent} and \code{country} fields are specified in the
 acceleration config, only the country field has an appropriate
 filter operation, so the acceleration system will only use the
 country field for acceleration. The \code{useragent} field does not
@@ -1577,7 +1577,7 @@ docker rm idx
 \end{Verbatim}
 
 You should see that only the \code{manager} and \code{gravwell\_indexer} processes are
-running. The manager application is an open-source\footnote{https://github.com/gravwell/gravwell/tree/master/manager} Gravwell
+running. The manager application is an open-source\footnote{https://github.com/gravwell/gravwell/tree/main/manager} Gravwell
 process management application that somewhat takes on the role of
 systemd. It respects some configuration via environment variables of its own.
 
