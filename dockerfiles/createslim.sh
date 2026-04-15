@@ -4,7 +4,7 @@ if [ ! -f "$LICENSE" ]; then
 	exit -1
 fi
 
-docker rmi gravwell:slim #remove existing slim image
+docker rmi -f gravwell:slim #remove existing slim image
 docker pull gravwell/gravwell:${VER} # grabs desired gw image from dockerhub
 docker create --name slim gravwell/gravwell:${VER} #create temp container from latest image
 docker cp $LICENSE slim:/opt/gravwell/etc/license

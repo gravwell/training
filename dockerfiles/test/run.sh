@@ -1,6 +1,6 @@
 #!/bin/bash
 TGT="/tmp/test.tar.gz"
-docker rmi gravwell:test
+docker rmi -f gravwell:test
 
 set -e
 docker pull busybox:latest
