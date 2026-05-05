@@ -151,8 +151,8 @@ docker run -d --rm --net gravnet -p 8080:80 --name gravwell gravwell:base
 Now log into the web GUI (\href{http://localhost:8080}{http://localhost:8080}). Then, open a new \emph{private} browser window (so the existing login cookie isn't used), go to the same GUI URL, and enter some invalid login credentials, e.g. username ``admin'' with password ``admin''. This will generate a login failure message which we can check using the following query:
 
 \begin{Verbatim}[breaklines=true]
-tag=gravwell syslog Message=="Authentication failure" user 
-| stats count by user 
+tag=gravwell syslog Message=="Authorization failure" user
+| stats count by user
 | table user count
 \end{Verbatim}
 
