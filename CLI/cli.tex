@@ -61,16 +61,32 @@ count 1.10 K/1.00 663.35 KB/547 B 65.238537ms
 
 \section{Hands-on Lab: Basic CLI exploration}
 
-Launch a Gravwell webserver+indexer container:
+Launch a Gravwell webserver+indexer container using the following command:
 
 \begin{Verbatim}[breaklines=true]
-docker run --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
+docker run --shm-size=512m --rm --net gravnet -p 8080:80 -d --name gravwell gravwell:base
 \end{Verbatim}
 
-Now get a shell on the Gravwell container and run the client:
+You will need the additional shared memory space to install the gravwell tools in order to use the CLI. 
+
+Now get a shell on the Gravwell container:
 
 \begin{Verbatim}[breaklines=true]
 $ docker exec -it gravwell /bin/sh
+\end{Verbatim}
+
+You will need to download and install the gravwell tools in order to use the CLI. 
+To do this, use ``wget'' to download the latest tools from the Gravwell website, then use ``chmod'' to make the client executable:
+
+\begin{Verbatim}[breaklines=true]
+/ # wget https://update.gravwell.io/archive/<release version>/installers/gravwell_tools_<release version>.sh 
+/ # chmod 777 gravwell_tools_<release version>.sh 
+\end{Verbatim}
+
+Install the tools and run the client:
+
+\begin{Verbatim}[breaklines=true]
+/ # ./gravwell_tools_<release version>.sh
 / # gravwell -insecure-no-https
 Username:  admin
 Password:  changeme
