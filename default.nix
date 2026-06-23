@@ -1,9 +1,13 @@
 let
-  pkgs = import (fetchTarball
-    "https://github.com/NixOS/nixpkgs/archive/a6292e34000dc93d43bccf78338770c1c5ec8a99.tar.gz")
-    { };
+  nixpkgs = fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/a0374025a863d007d98e3297f6aa46cc3141c2f0.tar.gz";
+    sha256 = "14c0hqipkcm2iqi5ybjpx4xcvwxjp3sx3rfgb69dv83h0gm1crgn";
+  };
 
-in pkgs.stdenv.mkDerivation {
+  pkgs = import nixpkgs { };
+
+in
+pkgs.stdenv.mkDerivation {
   name = "Gravwell Training";
   src = ./.;
 
